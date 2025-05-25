@@ -10,6 +10,7 @@ import { getVocabulary } from "@/lib/localStorage";
 export default function VocabularyPage() {
   const [vocabulary, setVocabulary] = useState<VocabularyType[]>([]);
   const [activeTab, setActiveTab] = useState("list");
+  const [hydrated, setHydrated] = useState(false);
 
   const loadVocabulary = () => {
     const data = getVocabulary();
@@ -18,7 +19,12 @@ export default function VocabularyPage() {
 
   useEffect(() => {
     loadVocabulary();
+    setHydrated(true);
   }, []);
+
+  if (!hydrated) {
+    return null;
+  }
 
   return (
     <div className="container mx-auto py-10">
@@ -33,7 +39,7 @@ export default function VocabularyPage() {
           <VocabularyTable vocabulary={vocabulary} onRefresh={loadVocabulary} />
         </TabsContent>
         <TabsContent value="study">
-          <VocabularyStudy vocabulary={vocabulary} />
+          <VocabularyStudy vocabulary={vocabulary} onRefresh={loadVocabulary} />
         </TabsContent>
       </Tabs>
     </div>

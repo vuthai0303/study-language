@@ -4,9 +4,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { VocabularyType } from "@/types";
+import { updateVocabulary } from "@/lib/localStorage";
 
 interface VocabularyStudyProps {
   vocabulary: VocabularyType[];
+  onRefresh: () => void;
 }
 
 type QuizQuestion = {
@@ -22,7 +24,13 @@ type QuizResult = {
   incorrect: number;
 };
 
-export function VocabularyStudy({ vocabulary }: VocabularyStudyProps) {
+const STATUS_LABELS: Record<VocabularyType["status"], string> = {
+  to_learn: "Cần học",
+  learning: "Đang học",
+  mastered: "Đã thuộc",
+};
+
+export function VocabularyStudy({ vocabulary, onRefresh }: VocabularyStudyProps) {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -30,20 +38,24 @@ export function VocabularyStudy({ vocabulary }: VocabularyStudyProps) {
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizFinished, setQuizFinished] = useState(false);
   const [result, setResult] = useState<QuizResult>({ total: 0, correct: 0, incorrect: 0 });
+  const [selectedStatus, setSelectedStatus] = useState<VocabularyType["status"]>("to_learn");
+
+  // Filter vocabulary by selected status
+  const filteredVocabulary = vocabulary.filter((v) => v.status === selectedStatus);
 
   const generateQuiz = () => {
-    if (vocabulary.length < 4) {
+    if (filteredVocabulary.length < 4) {
       alert("Bạn cần có ít nhất 4 từ vựng để bắt đầu học!");
       return;
     }
 
     // Shuffle vocabulary and take up to 10 items
-    const shuffled = [...vocabulary].sort(() => 0.5 - Math.random());
+    const shuffled = [...filteredVocabulary].sort(() => 0.5 - Math.random());
     const selectedVocabulary = shuffled.slice(0, Math.min(10, shuffled.length));
 
     // Generate questions
     const generatedQuestions = selectedVocabulary.map((item) => {
-      // Get 3 random incorrect options
+      // Get 3 random incorrect options from all vocabulary
       const incorrectOptions = vocabulary
         .filter((v) => v.id !== item.id)
         .sort(() => 0.5 - Math.random())
@@ -72,17 +84,29 @@ export function VocabularyStudy({ vocabulary }: VocabularyStudyProps) {
 
   const handleOptionSelect = (option: string) => {
     if (isAnswered) return;
-    
+
     setSelectedOption(option);
     setIsAnswered(true);
 
-    // Update result
     const isCorrect = option === questions[currentQuestionIndex].correctAnswer;
     setResult((prev) => ({
       ...prev,
       correct: isCorrect ? prev.correct + 1 : prev.correct,
       incorrect: isCorrect ? prev.incorrect : prev.incorrect + 1,
     }));
+
+    // If quiz is on "mastered" and answer is incorrect, move word to "learning"
+    if (
+      !isCorrect &&
+      selectedStatus === "mastered"
+    ) {
+      const wordId = questions[currentQuestionIndex].id;
+      const word = vocabulary.find((v) => v.id === wordId);
+      if (word && word.status === "mastered") {
+        updateVocabulary({ ...word, status: "learning" });
+        onRefresh(); // Refresh vocabulary after incorrect answer
+      }
+    }
   };
 
   const handleNextQuestion = () => {
@@ -107,10 +131,23 @@ export function VocabularyStudy({ vocabulary }: VocabularyStudyProps) {
         <p className="text-center mb-6">
           Bắt đầu bài kiểm tra trắc nghiệm để kiểm tra kiến thức từ vựng của bạn.
         </p>
-        <Button onClick={generateQuiz} disabled={vocabulary.length < 4}>
+        <div className="mb-4">
+          <label htmlFor="status-select" className="mr-2 font-medium">Chọn nhóm từ vựng:</label>
+          <select
+            id="status-select"
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value as VocabularyType["status"])}
+            className="border rounded px-2 py-1"
+          >
+            <option value="to_learn">{STATUS_LABELS["to_learn"]}</option>
+            <option value="learning">{STATUS_LABELS["learning"]}</option>
+            <option value="mastered">{STATUS_LABELS["mastered"]}</option>
+          </select>
+        </div>
+        <Button onClick={generateQuiz} disabled={filteredVocabulary.length < 4}>
           Bắt đầu học
         </Button>
-        {vocabulary.length < 4 && (
+        {filteredVocabulary.length < 4 && (
           <p className="text-sm text-muted-foreground mt-2">
             Bạn cần có ít nhất 4 từ vựng để bắt đầu học.
           </p>
