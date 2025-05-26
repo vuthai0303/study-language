@@ -81,6 +81,7 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
         },
         body: JSON.stringify({
           model: "gpt-4.1-nano-2025-04-14",
+          // model: "gpt-4.1-2025-04-14",
           messages: [
             {
               role: "system",
@@ -195,7 +196,18 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="p-4 bg-muted rounded-md">
-            <p>{currentSentence.text}</p>
+            <p>
+              {sentences.map((sentence, idx) => (
+                <span
+                  key={sentence.id}
+                  className={idx === currentSentenceIndex ? "text-red-500 font-semibold" : sentence.isCorrect ? "text-green-500 font-semibold" : undefined}
+                  style={idx === currentSentenceIndex ? { fontWeight: "bold" } : undefined}
+                >
+                  {sentence.isCorrect ? sentence.translation : sentence.text}
+                  {idx < sentences.length - 1 ? " " : ""}
+                </span>
+              ))}
+            </p>
           </div>
           
           <div>
