@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 // import axios from "axios"; // Uncomment when implementing actual OpenAI API calls
 
+const API_KEY_STORAGE_KEY = "openai_api_key";
+
 interface TranslationPracticeProps {
   paragraph: string;
   onReset: () => void;
@@ -42,7 +44,7 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
     setSentences((prev) =>
       prev.map((sentence, index) =>
         index === currentSentenceIndex
-          ? { ...sentence, translation, feedback: null, isCorrect: null }
+          ? { ...sentence, translation, feedback: sentence.feedback, isCorrect: null }
           : sentence
       )
     );
@@ -57,46 +59,59 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
     }
     
     setIsChecking(true);
+
+    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+
+    if (!apiKey) {
+      return;
+    }
     
     try {
-      // In a real application, this would call the OpenAI API
-      // For this demo, we'll simulate the API call
-      
-      // Simulated API response
-      const isCorrect = Math.random() > 0.3; // 70% chance of being correct for demo
-      const feedback = isCorrect
-        ? "Bản dịch của bạn chính xác! Ý nghĩa và ngữ pháp đều tốt."
-        : "Bản dịch cần cải thiện. Hãy chú ý đến thì của động từ và cấu trúc câu.";
-      
-      // In a real application, you would use OpenAI API like this:
-      /*
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: "gpt-4",
+
+      const prompt = `Kiểm tra bản dịch tiếng Anh "${currentSentence.translation}" sau có đúng với câu tiếng Việt: "${currentSentence.text}" không.
+                      Hãy cho biết bản dịch có chính xác không, nếu bản dịch đã chính xác hãy cung cấp phản hồi về cách cải thiện câu tốt hơn. 
+                      Nếu bản dịch chưa chính xác, chỉ cần cung cấp các từ vựng tiếng anh liên quan đến câu để giúp người tiếp tục cải thiện bản dịch, không cần phản hồi gì thêm.
+                      Trả lời dưới dạng JSON với các trường "isCorrect" (boolean) và "feedback" (string). Phản hồi nên ngắn gọn và rõ ràng bằng tiếng việt. Ví dụ: {"isCorrect": true, "feedback": "Câu dịch rất tốt, chỉ cần thêm một vài từ để làm cho nó tự nhiên hơn."}`;
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4.1-nano-2025-04-14",
           messages: [
             {
               role: "system",
-              content: "You are a language teacher evaluating English translations from Vietnamese."
+              content: "Bạn là một trợ lý AI hữu ích, chuyên kiểm tra bản dịch tiếng Anh.",
             },
             {
               role: "user",
-              content: `Original Vietnamese: "${currentSentence.text}"\nStudent's English translation: "${currentSentence.translation}"\n\nEvaluate if this translation is correct in terms of grammar and meaning. Respond with JSON in this format: {"isCorrect": boolean, "feedback": "your feedback here"}`
-            }
-          ]
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`
-          }
-        }
-      );
+              content: prompt,
+            },
+          ],
+          // max_tokens: 250, // Adjusted for paragraph length
+          // temperature: 0.7, // Balances creativity and coherence
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("OpenAI API error:", errorData);
+        // const userFriendlyError = errorData?.error?.message || `Lỗi ${response.status}. Vui lòng kiểm tra API key hoặc thử lại sau.`;
+        // setErrorMessage(`Lỗi tạo đoạn văn: ${userFriendlyError}`);
+        throw new Error(`OpenAI API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const result = data.choices[0]?.message?.content?.trim();
+
+      const res = result ? JSON.parse(result) : { isCorrect: false, feedback: "No feedback provided" };
       
-      const result = JSON.parse(response.data.choices[0].message.content);
-      const isCorrect = result.isCorrect;
-      const feedback = result.feedback;
-      */
+      const isCorrect = res.isCorrect;
+      const feedback = res.feedback;
+      
       
       // Update the sentence with feedback
       setSentences((prev) =>
@@ -189,7 +204,7 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
               value={currentSentence.translation}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleTranslationChange(e.target.value)}
               placeholder="Nhập bản dịch của bạn..."
-              disabled={!!currentSentence.feedback || isChecking}
+              disabled={currentSentence.isCorrect || isChecking}
               className="min-h-[100px]"
             />
           </div>
@@ -205,14 +220,16 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
             Hủy
           </Button>
           
-          {currentSentence.isCorrect !== null ? (
+          {currentSentence.isCorrect === true ? (
             <Button onClick={handleNextSentence}>
               {currentSentenceIndex < sentences.length - 1 ? "Câu tiếp theo" : "Hoàn thành"}
             </Button>
           ) : (
-            <Button onClick={checkTranslation} disabled={isChecking}>
-              {isChecking ? "Đang kiểm tra..." : "Kiểm tra"}
-            </Button>
+            <>
+              <Button onClick={checkTranslation} disabled={isChecking}>
+                {isChecking ? "Đang kiểm tra..." : "Kiểm tra"}
+              </Button>
+            </>
           )}
         </CardFooter>
       </Card>
