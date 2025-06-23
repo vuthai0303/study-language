@@ -96,6 +96,7 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
   
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const [isChecking, setIsChecking] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
 
   const handleTranslationChange = (translation: string) => {
@@ -126,12 +127,7 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
     
     try {
 
-      const prompt = `Kiểm tra bản dịch tiếng Anh "${currentSentence.translation}" sau có đúng với câu tiếng Việt: "${currentSentence.text}" không. Và thực hiện đánh giá trên 10 cấp độ.
-                      Nếu bản dịch có cấp độ từ 5 đến 10, câu dịch sẽ là isCorrect=true và hãy cung cấp phản hồi về cách cải thiện câu tốt hơn vào feebback.
-                      Nếu bản dịch có cấp độ từ 0 đến 5, câu dịch sẽ là isCorrect=false và hãy phản hồi lại bản dịch chưa đúng chỗ nào vào feedback và cung cấp các từ vựng tiếng anh liên quan đến câu dịch để giúp người tiếp tục cải thiện bản dịch vào vocabs, không cần phản hồi gì thêm.
-                      Trả lời dưới dạng JSON với các trường "isCorrect" (boolean), "feedback" (string), "vocabs"(list) và scope(number). Đảm bảo phản hồi đúng cấu trúc và feedback nên ngắn gọn và rõ ràng bằng tiếng việt. 
-                      Ví dụ bản dịch đúng: {"isCorrect": true, "feedback": "Câu dịch rất tốt, tuy nhiên cần sửa lai từ "abc" thành "xyz" để làm cho nó tự nhiên hơn.", "vocabs": [], "scope":8}.
-                      Ví dụ bản dịch sai: {"isCorrect": false, "feedback": "Bản dịch chưa đúng tham khảo thêm các từ vựng sau để hoàn thành bản dịch.", "vocabs": [{word: study, type: "verb", meaning: "học"}, {word: vocabulary, type: "noun", meaning: "từ vựng"}, {word: practice, type: "verb", meaning: "luyện tập"}], "scope":3}.`;
+      const prompt = `Đây là bản dịch tiếng anh của tôi: "${currentSentence.translation}". Tương ứng với câu tiếng Việt: "${currentSentence.text}".`;
 
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
@@ -145,7 +141,21 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
           messages: [
             {
               role: "system",
-              content: "Bạn là một trợ lý AI hữu ích, chuyên kiểm tra bản dịch tiếng Anh và thực hiện đánh giá và hướng dẫn cải thiện bản dịch cho tốt hơn.",
+              content: `Bạn là một trợ lý AI hữu ích, chuyên kiểm tra bản dịch tiếng Anh và thực hiện đánh giá và hướng dẫn cải thiện bản dịch cho tốt hơn.
+                        Hãy đảm bảo bản dịch đúng ngữ nghĩa, ngữ cảnh của đoạn văn. Ngữ pháp và từ vựng phải chính xác và phù hợp với ngữ cảnh.`,
+            },
+            {
+              role: "user",
+              content: `Đây là đoạn văn gốc bằng tiếng việt: "${paragraph}".
+                      Sau đây tôi sẽ thực hiện dịch từng câu của đoạn văn trên sang tiếng anh.
+                      Hãy giúp kiểm tra bản dịch, thực hiện đánh giá trên 10 cấp độ và nêu phản hồi về cách cải thiện bản dịch tốt hơn.
+                      Đảm bảo trả lời dưới dạng JSON với các trường "isCorrect" (boolean), "feedback" (string), "vocabs"(list) và scope(number). 
+                      Đảm bảo phản hồi đúng cấu trúc và feedback nên ngắn gọn và rõ ràng bằng tiếng việt. 
+                      Nếu bản dịch có cấp độ từ 5 đến 10, câu dịch sẽ là isCorrect=true và hãy cung cấp phản hồi về cách cải thiện câu tốt hơn vào feebback.
+                      Nếu bản dịch có cấp độ từ 0 đến 5, câu dịch sẽ là isCorrect=false và hãy phản hồi lại bản dịch chưa đúng chỗ nào vào feedback và cung cấp các từ vựng tiếng anh liên quan đến câu dịch để giúp người tiếp tục cải thiện bản dịch vào vocabs.
+                      Ví dụ bản dịch đúng: {"isCorrect": true, "feedback": "Câu dịch rất tốt, tuy nhiên cần sửa lai từ "abc" thành "xyz" để làm cho nó tự nhiên hơn.", "vocabs": [], "scope":8}.
+                      Ví dụ bản dịch sai: {"isCorrect": false, "feedback": "Bản dịch chưa đúng tham khảo thêm các từ vựng sau để hoàn thành bản dịch.", "vocabs": [{word: study, type: "verb", meaning: "học"}, {word: vocabulary, type: "noun", meaning: "từ vựng"}, {word: practice, type: "verb", meaning: "luyện tập"}], "scope":3}.
+                      `,
             },
             {
               role: "user",
@@ -160,8 +170,6 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
       if (!response.ok) {
         const errorData = await response.json();
         console.error("OpenAI API error:", errorData);
-        // const userFriendlyError = errorData?.error?.message || `Lỗi ${response.status}. Vui lòng kiểm tra API key hoặc thử lại sau.`;
-        // setErrorMessage(`Lỗi tạo đoạn văn: ${userFriendlyError}`);
         throw new Error(`OpenAI API error: ${response.statusText}`);
       }
 
@@ -195,6 +203,92 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
       alert("Có lỗi xảy ra khi kiểm tra bản dịch. Vui lòng thử lại!");
     } finally {
       setIsChecking(false);
+    }
+  };
+
+  const suggestTranslate = async () => {
+    const currentSentence = sentences[currentSentenceIndex];
+    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+
+    if (!apiKey) {
+      return;
+    }
+
+    setIsSuggesting(true);
+    
+    try {
+
+      const prompt = `Tôi đang cần dịch câu tiếng Anh "${currentSentence.text}" sau sang tiếng Việt. 
+                      Hãy giúp tôi đưa ra các gợi ý và từ vựng hỗ trợ để có thể hoàn thiện bản dịch.`;
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4.1-nano-2025-04-14",
+          // model: "gpt-4.1-2025-04-14",
+          messages: [
+            {
+              role: "system",
+              content: "Bạn là một trợ lý AI hữu ích, chuyên đưa ra các gợi ý và từ vựng hỗ trợ giúp cho người dùng cải thiện khả năng dịch thuật. Hãy đảm bảo dịch sát ngữ nghĩa và đúng cấu trúc, ngữ pháp, ngữ cảnh.",
+            },
+            {
+              role: "user",
+              content: `Đây là đoạn văn gốc bằng tiếng việt: "${paragraph}".
+                      Sau đây tôi sẽ thực hiện dịch từng câu của đoạn văn trên sang tiếng anh.
+                      Hãy giúp tôi đưa ra các gợi ý và từ vựng hỗ trợ giúp tôi có thể hoàn thiện bản dịch.
+                      Đảm bảo trả lời dưới dạng JSON với các trường"feedback" (string), "vocabs"(list). 
+                      Nội dung feedback nên ngắn gọn và rõ ràng bằng tiếng việt, tập trung gợi ý các ngữ pháp có thể sử dụng, có thêm mô tả ngắn gọn nên sử dụng ngữ pháp nào và tại sao. Bên cạnh đó cần chỉ rõ các thì nên sử dụng trong ngữ cảnh.
+                      Nội dung vocabs nên là danh sách các từ vựng tiếng anh liên quan đến câu dịch, đảm bảo đúng ngữ nghĩa và ngữ cảnh.
+                      Ví dụ: {"feedback": "Nên sử dụng thì quá khứ đơn vì ngữ cảnh đang ở quá khứ,...", "vocabs": [{word: study, type: "verb", meaning: "học"}, {word: vocabulary, type: "noun", meaning: "từ vựng"}, {word: practice, type: "verb", meaning: "luyện tập"}]}
+                      `,
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("OpenAI API error:", errorData);
+        throw new Error(`OpenAI API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const result = data.choices[0]?.message?.content?.trim();
+
+      const res = result ? JSON.parse(result) : { feedback: "No feedback provided", vocabs: [] };
+      
+      const feedback: Feedback = {
+        message: res.feedback,
+        vocabs: res.vocabs.map((vocab: { word: string; type: string; meaning: string }) => ({
+          word: vocab.word,
+          type: vocab.type,
+          meaning: vocab.meaning,
+        })),
+        scope: 0,
+      };
+      
+      
+      // Update the sentence with feedback
+      setSentences((prev) =>
+        prev.map((sentence, index) =>
+          index === currentSentenceIndex
+            ? { ...sentence, feedback }
+            : sentence
+        )
+      );
+    } catch (error) {
+      console.error("Error suggest translation:", error);
+      alert("Có lỗi xảy ra khi gợi ý bản dịch. Vui lòng thử lại!");
+    } finally {
+      setIsSuggesting(false);
     }
   };
 
@@ -298,11 +392,14 @@ export function TranslationPractice({ paragraph, onReset }: TranslationPracticeP
                 {currentSentenceIndex < sentences.length - 1 ? "Câu tiếp theo" : "Hoàn thành"}
               </Button>
             ) : (
-              <>
-                <Button onClick={checkTranslation} disabled={isChecking}>
+              <div className="flex gap-2 justify-end">
+                <Button onClick={suggestTranslate} disabled={isSuggesting || isChecking}>
+                  {isSuggesting ? "Đang đưa ra gợi ý..." : "Gợi ý"}
+                </Button>
+                <Button onClick={checkTranslation} disabled={isSuggesting || isChecking}>
                   {isChecking ? "Đang kiểm tra..." : "Kiểm tra"}
                 </Button>
-              </>
+              </div>
             )}
           </CardFooter>
         </Card>
