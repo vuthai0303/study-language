@@ -50,7 +50,7 @@ export function VocabularyForm({ vocabulary, onSuccess, open, onOpenChange }: Vo
           ...values,
         });
       } else {
-        addVocabulary(values);
+        addVocabulary({...values, status: "to_learn"});
       }
       
       form.reset();
