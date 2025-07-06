@@ -37,6 +37,20 @@ export default function Home() {
             </Link>
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Học ngữ pháp</CardTitle>
+            <CardDescription>Luyện tập các chủ điểm ngữ pháp tiếng Anh với câu hỏi trắc nghiệm AI</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">
+              Chọn các chủ điểm ngữ pháp bạn muốn luyện tập và làm bài kiểm tra trắc nghiệm do AI tạo ra.
+            </p>
+            <Link href="/grammar">
+              <Button>Bắt đầu học ngữ pháp</Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
