@@ -12,11 +12,13 @@ const API_KEY_STORAGE_KEY = "openai_api_key";
 
 export default function WritingPage() {
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+  const [level, setLevel] = useState<string>("Trung cấp");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedParagraph, setGeneratedParagraph] = useState<string | null>(null);
+  const [generatedParagraph, setGeneratedParagraph] = useState<string | null>(
+    null
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showTranslationPractice, setShowTranslationPractice] = useState(false);
-
 
   const handleTopicSelect = (topicId: string) => {
     setSelectedTopicId(topicId);
@@ -53,35 +55,55 @@ export default function WritingPage() {
         throw new Error("Topic not found");
       }
 
-      const prompt = `Viết một đoạn văn chi tiết bằng tiếng Việt về chủ đề: '${selectedTopic.name}'. Đoạn văn nên có độ dài khoảng 100-150 từ, phù hợp cho người học tiếng Việt trình độ trung cấp để thực hành dịch thuật.`;
+      // Xác định hướng dẫn theo trình độ
+      let levelInstruction = "";
+      if (level === "Cơ bản") {
+        levelInstruction =
+          "Đoạn văn nên sử dụng từ vựng và cấu trúc câu cơ bản, phù hợp cho người mới học thực hành dịch thuật từ tiếng việt sang tiếng anh.";
+      } else if (level === "Trung cấp") {
+        levelInstruction =
+          "Đoạn văn nên sử dụng từ vựng và cấu trúc câu ở mức trung cấp, phù hợp cho người có trình độ trung cấp để thực hành dịch thuật từ tiếng việt sang tiếng anh.";
+      } else if (level === "Chuyên nghiệp") {
+        levelInstruction =
+          "Đoạn văn nên sử dụng từ vựng và cấu trúc câu nâng cao, thể hiện sự tự nhiên và chuyên nghiệp, phù hợp cho người học trình độ cao để thực hành dịch thuật từ tiếng việt sang tiếng anh.";
+      } else {
+        levelInstruction = "";
+      }
+      const prompt = `Viết một đoạn văn chi tiết bằng tiếng Việt có độ dài khoảng 100-150 từ về chủ đề: '${selectedTopic.name}'. ${levelInstruction}`;
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4.1-nano-2025-04-14",
-          messages: [
-            {
-              role: "system",
-              content: "Bạn là một trợ lý AI hữu ích, chuyên tạo ra các đoạn văn bằng tiếng Việt theo chủ đề cho mục đích học ngôn ngữ.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          // max_tokens: 250, // Adjusted for paragraph length
-          // temperature: 0.7, // Balances creativity and coherence
-        }),
-      });
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4.1-2025-04-14",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Bạn là một trợ lý AI hữu ích, chuyên tạo ra các đoạn văn bằng tiếng Việt theo chủ đề cho mục đích học ngôn ngữ.",
+              },
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+            // max_tokens: 250, // Adjusted for paragraph length
+            // temperature: 0.7, // Balances creativity and coherence
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
         console.error("OpenAI API error:", errorData);
-        const userFriendlyError = errorData?.error?.message || `Lỗi ${response.status}. Vui lòng kiểm tra API key hoặc thử lại sau.`;
+        const userFriendlyError =
+          errorData?.error?.message ||
+          `Lỗi ${response.status}. Vui lòng kiểm tra API key hoặc thử lại sau.`;
         setErrorMessage(`Lỗi tạo đoạn văn: ${userFriendlyError}`);
         throw new Error(`OpenAI API error: ${response.statusText}`);
       }
@@ -93,13 +115,15 @@ export default function WritingPage() {
         setGeneratedParagraph(paragraph);
         setShowTranslationPractice(true); // Show translation practice after successful generation
       } else {
-        setErrorMessage("Không nhận được nội dung hợp lệ từ OpenAI. Vui lòng thử lại.");
+        setErrorMessage(
+          "Không nhận được nội dung hợp lệ từ OpenAI. Vui lòng thử lại."
+        );
         throw new Error("Empty response from OpenAI");
       }
-
     } catch (error) {
       console.error("Error generating paragraph:", error);
-      if (!errorMessage) { // Avoid overwriting specific API error messages
+      if (!errorMessage) {
+        // Avoid overwriting specific API error messages
         setErrorMessage("Có lỗi xảy ra khi tạo đoạn văn. Vui lòng thử lại!");
       }
     } finally {
@@ -110,25 +134,29 @@ export default function WritingPage() {
   const handleReset = () => {
     setGeneratedParagraph(null);
     setSelectedTopicId(null); // Optionally reset topic as well
+    setLevel("Trung cấp");
     setErrorMessage(null);
     setShowTranslationPractice(false);
   };
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Học viết & Tạo đoạn văn</h1>
-      
+      <h1 className="text-3xl font-bold mb-6">Học viết Tiếng Anh</h1>
+
       <Card>
         <CardContent className="pt-6 space-y-6">
           <div>
             <p className="text-muted-foreground mb-4">
-              Chọn một chủ đề, sau đó nhấn &ldquo;Tạo đoạn văn&rdquo; để AI tạo nội dung. Bạn có thể sử dụng đoạn văn này để thực hành dịch.
+              Chọn một chủ đề, sau đó nhấn &ldquo;Tạo đoạn văn&rdquo; để AI tạo
+              nội dung. Bạn có thể sử dụng đoạn văn này để thực hành dịch.
             </p>
             <TopicSelector
               onTopicSelect={handleTopicSelect}
               onGenerateParagraph={handleGenerateParagraph}
               isGenerating={isGenerating}
               selectedTopicId={selectedTopicId}
+              level={level}
+              onLevelChange={setLevel}
             />
           </div>
 
@@ -140,29 +168,46 @@ export default function WritingPage() {
           )}
 
           {errorMessage && (
-            <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+            <div
+              className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"
+              role="alert"
+            >
               <span className="font-medium">Lỗi:</span> {errorMessage}
             </div>
           )}
 
           {generatedParagraph && !showTranslationPractice && (
-             // This state might be redundant if TranslationPractice is shown immediately
+            // This state might be redundant if TranslationPractice is shown immediately
             <div>
               <h2 className="text-xl font-semibold mb-2">Đoạn văn đã tạo:</h2>
-              <Textarea value={generatedParagraph} readOnly rows={8} className="mb-4" />
-              <Button onClick={() => setShowTranslationPractice(true)}>Bắt đầu thực hành dịch</Button>
+              <Textarea
+                value={generatedParagraph}
+                readOnly
+                rows={8}
+                className="mb-4"
+              />
+              <Button onClick={() => setShowTranslationPractice(true)}>
+                Bắt đầu thực hành dịch
+              </Button>
             </div>
           )}
-          
+
           {showTranslationPractice && generatedParagraph && (
-            <TranslationPractice paragraph={generatedParagraph} onReset={handleReset} />
+            <TranslationPractice
+              paragraph={generatedParagraph}
+              onReset={handleReset}
+            />
           )}
 
-          {!isGenerating && !generatedParagraph && !errorMessage && !selectedTopicId && (
-             <p className="text-muted-foreground text-center py-4">
-                Vui lòng chọn chủ đề và cài đặt API Key (nếu chưa có) để bắt đầu.
-             </p>
-          )}
+          {!isGenerating &&
+            !generatedParagraph &&
+            !errorMessage &&
+            !selectedTopicId && (
+              <p className="text-muted-foreground text-center py-4">
+                Vui lòng chọn chủ đề và cài đặt API Key (nếu chưa có) để bắt
+                đầu.
+              </p>
+            )}
         </CardContent>
       </Card>
     </div>

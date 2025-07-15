@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Topic } from "@/types";
 import { getTopics, initializeDefaultTopics } from "@/lib/localStorage";
 
@@ -11,6 +17,8 @@ interface TopicSelectorProps {
   onGenerateParagraph: () => void;
   isGenerating: boolean;
   selectedTopicId: string | null;
+  level: string;
+  onLevelChange: (level: string) => void;
 }
 
 export function TopicSelector({
@@ -18,13 +26,15 @@ export function TopicSelector({
   onGenerateParagraph,
   isGenerating,
   selectedTopicId,
+  level,
+  onLevelChange,
 }: TopicSelectorProps) {
   const [topics, setTopics] = useState<Topic[]>([]);
 
   useEffect(() => {
     // Initialize default topics if none exist
     initializeDefaultTopics();
-    
+
     // Load topics
     const loadedTopics = getTopics();
     setTopics(loadedTopics);
@@ -32,7 +42,7 @@ export function TopicSelector({
 
   return (
     <div className="flex flex-col md:flex-row gap-4 items-end">
-      <div className="w-full md:w-64">
+      <div className="w-fit flex flex-col">
         <label className="block text-sm font-medium mb-2">Chọn chủ đề</label>
         <Select
           value={selectedTopicId || ""}
@@ -48,6 +58,23 @@ export function TopicSelector({
                 {topic.name}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="w-fit flex flex-col">
+        <label className="block text-sm font-medium mb-2">Chọn trình độ</label>
+        <Select
+          value={level}
+          onValueChange={onLevelChange}
+          disabled={isGenerating}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Chọn trình độ" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Cơ bản">Cơ bản</SelectItem>
+            <SelectItem value="Trung cấp">Trung cấp</SelectItem>
+            <SelectItem value="Chuyên nghiệp">Chuyên nghiệp</SelectItem>
           </SelectContent>
         </Select>
       </div>
