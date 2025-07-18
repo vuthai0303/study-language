@@ -7,6 +7,8 @@ export type VocabularyType = {
   status: "to_learn" | "learning" | "mastered";
 };
 
+export type VocabularyStudyType = "multiple choice" | "writing";
+
 export type Topic = {
   id: string;
   name: string;
