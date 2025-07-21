@@ -7,7 +7,20 @@ export type VocabularyType = {
   status: "to_learn" | "learning" | "mastered";
 };
 
-export type VocabularyStudyType = "multiple choice" | "writing";
+export type QuizQuestion = {
+  id: string;
+  word: string;
+  correctAnswer: string;
+  options: string[];
+};
+
+export type QuizResult = {
+  total: number;
+  correct: number;
+  incorrect: number;
+};
+
+export type VocabularyStudyType = "multiple_choice" | "writing";
 
 export type Topic = {
   id: string;
