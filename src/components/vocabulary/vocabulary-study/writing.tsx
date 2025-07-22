@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/card";
 import { VocabularyType, QuizResult } from "@/types";
 import { updateVocabulary } from "@/lib/localStorage";
+import { isEmpty } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 interface VocabularyWritingStudyProps {
   vocabulary: VocabularyType[];
@@ -27,8 +29,8 @@ type WritingQuestion = {
   meaning: string;
 };
 
+// Lấy ngẫu nhiên ít nhất 1 ký tự, khoảng 1/5 số ký tự (làm tròn lên)
 function getRandomRevealedIndexes(wordLength: number): number[] {
-  // Lấy ngẫu nhiên ít nhất 1 ký tự, khoảng 1/5 số ký tự (làm tròn lên)
   const revealCount = Math.max(1, Math.ceil(wordLength / 5));
   const indexes: number[] = [];
   while (indexes.length < revealCount) {
@@ -50,8 +52,9 @@ export function VocabularyWritingStudy({
 }: VocabularyWritingStudyProps) {
   const [questions, setQuestions] = useState<WritingQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswer, setUserAnswer] = useState<string[]>([]);
+  const [userAnswer, setUserAnswer] = useState<string>();
   const [revealedIndexes, setRevealedIndexes] = useState<number[]>([]);
+  const [correctIndexes, setCorrectIndexes] = useState<number[]>([]);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [quizFinished, setQuizFinished] = useState(false);
@@ -82,9 +85,7 @@ export function VocabularyWritingStudy({
       const word = generatedQuestions[0].word;
       const revealed = getRandomRevealedIndexes(word.length);
       setRevealedIndexes(revealed);
-      setUserAnswer(
-        word.split("").map((char, idx) => (revealed.includes(idx) ? char : ""))
-      );
+      setUserAnswer("");
       setIsAnswered(false);
       setIsCorrect(null);
     }
@@ -97,28 +98,28 @@ export function VocabularyWritingStudy({
     if (!word) return;
     const revealed = getRandomRevealedIndexes(word.length);
     setRevealedIndexes(revealed);
-    setUserAnswer(
-      word.split("").map((char, idx) => (revealed.includes(idx) ? char : ""))
-    );
+    setUserAnswer("");
     setIsAnswered(false);
     setIsCorrect(null);
   }, [currentQuestionIndex, questions, quizFinished]);
 
-  const handleInputChange = (idx: number, value: string) => {
-    if (isAnswered) return;
-    if (!/^[a-zA-Z]?$/.test(value)) return; // Chỉ cho nhập 1 ký tự chữ
-    setUserAnswer((prev) => {
-      const next = [...prev];
-      next[idx] = value;
-      return next;
+  const checkCorrectIndexes = () => {
+    if (isAnswered || !userAnswer) return;
+
+    const result: number[] = [];
+    const word: string[] =
+      (questions[currentQuestionIndex].word ?? "").split("") ?? [];
+
+    (userAnswer ?? "").split("").map((e, idx: number) => {
+      if (userAnswer[idx] == word[idx]) result.push(idx);
     });
+    setCorrectIndexes(result);
   };
 
   const handleCheckAnswer = () => {
-    if (isAnswered) return;
-    const word = questions[currentQuestionIndex].word;
-    const answer = userAnswer.join("");
-    const correct = answer.toLowerCase() === word.toLowerCase();
+    if (isAnswered || !userAnswer) return;
+    const word = questions[currentQuestionIndex].word ?? "";
+    const correct = userAnswer?.toLowerCase() === word.toLowerCase();
     setIsAnswered(true);
     setIsCorrect(correct);
     setResult((prev) => ({
@@ -126,6 +127,7 @@ export function VocabularyWritingStudy({
       correct: correct ? prev.correct + 1 : prev.correct,
       incorrect: correct ? prev.incorrect : prev.incorrect + 1,
     }));
+    checkCorrectIndexes();
 
     // Nếu quiz ở trạng thái "mastered" và trả lời sai, chuyển từ sang "learning"
     if (!correct && selectedStatus === "mastered") {
@@ -227,13 +229,16 @@ export function VocabularyWritingStudy({
               type="text"
               maxLength={1}
               className={`w-10 h-12 text-center text-xl border rounded ${
-                revealedIndexes.includes(idx)
+                isAnswered && correctIndexes.includes(idx)
+                  ? "bg-green-200 text-black font-bold"
+                  : isAnswered
+                  ? "bg-red-200 text-black font-bold"
+                  : revealedIndexes.includes(idx)
                   ? "bg-gray-200 text-black font-bold"
                   : "bg-white"
               }`}
-              value={userAnswer[idx] || ""}
-              disabled={revealedIndexes.includes(idx) || isAnswered}
-              onChange={(e) => handleInputChange(idx, e.target.value)}
+              value={revealedIndexes.includes(idx) || isAnswered ? char : ""}
+              disabled={true}
               autoComplete="off"
             />
           ))}
@@ -242,6 +247,14 @@ export function VocabularyWritingStudy({
           <span className="text-muted-foreground text-lg">
             {currentQuestion.meaning}
           </span>
+        </div>
+        <div className="mb-4 text-center">
+          <Input
+            placeholder="Nhập kết quả"
+            value={userAnswer}
+            onChange={(e) => setUserAnswer(e.target.value)}
+            disabled={isAnswered}
+          />
         </div>
         {isAnswered && (
           <div className="text-center mb-2">
@@ -261,12 +274,7 @@ export function VocabularyWritingStudy({
           Thoát
         </Button>
         {!isAnswered ? (
-          <Button
-            onClick={handleCheckAnswer}
-            disabled={userAnswer.some(
-              (c, idx) => !revealedIndexes.includes(idx) && c.trim() === ""
-            )}
-          >
+          <Button onClick={handleCheckAnswer} disabled={isEmpty(userAnswer)}>
             Kiểm tra
           </Button>
         ) : (
