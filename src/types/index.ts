@@ -22,7 +22,25 @@ export type QuizResult = {
 
 export type VocabularyStudyType = "multiple_choice" | "writing";
 
+export type WritingQuestion = {
+  id: string;
+  word: string;
+  meaning: string;
+};
+
 export type Topic = {
   id: string;
   name: string;
+};
+
+export type Question = {
+  label: string;
+  answers: string[];
+  trueAnsswer: number;
+  explain: string;
+};
+
+export type ReadingPracticeType = {
+  paragraph: string;
+  questions: Question[];
 };

@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { VocabularyType, QuizResult } from "@/types";
+import { VocabularyType, QuizResult, WritingQuestion } from "@/types";
 import { updateVocabulary } from "@/lib/localStorage";
 import { isEmpty } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -22,12 +22,6 @@ interface VocabularyWritingStudyProps {
   startQuiz: () => void;
   onCloseQuiz: () => void;
 }
-
-type WritingQuestion = {
-  id: string;
-  word: string;
-  meaning: string;
-};
 
 // Lấy ngẫu nhiên ít nhất 1 ký tự, khoảng 1/5 số ký tự (làm tròn lên)
 function getRandomRevealedIndexes(wordLength: number): number[] {

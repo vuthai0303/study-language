@@ -36,14 +36,14 @@ const GRAMMAR_TOPICS = [
   "Cụm động từ (Phrasal Verbs)",
   "Từ hạn định (Determiners)",
   "Liên từ (Conjunctions)",
-  "Thán từ (Interjections)"
+  "Thán từ (Interjections)",
 ];
 
 type QuizQuestion = {
   question: string;
   options: string[];
   answer: number;
-  feedback: string; 
+  feedback: string;
 };
 
 export default function GrammarPage() {
@@ -55,9 +55,7 @@ export default function GrammarPage() {
 
   const handleTopicChange = (topic: string) => {
     setSelectedTopics((prev) =>
-      prev.includes(topic)
-        ? prev.filter((t) => t !== topic)
-        : [...prev, topic]
+      prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]
     );
   };
 
@@ -74,13 +72,17 @@ export default function GrammarPage() {
 
     const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
     if (!apiKey) {
-      alert("Vui lòng nhập OpenAI API key trong phần cài đặt trước khi bắt đầu.");
+      alert(
+        "Vui lòng nhập OpenAI API key trong phần cài đặt trước khi bắt đầu."
+      );
       setLoading(false);
       return;
     }
 
     const prompt = `
-      Bạn là giáo viên tiếng Anh. Tạo 10 câu hỏi trắc nghiệm (mỗi câu có 4 lựa chọn, chỉ có một câu trả lời đúng) để thực hành các chủ đề ngữ pháp sau: ${selectedTopics.join(", ")}.
+      Bạn là giáo viên tiếng Anh. Tạo 10 câu hỏi trắc nghiệm (mỗi câu có 4 lựa chọn, chỉ có một câu trả lời đúng) để thực hành các chủ đề ngữ pháp sau: ${selectedTopics.join(
+        ", "
+      )}.
       Trả về kết quả dưới dạng mảng JSON với định dạng này:
       [
         {
@@ -95,22 +97,25 @@ export default function GrammarPage() {
       `;
 
     try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4.1-nano-2025-04-14",
-          messages: [
-            { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: prompt },
-          ],
-          // temperature: 0.7,
-          // max_tokens: 1800,
-        }),
-      });
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4.1-2025-04-14",
+            messages: [
+              { role: "system", content: "You are a helpful assistant." },
+              { role: "user", content: prompt },
+            ],
+            // temperature: 0.7,
+            // max_tokens: 1800,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.text();
@@ -167,16 +172,17 @@ export default function GrammarPage() {
               <input
                 type="checkbox"
                 checked={selectedTopics.length === GRAMMAR_TOPICS.length}
-                onChange={(e) =>
-                  e.target.checked ? checkAll() : uncheckAll()
-                }
+                onChange={(e) => (e.target.checked ? checkAll() : uncheckAll())}
               />
               Chọn tất cả
             </label>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-96 overflow-y-auto border rounded p-2">
             {GRAMMAR_TOPICS.map((topic) => (
-              <label key={topic} className="flex items-center gap-2 cursor-pointer">
+              <label
+                key={topic}
+                className="flex items-center gap-2 cursor-pointer"
+              >
                 <input
                   type="checkbox"
                   checked={selectedTopics.includes(topic)}
@@ -237,12 +243,14 @@ export default function GrammarPage() {
                 </div>
                 {showResult && (
                   <div className="mt-1 text-sm">
-                    {userAnswers[qIdx] === q.answer
-                      ? <span className="text-green-600">Correct</span>
-                      : <span className="text-red-600">Incorrect</span>
-                    }
-                    
-                    <br/><span>{q.feedback}</span>
+                    {userAnswers[qIdx] === q.answer ? (
+                      <span className="text-green-600">Correct</span>
+                    ) : (
+                      <span className="text-red-600">Incorrect</span>
+                    )}
+
+                    <br />
+                    <span>{q.feedback}</span>
                   </div>
                 )}
               </div>
@@ -254,7 +262,9 @@ export default function GrammarPage() {
             )}
             {showResult && (
               <div className="mt-4 font-semibold">
-                Score: {userAnswers.filter((a, i) => a === quiz[i].answer).length} / {quiz.length}
+                Score:{" "}
+                {userAnswers.filter((a, i) => a === quiz[i].answer).length} /{" "}
+                {quiz.length}
               </div>
             )}
           </form>

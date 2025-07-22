@@ -28,6 +28,11 @@ export function Navigation() {
       label: "Học ngữ pháp",
       active: pathname === "/grammar",
     },
+    {
+      href: "/reading",
+      label: "Luyện đọc",
+      active: pathname === "/reading",
+    },
   ];
 
   return (
