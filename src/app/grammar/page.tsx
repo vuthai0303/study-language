@@ -162,7 +162,7 @@ export default function GrammarPage() {
   return (
     <div className="w-full mx-auto p-8 flex flex-row flex-wrap justify-center gap-5">
       <Card className="p-6 max-w-2/5">
-        <h1 className="text-2xl font-bold mb-3">Grammar Practice</h1>
+        <h1 className="text-2xl font-bold mb-3">Luyện tập ngữ pháp</h1>
         <Label htmlFor="grammar-topics" className="mb-2 block">
           Chọn ngữ pháp để thực hành:
         </Label>
@@ -193,6 +193,9 @@ export default function GrammarPage() {
             ))}
           </div>
         </div>
+        <p className="text-muted-foreground text-center py-4">
+          Vui lòng chọn chủ đề và cài đặt API Key (nếu chưa có) để bắt đầu.
+        </p>
         <Button
           onClick={startQuiz}
           disabled={selectedTopics.length === 0 || loading}
