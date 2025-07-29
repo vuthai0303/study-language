@@ -85,8 +85,24 @@ export const initializeDefaultTopics = () => {
       { id: "5", name: "Thể thao" },
       { id: "6", name: "Công việc" },
       { id: "7", name: "Giới thiệu bản thân" },
+      { id: "8", name: "Phỏng vấn" },
     ];
 
     saveTopics(defaultTopics);
   }
+};
+
+// history paragraph function
+export const getHistoryParagraph = (): string[] => {
+  if (typeof window === "undefined") return [];
+
+  const historyParagraph = localStorage.getItem("history_paragraph");
+  return historyParagraph ? JSON.parse(historyParagraph) : [];
+};
+
+export const saveHistoryParagraph = (historyParagraph: string[]): string[] => {
+  if (typeof window === "undefined") return [];
+
+  localStorage.setItem("history_paragraph", JSON.stringify(historyParagraph));
+  return historyParagraph ?? [];
 };

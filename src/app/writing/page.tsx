@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TopicSelector } from "@/components/writing/topic-selector";
 import { TranslationPractice } from "@/components/writing/translation-practice";
-import { getTopics } from "@/lib/localStorage";
+import {
+  getHistoryParagraph,
+  getTopics,
+  saveHistoryParagraph,
+} from "@/lib/localStorage";
 import { Button } from "@/components/ui/button"; // Added for potential use, can be removed if not needed
 import { Textarea } from "@/components/ui/textarea"; // Added for displaying generated paragraph
 
@@ -19,6 +23,11 @@ export default function WritingPage() {
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showTranslationPractice, setShowTranslationPractice] = useState(false);
+  const [historyParagraph, setHistoryParagraph] = useState<string[]>([]);
+
+  useEffect(() => {
+    setHistoryParagraph(getHistoryParagraph());
+  }, []);
 
   const handleTopicSelect = (topicId: string) => {
     setSelectedTopicId(topicId);
@@ -69,7 +78,17 @@ export default function WritingPage() {
       } else {
         levelInstruction = "";
       }
-      const prompt = `Viết một đoạn văn chi tiết bằng tiếng Việt có độ dài khoảng 100-150 từ về chủ đề: '${selectedTopic.name}'. ${levelInstruction}`;
+
+      let topic = "";
+      if (selectedTopic.id == "8") {
+        topic = `Tạo 1 đoạn văn (khoảng 100-150 từ) bằng tiếng việt với nội dung là 1 đoạn hội thoại giữa 2 người đang trong 1 buổi phỏng vấn xin việc. 
+                Đoạn văn cần liền mạch, rõ ràng, có khả năng giúp tôi thực hiện luyện tập dịch từ tiếng việt sang tiếng anh.`;
+      } else {
+        topic = `Tạo một đoạn văn chi tiết bằng tiếng Việt có độ dài khoảng 100-150 từ về chủ đề: '${selectedTopic.name}'.
+                Đoạn văn cần liền mạch, rõ ràng, có khả năng giúp tôi thực hiện luyện tập dịch từ tiếng việt sang tiếng anh.`;
+      }
+
+      const prompt = `'${topic}' ${levelInstruction} Nội dung trả về chỉ bao gồm đoạn văn được tạo ra, không cần trả lời gì thêm.`;
 
       const response = await fetch(
         "https://api.openai.com/v1/chat/completions",
@@ -86,6 +105,12 @@ export default function WritingPage() {
                 role: "system",
                 content:
                   "Bạn là một trợ lý AI hữu ích, chuyên tạo ra các đoạn văn bằng tiếng Việt theo chủ đề cho mục đích học ngôn ngữ.",
+              },
+              {
+                role: "system",
+                content: `Sau đây là các đoạn văn mà trước đó bạn đã giúp tôi tạo ra. 
+                          \n Hãy đảm bảo rằng đoạn văn mới được tạo ra sẽ khác 70% so với các đoạn văn trước đó.
+                          \n ${historyParagraph.join("\n")}`,
               },
               {
                 role: "user",
@@ -109,7 +134,11 @@ export default function WritingPage() {
       }
 
       const data = await response.json();
-      const paragraph = data.choices[0]?.message?.content?.trim();
+      const paragraph = data.choices[0]?.message?.content?.trim() ?? "";
+
+      setHistoryParagraph(
+        saveHistoryParagraph([paragraph, ...historyParagraph].splice(0, 10))
+      );
 
       if (paragraph) {
         setGeneratedParagraph(paragraph);
