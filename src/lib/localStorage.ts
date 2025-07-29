@@ -93,16 +93,24 @@ export const initializeDefaultTopics = () => {
 };
 
 // history paragraph function
-export const getHistoryParagraph = (): string[] => {
+export const getHistoryParagraph = (isWriting: boolean): string[] => {
   if (typeof window === "undefined") return [];
 
-  const historyParagraph = localStorage.getItem("history_paragraph");
+  const historyParagraph = isWriting
+    ? localStorage.getItem("writing_history_paragraph")
+    : localStorage.getItem("reading_history_paragraph");
   return historyParagraph ? JSON.parse(historyParagraph) : [];
 };
 
-export const saveHistoryParagraph = (historyParagraph: string[]): string[] => {
+export const saveHistoryParagraph = (
+  isWriting: boolean,
+  historyParagraph: string[]
+): string[] => {
   if (typeof window === "undefined") return [];
 
-  localStorage.setItem("history_paragraph", JSON.stringify(historyParagraph));
+  localStorage.setItem(
+    isWriting ? "writing_history_paragraph" : "reading_history_paragraph",
+    JSON.stringify(historyParagraph)
+  );
   return historyParagraph ?? [];
 };

@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea"; // Added for displaying gen
 const API_KEY_STORAGE_KEY = "openai_api_key";
 
 export default function WritingPage() {
-  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>("1");
   const [level, setLevel] = useState<string>("Trung cấp");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedParagraph, setGeneratedParagraph] = useState<string | null>(
@@ -26,7 +26,7 @@ export default function WritingPage() {
   const [historyParagraph, setHistoryParagraph] = useState<string[]>([]);
 
   useEffect(() => {
-    setHistoryParagraph(getHistoryParagraph());
+    setHistoryParagraph(getHistoryParagraph(true));
   }, []);
 
   const handleTopicSelect = (topicId: string) => {
@@ -137,7 +137,10 @@ export default function WritingPage() {
       const paragraph = data.choices[0]?.message?.content?.trim() ?? "";
 
       setHistoryParagraph(
-        saveHistoryParagraph([paragraph, ...historyParagraph].splice(0, 10))
+        saveHistoryParagraph(
+          true,
+          [paragraph, ...historyParagraph].splice(0, 10)
+        )
       );
 
       if (paragraph) {

@@ -1,22 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TopicSelector } from "@/components/reading/topic-selector";
 import { ReadingPractice } from "@/components/reading/reading-practice";
-import { getTopics } from "@/lib/localStorage";
+import {
+  getHistoryParagraph,
+  getTopics,
+  saveHistoryParagraph,
+} from "@/lib/localStorage";
 import { ReadingPracticeType } from "@/types";
 
 const API_KEY_STORAGE_KEY = "openai_api_key";
 
 export default function ReadingPage() {
-  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>("1");
   const [level, setLevel] = useState<string>("Trung cấp");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPractice, setGeneratedPractice] =
     useState<ReadingPracticeType | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPractice, setShowPractice] = useState(false);
+  const [historyParagraph, setHistoryParagraph] = useState<string[]>([]);
+
+  useEffect(() => {
+    setHistoryParagraph(getHistoryParagraph(false));
+  }, []);
 
   const handleTopicSelect = (topicId: string) => {
     setSelectedTopicId(topicId);
@@ -100,6 +109,12 @@ export default function ReadingPage() {
                   "Bạn là một trợ lý AI hữu ích, chuyên tạo ra các bài luyện tập khả năng đọc tiếng anh theo nhiều chủ đề và trình độ.",
               },
               {
+                role: "system",
+                content: `Sau đây là các các bài luyện tập khả năng đọc tiếng anh mà trước đó bạn đã giúp tôi tạo ra. 
+                          \n Hãy đảm bảo rằng các bài luyện tập khả năng đọc tiếng anh mới được tạo ra sẽ khác 70% so với các đoạn văn trước đó.
+                          \n ${historyParagraph.join("\n")}`,
+              },
+              {
                 role: "user",
                 content: prompt,
               },
@@ -129,6 +144,13 @@ export default function ReadingPage() {
             paragraph: "",
             questions: [],
           };
+
+      setHistoryParagraph(
+        saveHistoryParagraph(
+          false,
+          [practice?.paragraph ?? "", ...historyParagraph].splice(0, 10)
+        )
+      );
 
       if (practice) {
         setGeneratedPractice(practice);

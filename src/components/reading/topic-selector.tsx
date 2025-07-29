@@ -10,7 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Topic } from "@/types";
-import { getTopics, initializeDefaultTopics } from "@/lib/localStorage";
 
 interface TopicSelectorProps {
   onTopicSelect: (topicId: string) => void;
@@ -32,12 +31,15 @@ export function TopicSelector({
   const [topics, setTopics] = useState<Topic[]>([]);
 
   useEffect(() => {
-    // Initialize default topics if none exist
-    initializeDefaultTopics();
-
-    // Load topics
-    const loadedTopics = getTopics();
-    setTopics(loadedTopics);
+    const defaultTopics: Topic[] = [
+      { id: "1", name: "Du lịch" },
+      { id: "2", name: "Công nghệ" },
+      { id: "3", name: "Giáo dục" },
+      { id: "4", name: "Sức khỏe" },
+      { id: "5", name: "Thể thao" },
+      { id: "6", name: "Công việc" },
+    ];
+    setTopics(defaultTopics);
   }, []);
 
   return (
