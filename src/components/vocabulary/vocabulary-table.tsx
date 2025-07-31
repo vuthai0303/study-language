@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { VocabularyType } from "@/types";
 import { VocabularyForm } from "./vocabulary-form";
 import { deleteVocabulary, updateVocabulary } from "@/lib/localStorage";
@@ -18,11 +24,18 @@ const STATUS_LABELS: Record<VocabularyType["status"], string> = {
   mastered: "Đã thuộc",
 };
 
-export function VocabularyTable({ vocabulary, onRefresh }: VocabularyTableProps) {
+export function VocabularyTable({
+  vocabulary,
+  onRefresh,
+}: VocabularyTableProps) {
   const [openForm, setOpenForm] = useState(false);
-  const [selectedVocabulary, setSelectedVocabulary] = useState<VocabularyType | undefined>(undefined);
+  const [selectedVocabulary, setSelectedVocabulary] = useState<
+    VocabularyType | undefined
+  >(undefined);
   const [draggedId, setDraggedId] = useState<string | null>(null);
-  const [dragOverStatus, setDragOverStatus] = useState<VocabularyType["status"] | null>(null);
+  const [dragOverStatus, setDragOverStatus] = useState<
+    VocabularyType["status"] | null
+  >(null);
 
   const handleAdd = () => {
     setSelectedVocabulary(undefined);
@@ -43,14 +56,14 @@ export function VocabularyTable({ vocabulary, onRefresh }: VocabularyTableProps)
 
   const getWordTypeLabel = (type: string) => {
     const types: Record<string, string> = {
-      noun: "Danh từ",
-      verb: "Động từ",
-      adjective: "Tính từ",
-      adverb: "Trạng từ",
-      preposition: "Giới từ",
-      conjunction: "Liên từ",
-      pronoun: "Đại từ",
-      phrase: "Cụm từ",
+      noun: "Danh từ (Noun)",
+      verb: "Động từ (Verb)",
+      adjective: "Tính từ (Adjective)",
+      adverb: "Trạng từ (Adverb)",
+      preposition: "Giới từ (Preposition)",
+      conjunction: "Liên từ (Conjunction)",
+      pronoun: "Đại từ (Pronoun)",
+      phrase: "Cụm từ (Phrase)",
     };
 
     return types[type] || type;
@@ -64,7 +77,9 @@ export function VocabularyTable({ vocabulary, onRefresh }: VocabularyTableProps)
   };
   vocabulary.forEach((item) => {
     const status: VocabularyType["status"] =
-      item.status === "to_learn" || item.status === "learning" || item.status === "mastered"
+      item.status === "to_learn" ||
+      item.status === "learning" ||
+      item.status === "mastered"
         ? item.status
         : "to_learn";
     statusLists[status].push({ ...item, status });
@@ -96,12 +111,18 @@ export function VocabularyTable({ vocabulary, onRefresh }: VocabularyTableProps)
     setDragOverStatus(null);
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, status: VocabularyType["status"]) => {
+  const handleDragOver = (
+    e: React.DragEvent<HTMLDivElement>,
+    status: VocabularyType["status"]
+  ) => {
     e.preventDefault();
     setDragOverStatus(status);
   };
 
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>, status: VocabularyType["status"]) => {
+  const handleDragLeave = (
+    e: React.DragEvent<HTMLDivElement>,
+    status: VocabularyType["status"]
+  ) => {
     // Only clear if leaving the current dragOverStatus
     if (dragOverStatus === status) {
       setDragOverStatus(null);
@@ -115,13 +136,19 @@ export function VocabularyTable({ vocabulary, onRefresh }: VocabularyTableProps)
         <Button onClick={handleAdd}>Thêm từ vựng</Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {(["to_learn", "learning", "mastered"] as VocabularyType["status"][]).map((status) => {
+        {(
+          ["to_learn", "learning", "mastered"] as VocabularyType["status"][]
+        ).map((status) => {
           const isActiveDrop = dragOverStatus === status;
           return (
             <div
               key={status}
               className={`border rounded-md p-2 bg-muted min-h-[200px] transition-all duration-200
-                ${isActiveDrop ? "ring-4 ring-blue-400 border-blue-500 bg-blue-50 animate-pulse" : ""}
+                ${
+                  isActiveDrop
+                    ? "ring-4 ring-blue-400 border-blue-500 bg-blue-50 animate-pulse"
+                    : ""
+                }
               `}
               onDrop={() => handleDrop(status)}
               onDragOver={(e) => handleDragOver(e, status)}
@@ -133,14 +160,18 @@ export function VocabularyTable({ vocabulary, onRefresh }: VocabularyTableProps)
                 zIndex: isActiveDrop ? 10 : undefined,
               }}
             >
-              <h3 className="font-semibold text-center mb-2">{STATUS_LABELS[status]}</h3>
+              <h3 className="font-semibold text-center mb-2">
+                {STATUS_LABELS[status]}
+              </h3>
               <div className="flex flex-col gap-3 min-h-[120px]">
                 {statusLists[status].map((item) =>
                   typeof item.id === "string" && item.id ? (
                     <Card
                       key={item.id}
-                      className={`shadow-md transition-all duration-300 ${
-                        draggedId === item.id ? "bg-blue-100 scale-105 shadow-2xl z-20" : "bg-white"
+                      className={`shadow-md transition-all duration-300 gap-2 py-4 ${
+                        draggedId === item.id
+                          ? "bg-blue-100 scale-105 shadow-2xl z-20"
+                          : "bg-white"
                       }`}
                       draggable
                       onDragStart={() => handleDragStart(item.id)}
@@ -160,10 +191,18 @@ export function VocabularyTable({ vocabulary, onRefresh }: VocabularyTableProps)
                         </div>
                       </CardContent>
                       <CardFooter className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(item)}
+                        >
                           Sửa
                         </Button>
-                        <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(item.id)}
+                        >
                           Xóa
                         </Button>
                       </CardFooter>
