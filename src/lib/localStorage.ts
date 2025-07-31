@@ -1,6 +1,6 @@
 "use client";
 
-import { VocabularyType, Topic } from "@/types";
+import { VocabularyType } from "@/types";
 
 // Vocabulary functions
 export const getVocabulary = (): VocabularyType[] => {
@@ -45,51 +45,6 @@ export const deleteVocabulary = (id: string) => {
   const updatedVocabulary = existingVocabulary.filter((item) => item.id !== id);
 
   saveVocabulary(updatedVocabulary);
-};
-
-// Topics functions
-export const getTopics = (): Topic[] => {
-  if (typeof window === "undefined") return [];
-
-  const topics = localStorage.getItem("topics");
-  return topics ? JSON.parse(topics) : [];
-};
-
-export const saveTopics = (topics: Topic[]) => {
-  if (typeof window === "undefined") return;
-
-  localStorage.setItem("topics", JSON.stringify(topics));
-};
-
-export const addTopic = (name: string) => {
-  const existingTopics = getTopics();
-  const newTopic = {
-    id: Date.now().toString(),
-    name,
-  };
-
-  saveTopics([...existingTopics, newTopic]);
-  return newTopic;
-};
-
-// Initialize default topics if none exist
-export const initializeDefaultTopics = () => {
-  const existingTopics = getTopics();
-
-  if (existingTopics.length === 0) {
-    const defaultTopics: Topic[] = [
-      { id: "1", name: "Du lịch" },
-      { id: "2", name: "Công nghệ" },
-      { id: "3", name: "Giáo dục" },
-      { id: "4", name: "Sức khỏe" },
-      { id: "5", name: "Thể thao" },
-      { id: "6", name: "Công việc" },
-      { id: "7", name: "Giới thiệu bản thân" },
-      { id: "8", name: "Phỏng vấn" },
-    ];
-
-    saveTopics(defaultTopics);
-  }
 };
 
 // history paragraph function

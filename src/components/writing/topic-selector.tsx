@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Topic } from "@/types";
-import { getTopics, initializeDefaultTopics } from "@/lib/localStorage";
+import { DEFAULT_WRITING_TOPIC } from "@/consts";
 
 interface TopicSelectorProps {
   onTopicSelect: (topicId: string) => void;
@@ -32,12 +32,8 @@ export function TopicSelector({
   const [topics, setTopics] = useState<Topic[]>([]);
 
   useEffect(() => {
-    // Initialize default topics if none exist
-    initializeDefaultTopics();
-
-    // Load topics
-    const loadedTopics = getTopics();
-    setTopics(loadedTopics);
+    const defaultTopics: Topic[] = DEFAULT_WRITING_TOPIC;
+    setTopics(defaultTopics);
   }, []);
 
   return (

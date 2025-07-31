@@ -4,12 +4,9 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TopicSelector } from "@/components/reading/topic-selector";
 import { ReadingPractice } from "@/components/reading/reading-practice";
-import {
-  getHistoryParagraph,
-  getTopics,
-  saveHistoryParagraph,
-} from "@/lib/localStorage";
+import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
 import { ReadingPracticeType } from "@/types";
+import { DEFAULT_READING_TOPIC } from "@/consts";
 
 const API_KEY_STORAGE_KEY = "openai_api_key";
 
@@ -54,7 +51,7 @@ export default function ReadingPage() {
     setIsGenerating(true);
 
     try {
-      const topics = getTopics();
+      const topics = DEFAULT_READING_TOPIC;
       const selectedTopic = topics.find((t) => t.id === selectedTopicId);
 
       if (!selectedTopic) {

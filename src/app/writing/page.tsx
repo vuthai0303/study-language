@@ -4,13 +4,10 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TopicSelector } from "@/components/writing/topic-selector";
 import { TranslationPractice } from "@/components/writing/translation-practice";
-import {
-  getHistoryParagraph,
-  getTopics,
-  saveHistoryParagraph,
-} from "@/lib/localStorage";
+import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
 import { Button } from "@/components/ui/button"; // Added for potential use, can be removed if not needed
 import { Textarea } from "@/components/ui/textarea"; // Added for displaying generated paragraph
+import { DEFAULT_WRITING_TOPIC } from "@/consts";
 
 const API_KEY_STORAGE_KEY = "openai_api_key";
 
@@ -56,7 +53,7 @@ export default function WritingPage() {
     setIsGenerating(true);
 
     try {
-      const topics = getTopics();
+      const topics = DEFAULT_WRITING_TOPIC;
       const selectedTopic = topics.find((t) => t.id === selectedTopicId);
 
       if (!selectedTopic) {

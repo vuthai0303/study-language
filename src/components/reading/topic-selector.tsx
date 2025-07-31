@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Topic } from "@/types";
+import { DEFAULT_READING_TOPIC } from "@/consts";
 
 interface TopicSelectorProps {
   onTopicSelect: (topicId: string) => void;
@@ -31,14 +32,7 @@ export function TopicSelector({
   const [topics, setTopics] = useState<Topic[]>([]);
 
   useEffect(() => {
-    const defaultTopics: Topic[] = [
-      { id: "1", name: "Du lịch" },
-      { id: "2", name: "Công nghệ" },
-      { id: "3", name: "Giáo dục" },
-      { id: "4", name: "Sức khỏe" },
-      { id: "5", name: "Thể thao" },
-      { id: "6", name: "Công việc" },
-    ];
+    const defaultTopics: Topic[] = DEFAULT_READING_TOPIC;
     setTopics(defaultTopics);
   }, []);
 
