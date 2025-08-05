@@ -12,6 +12,7 @@ export const STUDY_LABELS: Record<VocabularyStudyType, string> = {
 };
 
 export const DEFAULT_WRITING_TOPIC: Topic[] = [
+  { id: "0", name: "Sách / Tiểu thuyết" },
   { id: "1", name: "Du lịch" },
   { id: "2", name: "Công nghệ" },
   { id: "3", name: "Giáo dục" },
@@ -23,6 +24,7 @@ export const DEFAULT_WRITING_TOPIC: Topic[] = [
 ];
 
 export const DEFAULT_READING_TOPIC: Topic[] = [
+  { id: "0", name: "Sách / Tiểu thuyết" },
   { id: "1", name: "Du lịch" },
   { id: "2", name: "Công nghệ" },
   { id: "3", name: "Giáo dục" },

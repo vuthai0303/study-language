@@ -12,7 +12,7 @@ import { DEFAULT_WRITING_TOPIC } from "@/consts";
 const API_KEY_STORAGE_KEY = "openai_api_key";
 
 export default function WritingPage() {
-  const [selectedTopicId, setSelectedTopicId] = useState<string | null>("1");
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>("0");
   const [level, setLevel] = useState<string>("Trung cấp");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedParagraph, setGeneratedParagraph] = useState<string | null>(
@@ -77,9 +77,17 @@ export default function WritingPage() {
       }
 
       let topic = "";
-      if (selectedTopic.id == "8") {
+      if (selectedTopic.name == "Phỏng vấn") {
         topic = `Tạo 1 đoạn văn (khoảng 100-150 từ) bằng tiếng việt với nội dung là 1 đoạn hội thoại giữa 2 người đang trong 1 buổi phỏng vấn xin việc. 
                 Đoạn văn cần liền mạch, rõ ràng, có khả năng giúp tôi thực hiện luyện tập dịch từ tiếng việt sang tiếng anh.`;
+      } else if (selectedTopic.name == "Sách / Tiểu thuyết") {
+        topic = `Tạo 1 đoạn văn tiếng việt để luyện tập dịch từ tiếng việt sang tiếng anh khoảng 200-300 từ.
+        Đoạn văn là 1 đoạn trích hay tâm đắc, phổ biến trong các cuốn sách / tiểu thuyết sau: 
+        Không Gia Đình - Hector Malot, Ông Già Và Biển Cả - Ernest Hemingway, Âm Thanh Và Cuồng Nộ - William Faulkner, Thép Đã Tôi Thế Đấy - Nikolai Ostrovsky,
+        Nhà Giả Kim - Paulo Coelho, Lược Sử Thời Gian - Stephen Hawking, Cuốn Theo Chiều Gió - Margaret Munnerlyn Mitchell, Những Người Khốn Khổ - Victor Hugo,
+        Hai Số Phận - Jeffrey Archer, Đồi Gió Hú - Ellis Bell, Chiến Tranh Và Hòa Bình - Lev Nikolayevich Tolstoy, Sông Đông êm đềm - Mikhail Aleksandrovich Sholokhov,
+        Trăm Năm Cô Đơn - Gabriel Garcia Marquez, Từ Thăm Thẳm Lãng Quên - Patrick Modiano, Nếu Em Không Phải Một Giấc Mơ - Marc Levy.
+        Hãy nhớ có thêm 1 dòng tiếng việt mô tả đoạn văn trên được trích từ sách / tiểu thuyết nào?, trang bao nhiêu? vào cuối câu.`;
       } else {
         topic = `Tạo một đoạn văn chi tiết bằng tiếng Việt có độ dài khoảng 100-150 từ về chủ đề: '${selectedTopic.name}'.
                 Đoạn văn cần liền mạch, rõ ràng, có khả năng giúp tôi thực hiện luyện tập dịch từ tiếng việt sang tiếng anh.`;

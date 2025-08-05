@@ -73,21 +73,35 @@ export default function ReadingPage() {
       } else {
         levelInstruction = "";
       }
-      const prompt = `Hãy giúp tôi tạo ra 1 bài luyện tập khả năng đọc trong tiếng anh (tham khảo các bài thi về reading trong kì thi Toeic, Ielts,...). 
-      Nội dung sẽ gồm 1 đoạn văn khoảng 600 từ về chủ đề '${selectedTopic.name}' và khoảng 5 câu hỏi trắc nghiệm để người dùng dựa vào thông tin đã đọc từ đoạn văn để trả lời.
-      ${levelInstruction}
-      \n
-      Kết quả sẽ trả về sẽ có kiểu json tương ứng như sau:
-      {
-        paragraph: "abc" // Đây là đoạn văn,
-        questions: [{
-            label: "Câu hỏi" // Đây là câu hỏi
-            answers: ["A. xyz", "B. abc", "C. xzt", "D. aqq"] // Danh sách kết quả trắc nghiệm, gồm 4 đáp án A, B, C, D
-            trueAnsswer: 1 // index tương ứng với kết quả đúng
-            explain: "Giải thích" // Giải thích ngắn gọn, dễ hiểu cho người dùng hiểu về kết quả đúng. Giải thích bằng tiếng việt.
-        }] // Danh sách gồm 5 câu hỏi tương ứng với đoạn văn
+
+      let topic = "";
+      if (selectedTopic.name == "Sách / Tiểu thuyết") {
+        topic = `Nội dung sẽ là 1 đoạn trích (khoảng 600 từ) hay, tâm đắc, phổ biến bằng tiếng anh trong các cuốn sách / tiểu thuyết sau: 
+        Không Gia Đình - Hector Malot, Ông Già Và Biển Cả - Ernest Hemingway, Âm Thanh Và Cuồng Nộ - William Faulkner, Thép Đã Tôi Thế Đấy - Nikolai Ostrovsky,
+        Nhà Giả Kim - Paulo Coelho, Lược Sử Thời Gian - Stephen Hawking, Cuốn Theo Chiều Gió - Margaret Munnerlyn Mitchell, Những Người Khốn Khổ - Victor Hugo,
+        Hai Số Phận - Jeffrey Archer, Đồi Gió Hú - Ellis Bell, Chiến Tranh Và Hòa Bình - Lev Nikolayevich Tolstoy, Sông Đông êm đềm - Mikhail Aleksandrovich Sholokhov,
+        Trăm Năm Cô Đơn - Gabriel Garcia Marquez, Từ Thăm Thẳm Lãng Quên - Patrick Modiano, Nếu Em Không Phải Một Giấc Mơ - Marc Levy.
+        Hãy nhớ có thêm 1 dòng bằng tiếng anh mô tả đoạn văn trên được trích từ sách / tiểu thuyết nào?, trang bao nhiêu? vào cuối câu.
+        Và khoảng 5 câu hỏi trắc nghiệm để người dùng dựa vào thông tin đã đọc từ đoạn trích để trả lời.`;
+      } else {
+        topic = `Nội dung sẽ gồm 1 đoạn văn khoảng 600 từ về chủ đề '${selectedTopic.name} và khoảng 5 câu hỏi trắc nghiệm để người dùng dựa vào thông tin đã đọc từ đoạn văn để trả lời.'`;
       }
-      `;
+
+      const prompt = `Hãy giúp tôi tạo ra 1 bài luyện tập khả năng đọc trong tiếng anh (tham khảo các bài thi về reading trong kì thi Toeic, Ielts,...). 
+                      '${topic}'
+                      \n ${levelInstruction}
+                      \n
+                      Kết quả sẽ trả về sẽ có kiểu json tương ứng như sau:
+                      {
+                        paragraph: "abc" // Đây là đoạn văn,
+                        questions: [{
+                            label: "Câu hỏi" // Đây là câu hỏi
+                            answers: ["A. xyz", "B. abc", "C. xzt", "D. aqq"] // Danh sách kết quả trắc nghiệm, gồm 4 đáp án A, B, C, D
+                            trueAnsswer: 1 // index tương ứng với kết quả đúng
+                            explain: "Giải thích" // Giải thích ngắn gọn, dễ hiểu cho người dùng hiểu về kết quả đúng. Giải thích bằng tiếng việt.
+                        }] // Danh sách gồm 5 câu hỏi tương ứng với đoạn văn
+                      }
+                      `;
 
       const response = await fetch(
         "https://api.openai.com/v1/chat/completions",
