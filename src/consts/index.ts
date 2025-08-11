@@ -1,5 +1,16 @@
 import { VocabularyStudyType, VocabularyType, Topic } from "@/types";
 
+export const TYPE_VOCAB_LABELS = [
+  { id: "noun", name: "Danh từ (Noun)" },
+  { id: "verb", name: "Động từ (Verb)" },
+  { id: "adjective", name: "Tính từ (Adjective)" },
+  { id: "adverb", name: "Trạng từ (Adverb)" },
+  { id: "preposition", name: "Giới từ (Preposition)" },
+  { id: "conjunction", name: "Liên từ (Conjunction)" },
+  { id: "pronoun", name: "Đại từ (Pronoun)" },
+  { id: "phrase", name: "Cụm từ (Phrase)" },
+];
+
 export const STATUS_LABELS: Record<VocabularyType["status"], string> = {
   to_learn: "Cần học",
   learning: "Đang học",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -16,7 +16,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-// import axios from "axios"; // Uncomment when implementing actual OpenAI API calls
+import { TYPE_VOCAB_LABELS } from "@/consts";
+import { getVocabulary, addVocabulary } from "@/lib/localStorage";
+import { VocabularyType } from "@/types";
 
 const API_KEY_STORAGE_KEY = "openai_api_key";
 
@@ -109,6 +111,19 @@ export function TranslationPractice({
       }));
   });
 
+  // State lưu danh sách từ vựng
+  const [vocabularyList, setVocabularyList] = useState<VocabularyType[]>([]);
+
+  // Load danh sách từ vựng khi mount hoặc khi thêm mới
+  useEffect(() => {
+    setVocabularyList(getVocabulary());
+  }, []);
+
+  // Hàm reload vocab khi thêm mới
+  const reloadVocabulary = () => {
+    setVocabularyList(getVocabulary());
+  };
+
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const [isChecking, setIsChecking] = useState(false);
   const [isSuggesting, setIsSuggesting] = useState(false);
@@ -157,7 +172,8 @@ export function TranslationPractice({
             Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "gpt-5-2025-08-07",
+            // model: "gpt-5-2025-08-07",
+            model: "gpt-5-mini-2025-08-07",
             messages: [
               {
                 role: "system",
@@ -176,6 +192,9 @@ export function TranslationPractice({
                       \nNếu bản dịch có cấp độ từ 0 đến 5, câu dịch sẽ là isCorrect=false, hãy nêu rõ lý do tại sao bản dịch chưa đúng vào feedback và cung cấp các từ vựng tiếng anh liên quan đến câu dịch để giúp người tiếp tục cải thiện bản dịch vào vocabs.
                       \nVí dụ bản dịch đúng: {"isCorrect": true, "feedback": "Câu dịch rất tốt, tuy nhiên cần sửa lai từ "abc" thành "xyz" để làm cho nó tự nhiên hơn.", "vocabs": [], "scope":8}.
                       \nVí dụ bản dịch sai: {"isCorrect": false, "feedback": "Bản dịch chưa đúng, chỗ "abc" cần được sửa thành "xyz" vì nên sử dụng thì hiện tại đơn,... Tham khảo thêm các từ vựng sau để hoàn thành bản dịch.", "vocabs": [{word: study, type: "verb", meaning: "học"}, {word: vocabulary, type: "noun", meaning: "từ vựng"}, {word: practice, type: "verb", meaning: "luyện tập"}], "scope":3}.
+                      \nType của từ vựng tương ứng với các type sau ${TYPE_VOCAB_LABELS.map(
+                        (e) => e.id
+                      ).join(",")}
                       \n
                       \n${prompt}
                       `,
@@ -256,8 +275,8 @@ export function TranslationPractice({
             Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "gpt-4.1-nano-2025-04-14",
             // model: "gpt-5-2025-08-07",
+            model: "gpt-5-mini-2025-08-07",
             messages: [
               {
                 role: "system",
@@ -273,6 +292,9 @@ export function TranslationPractice({
                       \nNội dung feedback nên ngắn gọn và rõ ràng bằng tiếng việt, tập trung gợi ý các ngữ pháp có thể sử dụng, có thêm mô tả ngắn gọn nên sử dụng ngữ pháp nào và tại sao. Bên cạnh đó cần chỉ rõ các thì nên sử dụng trong ngữ cảnh.
                       \nNội dung vocabs nên là danh sách các từ vựng tiếng anh liên quan đến câu dịch, đảm bảo đúng ngữ nghĩa và ngữ cảnh.
                       \nVí dụ: {"feedback": "Nên sử dụng thì quá khứ đơn vì ngữ cảnh đang ở quá khứ,...", "vocabs": [{word: study, type: "verb", meaning: "học"}, {word: vocabulary, type: "noun", meaning: "từ vựng"}, {word: practice, type: "verb", meaning: "luyện tập"}]}
+                      \nType của từ vựng tương ứng với các type sau ${TYPE_VOCAB_LABELS.map(
+                        (e) => e.id
+                      ).join(",")}
                       \n
                       \n${prompt}
                       `,
@@ -461,7 +483,7 @@ export function TranslationPractice({
             <CardTitle>
               <div className="flex flex-row justify-between">
                 <span>Nhận xét của AI</span>
-                <span>{(currentSentence.feedback?.scope ?? "0") + "/10"}</span>
+                <span>{(currentSentence.feedback?.scope ?? "?") + "/10"}</span>
               </div>
             </CardTitle>
           </CardHeader>
@@ -481,13 +503,74 @@ export function TranslationPractice({
           <CardFooter className="flex justify-between">
             {currentSentence.feedback && (
               <div className={`p-4 rounded-md`}>
-                {currentSentence.feedback.vocabs.map((vocab, index) => (
-                  <div key={index} className="mb-2">
-                    <span className="font-semibold">{vocab.word}</span>
-                    <span>{" (" + vocab.type + ") : "}</span>
-                    <span>{vocab.meaning}</span>
-                  </div>
-                ))}
+                {currentSentence.feedback.vocabs.map((vocab, index) => {
+                  // Check vocabulary is existed in list
+                  const existed = vocabularyList.find(
+                    (item) =>
+                      item.word?.toLowerCase() === vocab.word?.toLowerCase() &&
+                      item.type === vocab.type
+                  );
+                  // Lấy status nếu đã có
+                  const statusLabel =
+                    existed?.status === "to_learn"
+                      ? "Cần học"
+                      : existed?.status === "learning"
+                      ? "Đang học"
+                      : existed?.status === "mastered"
+                      ? "Đã thuộc"
+                      : "";
+
+                  return (
+                    <div
+                      key={index}
+                      className="mb-2 flex items-center justify-between gap-2"
+                    >
+                      <div>
+                        <span className="font-semibold">{vocab.word}</span>
+                        <span>{" (" + vocab.type + ") : "}</span>
+                        <span>{vocab.meaning}</span>
+                      </div>
+                      <div className="flex">
+                        {!existed ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  addVocabulary({
+                                    word: vocab.word,
+                                    type: vocab.type,
+                                    meaning: vocab.meaning,
+                                    status: "to_learn",
+                                  });
+                                  reloadVocabulary();
+                                }}
+                                aria-label="Thêm từ vựng"
+                              >
+                                <span
+                                  style={{
+                                    fontSize: "18px",
+                                    fontWeight: "bold",
+                                  }}
+                                >
+                                  +
+                                </span>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              Nhấn để thêm từ vựng vào danh sách từ vựng cần học
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <span className="text-xs px-2 py-1 rounded bg-gray-100 border ml-2 text-center">
+                            {statusLabel}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CardFooter>
