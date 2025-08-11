@@ -160,9 +160,14 @@ export function VocabularyTable({
                 zIndex: isActiveDrop ? 10 : undefined,
               }}
             >
-              <h3 className="font-semibold text-center mb-2">
-                {STATUS_LABELS[status]}
-              </h3>
+              <div className="relative">
+                <h3 className="font-semibold text-center mb-2">
+                  {STATUS_LABELS[status]}
+                </h3>
+                <h4 className="absolute top-0 right-0 text-gray-500">
+                  Tổng: {statusLists[status]?.length}
+                </h4>
+              </div>
               <div className="flex flex-col gap-3 min-h-[120px]">
                 {statusLists[status].map((item) =>
                   typeof item.id === "string" && item.id ? (

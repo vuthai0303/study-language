@@ -87,12 +87,25 @@ export function VocabularyStudy({
             <option value="writing">{STUDY_LABELS["writing"]}</option>
           </select>
         </div>
-        <Button onClick={startQuiz} disabled={filteredVocabulary.length < 4}>
+        <Button
+          onClick={startQuiz}
+          disabled={
+            (selectedStudyType == "multiple_choice" &&
+              filteredVocabulary.length < 4) ||
+            filteredVocabulary.length <= 0
+          }
+        >
           Bắt đầu học
         </Button>
-        {filteredVocabulary.length < 4 && (
+        {selectedStudyType == "multiple_choice" &&
+          filteredVocabulary.length < 4 && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Bạn cần có ít nhất 4 từ vựng để bắt đầu học.
+            </p>
+          )}
+        {filteredVocabulary.length <= 0 && (
           <p className="text-sm text-muted-foreground mt-2">
-            Bạn cần có ít nhất 4 từ vựng để bắt đầu học.
+            Bạn cần có ít nhất 1 từ vựng để bắt đầu học.
           </p>
         )}
       </div>

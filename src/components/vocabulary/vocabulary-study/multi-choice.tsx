@@ -48,17 +48,18 @@ export function VocabularyMultiChoiceStudy({
         .filter((v) => v.id !== item.id)
         .sort(() => 0.5 - Math.random())
         .slice(0, 3)
-        .map((v) => v.meaning);
+        .map((v) => `(${v.type}) ${v.meaning}`);
 
       // Combine correct and incorrect options and shuffle
-      const options = [item.meaning, ...incorrectOptions].sort(
-        () => 0.5 - Math.random()
-      );
+      const options = [
+        `(${item.type}) ${item.meaning}`,
+        ...incorrectOptions,
+      ].sort(() => 0.5 - Math.random());
 
       return {
         id: item.id,
         word: item.word,
-        correctAnswer: item.meaning,
+        correctAnswer: `(${item.type}) ${item.meaning}`,
         options,
       };
     });
@@ -84,13 +85,16 @@ export function VocabularyMultiChoiceStudy({
       incorrect: isCorrect ? prev.incorrect : prev.incorrect + 1,
     }));
 
-    // If quiz is on "mastered" and answer is incorrect, move word to "learning"
-    if (!isCorrect && selectedStatus === "mastered") {
+    // If quiz is on "mastered" and answer is incorrect, move word to "learning", quiz is on "learning" move word to "to_learn"
+    if (!isCorrect && ["mastered", "learning"].includes(selectedStatus)) {
       const wordId = questions[currentQuestionIndex].id;
-      const word = vocabulary.find((v) => v.id === wordId);
-      if (word && word.status === "mastered") {
-        updateVocabulary({ ...word, status: "learning" });
-        onRefresh(); // Refresh vocabulary after incorrect answer
+      const wordObj = vocabulary.find((v) => v.id === wordId);
+      if (wordObj) {
+        updateVocabulary({
+          ...wordObj,
+          status: wordObj.status === "mastered" ? "learning" : "to_learn",
+        });
+        onRefresh();
       }
     }
   };

@@ -26,6 +26,7 @@ export type WritingQuestion = {
   id: string;
   word: string;
   meaning: string;
+  type: string;
 };
 
 export type Topic = {

@@ -23,12 +23,22 @@ interface VocabularyWritingStudyProps {
   onCloseQuiz: () => void;
 }
 
-// Lấy ngẫu nhiên ít nhất 1 ký tự, khoảng 1/5 số ký tự (làm tròn lên)
-function getRandomRevealedIndexes(wordLength: number): number[] {
-  const revealCount = Math.max(1, Math.ceil(wordLength / 5));
-  const indexes: number[] = [];
+// Randomly select at least 1 character, approximately 1/5 of the total number of characters (rounded up).
+function getRandomRevealedIndexes(word: string): number[] {
+  if (!word) return [];
+
+  const getIndexesOfChar = (str: string, ch: string): number[] =>
+    str
+      .split("")
+      .reduce<number[]>(
+        (acc, c, i) => (c === ch ? (acc.push(i), acc) : acc),
+        []
+      );
+
+  const indexes: number[] = [0, ...getIndexesOfChar(word, " ")];
+  const revealCount = Math.max(1, Math.ceil(word.length / 5)) + indexes.length;
   while (indexes.length < revealCount) {
-    const idx = Math.floor(Math.random() * wordLength);
+    const idx = Math.floor(Math.random() * word.length);
     if (!indexes.includes(idx)) {
       indexes.push(idx);
     }
@@ -58,13 +68,14 @@ export function VocabularyWritingStudy({
     incorrect: 0,
   });
 
-  // Khởi tạo quiz khi bắt đầu
+  // Create quiz
   useEffect(() => {
     if (!quizStarted) return;
     const generatedQuestions = vocabulary.map((item) => ({
       id: item.id,
       word: item.word,
       meaning: item.meaning,
+      type: item.type,
     }));
     setQuestions(generatedQuestions);
     setCurrentQuestionIndex(0);
@@ -74,10 +85,9 @@ export function VocabularyWritingStudy({
       correct: 0,
       incorrect: 0,
     });
-    // Khởi tạo cho câu đầu tiên
     if (generatedQuestions.length > 0) {
       const word = generatedQuestions[0].word;
-      const revealed = getRandomRevealedIndexes(word.length);
+      const revealed = getRandomRevealedIndexes(word);
       setRevealedIndexes(revealed);
       setUserAnswer("");
       setIsAnswered(false);
@@ -85,12 +95,12 @@ export function VocabularyWritingStudy({
     }
   }, [quizStarted, vocabulary]);
 
-  // Khi chuyển câu hỏi, reset state liên quan
+  // Reset state when change question
   useEffect(() => {
     if (questions.length === 0 || quizFinished) return;
     const word = questions[currentQuestionIndex]?.word;
     if (!word) return;
-    const revealed = getRandomRevealedIndexes(word.length);
+    const revealed = getRandomRevealedIndexes(word);
     setRevealedIndexes(revealed);
     setUserAnswer("");
     setIsAnswered(false);
@@ -123,12 +133,15 @@ export function VocabularyWritingStudy({
     }));
     checkCorrectIndexes();
 
-    // Nếu quiz ở trạng thái "mastered" và trả lời sai, chuyển từ sang "learning"
-    if (!correct && selectedStatus === "mastered") {
+    // If quiz is on "mastered" and answer is incorrect, move word to "learning", quiz is on "learning" move word to "to_learn"
+    if (!correct && ["mastered", "learning"].includes(selectedStatus)) {
       const wordId = questions[currentQuestionIndex].id;
       const wordObj = vocabulary.find((v) => v.id === wordId);
-      if (wordObj && wordObj.status === "mastered") {
-        updateVocabulary({ ...wordObj, status: "learning" });
+      if (wordObj) {
+        updateVocabulary({
+          ...wordObj,
+          status: wordObj.status === "mastered" ? "learning" : "to_learn",
+        });
         onRefresh();
       }
     }
@@ -239,7 +252,7 @@ export function VocabularyWritingStudy({
         </div>
         <div className="mb-4 text-center">
           <span className="text-muted-foreground text-lg">
-            {currentQuestion.meaning}
+            ({currentQuestion.type}) {currentQuestion.meaning}
           </span>
         </div>
         <div className="mb-4 text-center">
