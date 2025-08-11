@@ -174,6 +174,7 @@ export function TranslationPractice({
           body: JSON.stringify({
             // model: "gpt-5-2025-08-07",
             model: "gpt-5-mini-2025-08-07",
+            reasoning_effort: "minimal",
             messages: [
               {
                 role: "system",
@@ -277,6 +278,7 @@ export function TranslationPractice({
           body: JSON.stringify({
             // model: "gpt-5-2025-08-07",
             model: "gpt-5-mini-2025-08-07",
+            reasoning_effort: "minimal",
             messages: [
               {
                 role: "system",

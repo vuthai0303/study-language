@@ -105,6 +105,7 @@ export default function WritingPage() {
           },
           body: JSON.stringify({
             model: "gpt-5-2025-08-07",
+            reasoning_effort: "minimal",
             messages: [
               {
                 role: "system",
