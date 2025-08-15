@@ -86,13 +86,26 @@ export function VocabularyMultiChoiceStudy({
     }));
 
     // If quiz is on "mastered" and answer is incorrect, move word to "learning", quiz is on "learning" move word to "to_learn"
-    if (!isCorrect && ["mastered", "learning"].includes(selectedStatus)) {
+    if (!isCorrect && selectedStatus != "to_learn") {
       const wordId = questions[currentQuestionIndex].id;
       const wordObj = vocabulary.find((v) => v.id === wordId);
       if (wordObj) {
         updateVocabulary({
           ...wordObj,
           status: wordObj.status === "mastered" ? "learning" : "to_learn",
+        });
+        onRefresh();
+      }
+    }
+
+    // If quiz is on "to_learn" and answer is correct, move word to "learning", quiz is on "learning" move word to "mastered"
+    if (isCorrect && selectedStatus != "mastered") {
+      const wordId = questions[currentQuestionIndex].id;
+      const wordObj = vocabulary.find((v) => v.id === wordId);
+      if (wordObj) {
+        updateVocabulary({
+          ...wordObj,
+          status: wordObj.status == "to_learn" ? "learning" : "mastered",
         });
         onRefresh();
       }
