@@ -11,6 +11,11 @@ import {
 } from "@/components/ui/card";
 import { QuizQuestion, QuizResult, VocabularyType } from "@/types";
 import { updateVocabulary } from "@/lib/localStorage";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface VocabularyMultiChoiceStudyProps {
   vocabulary: VocabularyType[];
@@ -199,7 +204,14 @@ export function VocabularyMultiChoiceStudy({
               className="w-full justify-start text-left"
               onClick={() => handleOptionSelect(option)}
             >
-              {option}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="truncate">{option}</p>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span>{option}</span>
+                </TooltipContent>
+              </Tooltip>
             </Button>
           ))}
         </div>

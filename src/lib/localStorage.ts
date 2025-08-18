@@ -1,6 +1,7 @@
 "use client";
 
 import { VocabularyType } from "@/types";
+import { v4 as uuidv4 } from "uuid";
 
 // Vocabulary functions
 export const getVocabulary = (): VocabularyType[] => {
@@ -22,7 +23,7 @@ export const addVocabulary = (
   const existingVocabulary = getVocabulary();
   const newVocabulary = {
     ...vocabulary,
-    id: Date.now().toString(),
+    id: uuidv4(),
     createdAt: new Date().toISOString(),
   };
 

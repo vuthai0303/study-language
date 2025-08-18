@@ -20,7 +20,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { VocabularyType } from "@/types";
 import { VocabularyForm } from "./vocabulary-form";
-import { deleteVocabulary, updateVocabulary } from "@/lib/localStorage";
+import {
+  addVocabulary,
+  deleteVocabulary,
+  updateVocabulary,
+} from "@/lib/localStorage";
 import { CopyIcon } from "lucide-react";
 
 interface VocabularyTableProps {
@@ -209,9 +213,18 @@ export function VocabularyTable({
           v.type === item.type &&
           v.meaning === item.meaning
       );
-    const newWords = parsed.filter(
-      (item) => item.word && item.type && item.meaning && !isDuplicate(item)
-    );
+    const newWords: Omit<VocabularyType, "id" | "createdAt">[] = parsed
+      .filter(
+        (item) => item.word && item.type && item.meaning && !isDuplicate(item)
+      )
+      .map((e) => {
+        return {
+          word: e.word,
+          type: e.type,
+          meaning: e.meaning,
+          status: e.status,
+        };
+      });
     if (newWords.length === 0) {
       setImportSuccess("Không có từ mới nào được thêm.");
       onRefresh();
@@ -219,9 +232,7 @@ export function VocabularyTable({
     }
     try {
       newWords.forEach((item) => {
-        // Tạo id nếu chưa có
-        if (!item.id) item.id = Math.random().toString(36).slice(2, 12);
-        updateVocabulary(item);
+        addVocabulary(item);
       });
       setImportSuccess(`Đã thêm ${newWords.length} từ mới!`);
       onRefresh();

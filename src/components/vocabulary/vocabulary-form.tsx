@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TYPE_VOCAB_LABELS } from "@/consts";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -58,11 +58,27 @@ export function VocabularyForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      word: vocabulary?.word || "",
-      type: vocabulary?.type || "",
-      meaning: vocabulary?.meaning || "",
+      word: "",
+      type: "",
+      meaning: "",
     },
   });
+
+  useEffect(() => {
+    if (isEditing && vocabulary) {
+      form.reset({
+        word: vocabulary.word,
+        type: vocabulary.type,
+        meaning: vocabulary.meaning,
+      });
+    } else {
+      form.reset({
+        word: "",
+        type: "",
+        meaning: "",
+      });
+    }
+  }, [isEditing, vocabulary, form]);
 
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
