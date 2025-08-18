@@ -233,6 +233,7 @@ export default function WritingPage() {
           {showTranslationPractice && generatedParagraph && (
             <TranslationPractice
               paragraph={generatedParagraph}
+              level={level}
               onReset={handleReset}
             />
           )}

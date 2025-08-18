@@ -24,6 +24,7 @@ const API_KEY_STORAGE_KEY = "openai_api_key";
 
 interface TranslationPracticeProps {
   paragraph: string;
+  level: string;
   onReset: () => void;
 }
 
@@ -95,6 +96,7 @@ const SentenceLayout = ({
 
 export function TranslationPractice({
   paragraph,
+  level,
   onReset,
 }: TranslationPracticeProps) {
   const [sentences, setSentences] = useState<Sentence[]>(() => {
@@ -174,13 +176,19 @@ export function TranslationPractice({
           body: JSON.stringify({
             // model: "gpt-5-2025-08-07",
             model: "gpt-5-mini-2025-08-07",
-            reasoning_effort: "minimal",
+            reasoning_effort: "medium",
             messages: [
               {
                 role: "system",
                 content: `Bạn là một trợ lý AI hữu ích, chuyên kiểm tra bản dịch tiếng Anh và thực hiện đánh giá và hướng dẫn cải thiện bản dịch cho tốt hơn.
                         Hãy đảm bảo đánh giá bản dịch đúng ngữ nghĩa, ngữ cảnh của đoạn văn, ngữ pháp và từ vựng phải chính xác và phù hợp với ngữ cảnh.
-                        Thực hiện đánh giá trên 10 cấp độ.`,
+                        Thực hiện đánh giá phù hợp với người có trình độ ${level} - ${
+                  level == "Cơ bản"
+                    ? "Tương ứng với trình độ Toeic dưới 400, Ielts dưới 4."
+                    : level == "Trung cấp"
+                    ? "Tương ứng với trình độ Toeic từ 400 đến 700, Ielts từ 4 đến 7."
+                    : "Tương ứng với trình độ Toeic trên 700, Ielts trên 7."
+                }`,
               },
               {
                 role: "user",
@@ -188,16 +196,18 @@ export function TranslationPractice({
                       \nSau đây tôi sẽ thực hiện dịch từng câu của đoạn văn trên sang tiếng anh.
                       \nHãy giúp tôi kiểm tra bản dịch, thực hiện đánh giá trên 10 cấp độ và nêu phản hồi về cách cải thiện bản dịch tốt hơn.
                       \nĐảm bảo trả lời dưới dạng JSON với các trường "isCorrect" (boolean), "feedback" (string), "vocabs"(list) và scope(number). 
-                      \nĐảm bảo phản hồi đúng cấu trúc và feedback nên ngắn gọn, rõ ràng và tập trung vào chỗ bị sai hoặc cần cải thiện thêm, feedback bằng tiếng việt.
-                      \nNếu bản dịch có cấp độ từ 5 đến 10, câu dịch sẽ là isCorrect=true, hãy cung cấp phản hồi về cách cải thiện câu tốt hơn vào feebback.
-                      \nNếu bản dịch có cấp độ từ 0 đến 5, câu dịch sẽ là isCorrect=false, hãy nêu rõ lý do tại sao bản dịch chưa đúng vào feedback và cung cấp các từ vựng tiếng anh liên quan đến câu dịch để giúp người tiếp tục cải thiện bản dịch vào vocabs.
-                      \nVí dụ bản dịch đúng: {"isCorrect": true, "feedback": "Câu dịch rất tốt, tuy nhiên cần sửa lai từ "abc" thành "xyz" để làm cho nó tự nhiên hơn.", "vocabs": [], "scope":8}.
-                      \nVí dụ bản dịch sai: {"isCorrect": false, "feedback": "Bản dịch chưa đúng, chỗ "abc" cần được sửa thành "xyz" vì nên sử dụng thì hiện tại đơn,... Tham khảo thêm các từ vựng sau để hoàn thành bản dịch.", "vocabs": [{word: study, type: "verb", meaning: "học"}, {word: vocabulary, type: "noun", meaning: "từ vựng"}, {word: practice, type: "verb", meaning: "luyện tập"}], "scope":3}.
+                      \nĐảm bảo chắn chắn phản hồi đúng cấu trúc mô tả (lưu ý trường hợp isCorrect và scope phải mapping với nhau) 
+                      \nPhản hồi (Feedback) bằng tiếng việt ngắn gọn, rõ ràng, dễ hiểu.
+                      \nNếu bản dịch có cấp độ từ 5 đến 10 (scope từ 5 đến 10), câu dịch sẽ là isCorrect=true, hãy cung cấp phản hồi về cách cải thiện câu dịch tốt hơn vào feebback ví dụ như sử dụng từ vựng abc thay cho xyz để trang trọng hơn, phù hợp với ngữ nghĩa hơn..., learn nên sử dụng cho trường hợp abc, vì đây là trường hợp xyz nên sử dụng từ vựng stydy... và đưa thêm các từ vựng đó vào vocab.
+                      \nNếu bản dịch có cấp độ từ 0 đến 5 (scope từ 0 đến 5), câu dịch sẽ là isCorrect=false, hãy nêu lý do ngắn gọn rõ ràng tại sao bản dịch chưa đúng (chưa đúng do sử dụng thì sai, hay từ vựng đang sai, hay sắp xếp câu chưa đúng...) vào feedback, tập trung chỉnh sửa câu tôi đang dịch thay vì gợi ý câu dịch khác.
+                      \nVí dụ bản dịch đúng (scope từ 5 đến 10): {"isCorrect": true, "feedback": "Câu dịch rất tốt, tuy nhiên cần sửa lai từ "abc" thành "xyz" để làm cho nó tự nhiên hơn.", "vocabs": [{word: study, type: "verb", meaning: "học"}], "scope":"?"}.
+                      \nVí dụ bản dịch sai (scope từ 0 đến 5): {"isCorrect": false, "feedback": "Bản dịch chưa đúng, chỗ "abc" cần được sửa thành "xyz" vì nên sử dụng thì hiện tại đơn,... Tham khảo thêm các từ vựng sau để hoàn thành bản dịch.", "vocabs": [{word: study, type: "verb", meaning: "học"}, {word: vocabulary, type: "noun", meaning: "từ vựng"}, {word: practice, type: "verb", meaning: "luyện tập"}], "scope":"?"}.
                       \nType của từ vựng tương ứng với các type sau ${TYPE_VOCAB_LABELS.map(
                         (e) => e.id
                       ).join(",")}
                       \n
                       \n${prompt}
+                      \n
                       `,
               },
             ],
@@ -222,7 +232,7 @@ export function TranslationPractice({
             isCorrect: false,
             feedback: "No feedback provided",
             vocabs: [],
-            scope: 0,
+            scope: "?",
           };
 
       const isCorrect = res.isCorrect;
@@ -282,8 +292,16 @@ export function TranslationPractice({
             messages: [
               {
                 role: "system",
-                content:
-                  "Bạn là một trợ lý AI hữu ích, chuyên đưa ra các gợi ý và từ vựng hỗ trợ giúp cho người dùng cải thiện khả năng dịch thuật. Hãy đảm bảo dịch sát ngữ nghĩa và đúng cấu trúc, ngữ pháp, ngữ cảnh.",
+                content: `Bạn là một trợ lý AI hữu ích, chuyên đưa ra các gợi ý và từ vựng hỗ trợ giúp cho người dùng cải thiện khả năng dịch thuật 
+                phù hợp với người có trình độ ${level} - ${
+                  level == "Cơ bản"
+                    ? "Tương ứng với trình độ Toeic dưới 400, Ielts dưới 4."
+                    : level == "Trung cấp"
+                    ? "Tương ứng với trình độ Toeic từ 400 đến 700, Ielts từ 4 đến 7."
+                    : "Tương ứng với trình độ Toeic trên 700, Ielts trên 7."
+                }
+                  \nHãy đảm bảo dịch sát ngữ nghĩa và đúng cấu trúc, ngữ pháp, ngữ cảnh.
+                    `,
               },
               {
                 role: "user",
@@ -291,7 +309,7 @@ export function TranslationPractice({
                       \nSau đây tôi sẽ thực hiện dịch từng câu của đoạn văn trên sang tiếng anh.
                       \nHãy giúp tôi đưa ra các gợi ý và từ vựng hỗ trợ giúp tôi có thể hoàn thiện bản dịch.
                       \nĐảm bảo trả lời dưới dạng JSON với các trường"feedback" (string), "vocabs"(list). 
-                      \nNội dung feedback nên ngắn gọn và rõ ràng bằng tiếng việt, tập trung gợi ý các ngữ pháp có thể sử dụng, có thêm mô tả ngắn gọn nên sử dụng ngữ pháp nào và tại sao. Bên cạnh đó cần chỉ rõ các thì nên sử dụng trong ngữ cảnh.
+                      \nNội dung feedback nên ngắn gọn (khoảng 100 từ), rõ ràng bằng tiếng việt, tập trung gợi ý các ngữ pháp có thể sử dụng, có thêm mô tả ngắn gọn nên sử dụng ngữ pháp nào và tại sao. Bên cạnh đó cần chỉ rõ các thì nên sử dụng trong ngữ cảnh.
                       \nNội dung vocabs nên là danh sách các từ vựng tiếng anh liên quan đến câu dịch, đảm bảo đúng ngữ nghĩa và ngữ cảnh.
                       \nVí dụ: {"feedback": "Nên sử dụng thì quá khứ đơn vì ngữ cảnh đang ở quá khứ,...", "vocabs": [{word: study, type: "verb", meaning: "học"}, {word: vocabulary, type: "noun", meaning: "từ vựng"}, {word: practice, type: "verb", meaning: "luyện tập"}]}
                       \nType của từ vựng tương ứng với các type sau ${TYPE_VOCAB_LABELS.map(
