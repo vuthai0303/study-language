@@ -102,7 +102,7 @@ export function TranslationPractice({
   const [sentences, setSentences] = useState<Sentence[]>(() => {
     // Split paragraph into sentences
     return paragraph
-      .split(/(?<=[.!?])\s+/)
+      .split(/(?<=[.!?])"*\s+/)
       .filter((s) => s.trim().length > 0)
       .map((text, index) => ({
         id: index,
@@ -424,7 +424,7 @@ export function TranslationPractice({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mt-6 h-full flex flex-col overflow-hidden">
       <div className="w-full bg-gray-200 rounded-full h-2.5">
         <div
           className="bg-primary h-2.5 rounded-full"
@@ -432,8 +432,8 @@ export function TranslationPractice({
         ></div>
       </div>
 
-      <div className="flex flex-row gap-3">
-        <Card className="w-3/4">
+      <div className="mt-2 h-full overflow-hidden flex flex-row gap-3 ">
+        <Card className="w-3/4 h-full">
           <CardHeader>
             <CardTitle>
               Câu {currentSentenceIndex + 1}/{sentences.length}
@@ -441,7 +441,7 @@ export function TranslationPractice({
             <CardDescription>Dịch câu sau sang tiếng Anh</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="p-4 bg-muted rounded-md">
+            <div className="p-4 bg-muted rounded-md overflow-auto">
               <p className="text-base/7">
                 {sentences.map((sentence, idx) => (
                   <SentenceLayout
@@ -498,7 +498,7 @@ export function TranslationPractice({
             )}
           </CardFooter>
         </Card>
-        <Card className="w-1/4">
+        <Card className="w-1/4 ">
           <CardHeader>
             <CardTitle>
               <div className="flex flex-row justify-between">
@@ -507,7 +507,7 @@ export function TranslationPractice({
               </div>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="h-1/2 space-y-4 overflow-scroll">
             {currentSentence.feedback && (
               <div
                 className={`p-4 rounded-md ${
@@ -520,9 +520,9 @@ export function TranslationPractice({
               </div>
             )}
           </CardContent>
-          <CardFooter className="flex justify-between">
+          <CardFooter className="flex flex-1 justify-between overflow-scroll">
             {currentSentence.feedback && (
-              <div className={`p-4 rounded-md`}>
+              <div className={`py-4 h-full`}>
                 {currentSentence.feedback.vocabs.map((vocab, index) => {
                   // Check vocabulary is existed in list
                   const existed = vocabularyList.find(

@@ -178,11 +178,11 @@ export default function WritingPage() {
   };
 
   return (
-    <div className="container mx-auto py-10">
+    <div className={`container mx-auto py-6 flex flex-col ${!generatedParagraph ? 'h-fit' : 'h-screen'}`}>
       <h1 className="text-3xl font-bold mb-6">Học viết Tiếng Anh</h1>
 
-      <Card>
-        <CardContent className="pt-6 space-y-6">
+      <Card className="h-full">
+        <CardContent className="h-full flex flex-col overflow-hidden">
           <div>
             <p className="text-muted-foreground mb-4">
               Chọn một chủ đề, sau đó nhấn &ldquo;Tạo đoạn văn&rdquo; để AI tạo
