@@ -32,6 +32,7 @@ export const DEFAULT_WRITING_TOPIC: Topic[] = [
   { id: "6", name: "Công việc" },
   { id: "7", name: "Giới thiệu bản thân" },
   { id: "8", name: "Phỏng vấn" },
+  { id: "-1", name: "Đoạn văn tự điền" },
 ];
 
 export const DEFAULT_READING_TOPIC: Topic[] = [

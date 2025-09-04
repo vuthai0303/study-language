@@ -380,12 +380,12 @@ export function TranslationPractice({
     const correctCount = sentences.filter((s) => s.isCorrect).length;
 
     return (
-      <Card>
+      <Card className="h-full mt-6">
         <CardHeader>
           <CardTitle>Hoàn thành!</CardTitle>
           <CardDescription>Bạn đã hoàn thành bài tập dịch</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="h-full overflow-scroll">
           <div className="space-y-4">
             <div className="text-center">
               <p className="text-4xl font-bold">
@@ -424,7 +424,7 @@ export function TranslationPractice({
   }
 
   return (
-    <div className="mt-6 h-full flex flex-col overflow-hidden">
+    <div className="pt-6 h-full flex flex-col overflow-hidden">
       <div className="w-full bg-gray-200 rounded-full h-2.5">
         <div
           className="bg-primary h-2.5 rounded-full"
@@ -432,7 +432,7 @@ export function TranslationPractice({
         ></div>
       </div>
 
-      <div className="mt-2 h-full overflow-hidden flex flex-row gap-3 ">
+      <div className="pt-2 h-full overflow-hidden flex flex-row gap-3 ">
         <Card className="w-3/4 h-full">
           <CardHeader>
             <CardTitle>
@@ -440,8 +440,8 @@ export function TranslationPractice({
             </CardTitle>
             <CardDescription>Dịch câu sau sang tiếng Anh</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 bg-muted rounded-md overflow-auto">
+          <CardContent className="flex flex-col overflow-hidden">
+            <div className="p-4 bg-muted rounded-md overflow-scroll">
               <p className="text-base/7">
                 {sentences.map((sentence, idx) => (
                   <SentenceLayout
@@ -454,8 +454,8 @@ export function TranslationPractice({
               </p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
+            <div className="pt-6">
+              <label className="block text-sm font-medium pb-2">
                 Bản dịch của bạn:
               </label>
               <Textarea

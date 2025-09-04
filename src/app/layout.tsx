@@ -29,7 +29,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-svh`}
       >
         <Header />
-        <main className="h-full flex-1">
+        <main className="h-full overflow-hidden">
           {children}
         </main>
       </body>

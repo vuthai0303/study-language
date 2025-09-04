@@ -33,7 +33,15 @@ export default function WritingPage() {
     setShowTranslationPractice(false);
   };
 
-  const handleGenerateParagraph = async () => {
+  const handleGenerateParagraph = async (paragraph : string | null) => {
+    // if has existed paragraph
+    if (paragraph && paragraph.length > 0) {
+      setGeneratedParagraph(paragraph);
+      setShowTranslationPractice(true);
+      setIsGenerating(false);
+      return;
+    }
+    // call AI to create paragraph
     setErrorMessage(null);
     setGeneratedParagraph(null);
     setShowTranslationPractice(false);
@@ -82,7 +90,7 @@ export default function WritingPage() {
                 Đoạn văn cần liền mạch, rõ ràng, có khả năng giúp tôi thực hiện luyện tập dịch từ tiếng việt sang tiếng anh.`;
       } else if (selectedTopic.name == "Sách / Tiểu thuyết") {
         topic = `Tạo 1 đoạn văn tiếng việt để luyện tập dịch từ tiếng việt sang tiếng anh khoảng 200-300 từ.
-        Đoạn văn là 1 đoạn trích hay tâm đắc, phổ biến trong các cuốn sách / tiểu thuyết sau: 
+        Đoạn văn là 1 đoạn trích hay tâm đắc, phổ biến trong các cuốn sách / tiểu thuyết sau (chọn random): 
         Không Gia Đình - Hector Malot, Ông Già Và Biển Cả - Ernest Hemingway, Âm Thanh Và Cuồng Nộ - William Faulkner, Thép Đã Tôi Thế Đấy - Nikolai Ostrovsky,
         Nhà Giả Kim - Paulo Coelho, Lược Sử Thời Gian - Stephen Hawking, Cuốn Theo Chiều Gió - Margaret Munnerlyn Mitchell, Những Người Khốn Khổ - Victor Hugo,
         Hai Số Phận - Jeffrey Archer, Đồi Gió Hú - Ellis Bell, Chiến Tranh Và Hòa Bình - Lev Nikolayevich Tolstoy, Sông Đông êm đềm - Mikhail Aleksandrovich Sholokhov,
@@ -171,17 +179,15 @@ export default function WritingPage() {
 
   const handleReset = () => {
     setGeneratedParagraph(null);
-    setSelectedTopicId(null); // Optionally reset topic as well
-    setLevel("Trung cấp");
     setErrorMessage(null);
     setShowTranslationPractice(false);
   };
 
   return (
-    <div className={`container mx-auto py-6 flex flex-col ${!generatedParagraph ? 'h-fit' : 'h-screen'}`}>
-      <h1 className="text-3xl font-bold mb-6">Học viết Tiếng Anh</h1>
+    <div className={`container mx-auto py-6 flex flex-col ${!generatedParagraph ? 'h-fit' : 'h-full'}`}>
+      <h1 className="text-3xl font-bold pb-6">Học viết Tiếng Anh</h1>
 
-      <Card className="h-full">
+      <Card className="overflow-hidden">
         <CardContent className="h-full flex flex-col overflow-hidden">
           <div>
             <p className="text-muted-foreground mb-4">
@@ -191,6 +197,7 @@ export default function WritingPage() {
             <TopicSelector
               onTopicSelect={handleTopicSelect}
               onGenerateParagraph={handleGenerateParagraph}
+              showTranslationPractice={showTranslationPractice}
               isGenerating={isGenerating}
               selectedTopicId={selectedTopicId}
               level={level}
