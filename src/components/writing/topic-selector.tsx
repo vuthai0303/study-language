@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Dispatch, SetStateAction } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -34,7 +34,6 @@ export function TopicSelector({
 }: TopicSelectorProps) {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [paragraph, setParagraph] = useState<string>("");
-  const [isEnterParagraph, setEnterParagraph] = useState<boolean>(false);
 
   useEffect(() => {
     const defaultTopics: Topic[] = DEFAULT_WRITING_TOPIC;
