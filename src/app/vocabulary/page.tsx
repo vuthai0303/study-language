@@ -27,15 +27,13 @@ export default function VocabularyPage() {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Học từ vựng</h1>
-
-      <Tabs defaultValue="list" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6">
+    <div className="container h-full mx-auto py-10 overflow-hidden">
+      <Tabs defaultValue="list" value={activeTab} onValueChange={setActiveTab} className="h-full overflow-hidden">
+        <TabsList className="">
           <TabsTrigger value="list">Danh sách từ vựng</TabsTrigger>
           <TabsTrigger value="study">Học từ vựng</TabsTrigger>
         </TabsList>
-        <TabsContent value="list">
+        <TabsContent value="list" className="h-full overflow-hidden">
           <VocabularyTable vocabulary={vocabulary} onRefresh={loadVocabulary} />
         </TabsContent>
         <TabsContent value="study">

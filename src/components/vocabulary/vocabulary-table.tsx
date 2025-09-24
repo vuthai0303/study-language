@@ -26,6 +26,7 @@ import {
   updateVocabulary,
 } from "@/lib/localStorage";
 import { CopyIcon } from "lucide-react";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface VocabularyTableProps {
   vocabulary: VocabularyType[];
@@ -242,7 +243,7 @@ export function VocabularyTable({
   };
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Quản lý từ vựng</h2>
         <div className="flex gap-2">
@@ -334,7 +335,7 @@ export function VocabularyTable({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full overflow-hidden">
         {(
           ["to_learn", "learning", "mastered"] as VocabularyType["status"][]
         ).map((status) => {
@@ -342,7 +343,7 @@ export function VocabularyTable({
           return (
             <div
               key={status}
-              className={`border rounded-md p-2 bg-muted min-h-[200px] transition-all duration-200
+              className={`border rounded-md bg-muted min-h-[200px] transition-all duration-200
                 ${
                   isActiveDrop
                     ? "ring-4 ring-blue-400 border-blue-500 bg-blue-50 animate-pulse"
@@ -363,16 +364,16 @@ export function VocabularyTable({
                 <h3 className="font-semibold text-center mb-2">
                   {STATUS_LABELS[status]}
                 </h3>
-                <h4 className="absolute top-0 right-0 text-gray-500">
+                <h4 className="absolute top-0 right-2 text-gray-500">
                   Tổng: {statusLists[status]?.length}
                 </h4>
               </div>
-              <div className="flex flex-col gap-3 min-h-[120px]">
+              <ScrollArea className="h-[calc(100%-30px)] w-full px-3">
                 {statusLists[status].map((item) =>
                   typeof item.id === "string" && item.id ? (
                     <Card
                       key={item.id}
-                      className={`shadow-md transition-all duration-300 gap-2 py-4 ${
+                      className={`shadow-md transition-all duration-300 gap-2 py-4 mb-3 ${
                         draggedId === item.id
                           ? "bg-blue-100 scale-105 shadow-2xl z-20"
                           : "bg-white"
@@ -413,7 +414,7 @@ export function VocabularyTable({
                     </Card>
                   ) : null
                 )}
-              </div>
+                </ScrollArea>
             </div>
           );
         })}
