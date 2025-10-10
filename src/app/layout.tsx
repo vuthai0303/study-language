@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/header";
+import { StoreProvider } from "@/store/provider";
+import { LoadingOverlay } from "@/components/loading";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,10 +30,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-svh`}
       >
-        <Header />
-        <main className="h-full overflow-hidden">
-          {children}
-        </main>
+        <StoreProvider>
+          <Header />
+          <main className="h-[calc(100% - 64px)] overflow-hidden">
+            {children}
+          </main>
+          <LoadingOverlay />
+        </StoreProvider>
       </body>
     </html>
   );
