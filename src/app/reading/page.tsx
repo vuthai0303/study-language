@@ -7,6 +7,8 @@ import { ReadingPractice } from "@/components/reading/reading-practice";
 import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
 import { ReadingPracticeType } from "@/types";
 import { DEFAULT_READING_TOPIC } from "@/consts";
+import { useAppDispatch } from "@/hooks/reduxHook";
+import { hideLoading, showLoading } from "@/store/loadingSlice";
 
 const API_KEY_STORAGE_KEY = "openai_api_key";
 
@@ -19,6 +21,9 @@ export default function ReadingPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPractice, setShowPractice] = useState(false);
   const [historyParagraph, setHistoryParagraph] = useState<string[]>([]);
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     setHistoryParagraph(getHistoryParagraph(false));
@@ -32,6 +37,7 @@ export default function ReadingPage() {
   };
 
   const handleGeneratePractice = async () => {
+    console.log("Generating practice for topic:", selectedTopicId, "level:", level);
     setErrorMessage(null);
     setGeneratedPractice(null);
     setShowPractice(false);
@@ -49,6 +55,7 @@ export default function ReadingPage() {
     }
 
     setIsGenerating(true);
+    dispatch(showLoading());
 
     try {
       const topics = DEFAULT_READING_TOPIC;
@@ -95,11 +102,11 @@ export default function ReadingPage() {
                       {
                         paragraph: "abc" // Đây là đoạn văn,
                         questions: [{
-                            label: "Câu hỏi" // Đây là câu hỏi
+                            label: "Câu hỏi" // Đây là câu hỏi bằng tiếng anh
                             answers: ["A. xyz", "B. abc", "C. xzt", "D. aqq"] // Danh sách kết quả trắc nghiệm, gồm 4 đáp án A, B, C, D
                             trueAnsswer: 1 // index tương ứng với kết quả đúng
                             explain: "Giải thích" // Giải thích ngắn gọn, dễ hiểu cho người dùng hiểu về kết quả đúng. Giải thích bằng tiếng việt.
-                        }] // Danh sách gồm 5 câu hỏi tương ứng với đoạn văn
+                        }] // Danh sách gồm 5 câu hỏi bằng tiếng anh tương ứng với đoạn văn
                       }
                       `;
 
@@ -112,7 +119,7 @@ export default function ReadingPage() {
             Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "gpt-5-2025-08-07",
+            model: "gpt-5-mini-2025-08-07",
             messages: [
               {
                 role: "system",
@@ -179,6 +186,7 @@ export default function ReadingPage() {
       }
     } finally {
       setIsGenerating(false);
+      dispatch(hideLoading());
     }
   };
 
@@ -191,35 +199,47 @@ export default function ReadingPage() {
     setGeneratedPractice(null);
     setErrorMessage(null);
     setShowPractice(false);
+    setIsCompleted(false);
   };
 
-  return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Luyện đọc Tiếng Anh</h1>
+  const checkResult = (value : boolean) => {
+    if (value === false && isCompleted === true) {
+      // reset khi chuyển từ trạng thái completed sang chưa completed
+      resetPractice();
+    }
+    setIsCompleted(value);
+  }
 
-      <Card>
-        <CardContent className="pt-6 space-y-6">
+  return (
+    <div className="w-full h-full overflow-auto mx-auto px-10 py-6 flex flex-col gap-3">
+      <h1 className="text-3xl font-bold">Luyện đọc Tiếng Anh</h1>
+      <Card className="gap-3 py-3">
+        <CardContent className="space-y-3">
           <div>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-2">
               Chọn một chủ đề và trình độ, sau đó nhấn &ldquo;Tạo bài tập&rdquo;
               để AI tạo bài tập.
             </p>
             <TopicSelector
               onTopicSelect={handleTopicSelect}
               onGeneratePractice={handleGeneratePractice}
-              isGenerating={isGenerating}
               selectedTopicId={selectedTopicId}
               level={level}
               onLevelChange={setLevel}
+              isGenerating={isGenerating}
+              showPractice={showPractice}
+              isCompleted={isCompleted}
+              cancelPractice={cancelPractice}
+              checkResult={checkResult}
             />
           </div>
 
-          {isGenerating && (
+          {/* {isGenerating && (
             <div className="flex items-center justify-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <p className="ml-2">Đang tạo bài tập...</p>
             </div>
-          )}
+          )} */}
 
           {errorMessage && (
             <div
@@ -228,14 +248,6 @@ export default function ReadingPage() {
             >
               <span className="font-medium">Lỗi:</span> {errorMessage}
             </div>
-          )}
-
-          {showPractice && generatedPractice && (
-            <ReadingPractice
-              practice={generatedPractice}
-              resetPractice={resetPractice}
-              cancelPractice={cancelPractice}
-            />
           )}
 
           {!isGenerating &&
@@ -249,6 +261,12 @@ export default function ReadingPage() {
             )}
         </CardContent>
       </Card>
+      {showPractice && generatedPractice && (
+        <ReadingPractice
+          practice={generatedPractice}
+          isCompleted={isCompleted}
+        />
+      )}
     </div>
   );
 }

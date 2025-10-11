@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         <StoreProvider>
           <Header />
-          <main className="h-[calc(100% - 64px)] overflow-hidden">
+          <main className="h-[calc(100%_-_65px)] overflow-hidden">
             {children}
           </main>
           <LoadingOverlay />

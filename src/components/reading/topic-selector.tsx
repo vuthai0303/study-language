@@ -15,19 +15,27 @@ import { DEFAULT_READING_TOPIC } from "@/consts";
 interface TopicSelectorProps {
   onTopicSelect: (topicId: string) => void;
   onGeneratePractice: () => void;
-  isGenerating: boolean;
   selectedTopicId: string | null;
   level: string;
   onLevelChange: (level: string) => void;
+  isGenerating: boolean;
+  showPractice: boolean;
+  isCompleted: boolean;
+  cancelPractice: () => void;
+  checkResult : (value: boolean) => void;
 }
 
 export function TopicSelector({
   onTopicSelect,
   onGeneratePractice,
-  isGenerating,
   selectedTopicId,
   level,
   onLevelChange,
+  isGenerating,
+  showPractice,
+  isCompleted,
+  cancelPractice,
+  checkResult
 }: TopicSelectorProps) {
   const [topics, setTopics] = useState<Topic[]>([]);
 
@@ -43,7 +51,7 @@ export function TopicSelector({
         <Select
           value={selectedTopicId || ""}
           onValueChange={onTopicSelect}
-          disabled={isGenerating}
+          disabled={showPractice || isGenerating}
         >
           <SelectTrigger>
             <SelectValue placeholder="Chọn chủ đề" />
@@ -62,7 +70,7 @@ export function TopicSelector({
         <Select
           value={level}
           onValueChange={onLevelChange}
-          disabled={isGenerating}
+          disabled={showPractice || isGenerating}
         >
           <SelectTrigger>
             <SelectValue placeholder="Chọn trình độ" />
@@ -74,12 +82,26 @@ export function TopicSelector({
           </SelectContent>
         </Select>
       </div>
-      <Button
-        onClick={onGeneratePractice}
-        disabled={!selectedTopicId || isGenerating}
-      >
-        {isGenerating ? "Đang tạo..." : "Tạo bài tập"}
-      </Button>
+      {showPractice && (
+        <div className="flex justify-between">
+          <div className="flex gap-2 justify-end">
+              <Button onClick={cancelPractice} disabled={false}>
+                Hủy
+              </Button>
+              <Button onClick={() => checkResult(!isCompleted)} disabled={false}>
+                {isCompleted ? "Tiếp tục học" : "Kiểm tra"}
+              </Button>
+            </div>
+        </div>
+      )}
+      {!showPractice && (
+        <Button
+          onClick={onGeneratePractice}
+          disabled={!selectedTopicId || !level || showPractice || isGenerating}
+        >
+          Tạo bài tập
+        </Button>
+      )}
     </div>
   );
 }

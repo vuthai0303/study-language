@@ -368,7 +368,7 @@ export function VocabularyTable({
                   Tổng: {statusLists[status]?.length}
                 </h4>
               </div>
-              <ScrollArea className="h-[calc(100%-30px)] w-full px-3">
+              <ScrollArea className="h-[calc(100%_-_40px)] w-full px-3">
                 {statusLists[status].map((item) =>
                   typeof item.id === "string" && item.id ? (
                     <Card
