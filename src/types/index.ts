@@ -45,3 +45,13 @@ export type ReadingPracticeType = {
   paragraph: string;
   questions: Question[];
 };
+
+export type MessageType = { 
+  type: "success" | "error";
+  text: string 
+};
+
+export type AiKeyType = {
+  OPEN_AI_TOKEN: string;
+  GEMINI_AI_TOKEN: string;
+}

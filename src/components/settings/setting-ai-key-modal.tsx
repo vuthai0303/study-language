@@ -15,28 +15,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { showLoading, hideLoading } from "@/store/loadingSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
+import { MessageType } from "@/types";
+import { saveAiKey } from "@/store/aiKey";
 
-const API_KEY_STORAGE_KEY = "openai_api_key";
-
-interface OpenAIApiKeyModalProps {
+interface SettingAIKeyModalProps {
   children: React.ReactNode; // To wrap the trigger button
 }
 
-export function OpenAIApiKeyModal({ children }: OpenAIApiKeyModalProps) {
+export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
   const [openAiKey, setOpenAiKey] = useState("");
   const [geminiKey, setGeminiKey] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<MessageType | null>(null);
   const isLoading = useAppSelector((state) => state.isLoading);
+  const aiKey = useAppSelector((state) => state.aiKey);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (isOpen) {
-      const storedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-      if (storedApiKey) {
-        setOpenAiKey(storedApiKey);
+      if (aiKey) {
+        setOpenAiKey(aiKey.OPEN_AI_TOKEN);
+        setGeminiKey(aiKey.GEMINI_AI_TOKEN);
       } else {
-        setOpenAiKey(""); // Clear if no key is stored
+        // Clear if no key is stored
+        setOpenAiKey(""); 
+        setGeminiKey("");
       }
       setMessage(null); // Clear previous messages when modal opens
     }
@@ -44,21 +47,21 @@ export function OpenAIApiKeyModal({ children }: OpenAIApiKeyModalProps) {
 
   const handleSave = () => {
     setMessage(null);
-    if (!openAiKey.trim()) {
-      setMessage({ type: "error", text: "API key không được để trống." });
+    if (!openAiKey.trim() && !geminiKey.trim()) {
+      setMessage({ type: "error", text: "Vui lòng nhập 1 trong các AI key!" });
       return;
     }
 
     // Basic validation (starts with sk- and has a certain length, e.g. > 30)
     // This is a very basic check and OpenAI might change their key format.
     if (!openAiKey.startsWith("sk-") || openAiKey.length < 30) {
-      setMessage({ type: "error", text: "Định dạng API key không hợp lệ. Key thường bắt đầu bằng 'sk-'." });
+      setMessage({ type: "error", text: "Định dạng Open API key không hợp lệ. Key thường bắt đầu bằng 'sk-'." });
       return;
     }
 
     dispatch(showLoading());
     try {
-      localStorage.setItem(API_KEY_STORAGE_KEY, openAiKey);
+      dispatch(saveAiKey({OPEN_AI_TOKEN: openAiKey, GEMINI_AI_TOKEN: geminiKey}));
       setMessage({ type: "success", text: "Đã lưu API key!" });
     } catch (error) {
       console.error("Lỗi lưu API key:", error);

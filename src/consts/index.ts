@@ -44,3 +44,12 @@ export const DEFAULT_READING_TOPIC: Topic[] = [
   { id: "5", name: "Thể thao" },
   { id: "6", name: "Công việc" },
 ];
+
+export const LOCAL_STORAGE_KEY = {
+  VOCABULARY: "vocabulary",
+  WRITING_HISTORY_PARAGRAPH: "writing_history_paragraph",
+  READING_HISTORY_PARAGRAPH: "reading_history_paragraph",
+  AI_KEY: "AI_KEY",
+  OPEN_AI_TOKEN: "OPEN_AI_TOKEN",
+  GEMINI_AI_TOKEN: "GEMINI_AI_TOKEN"
+};

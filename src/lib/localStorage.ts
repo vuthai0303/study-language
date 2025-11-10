@@ -1,20 +1,36 @@
 "use client";
 
-import { VocabularyType } from "@/types";
+import { LOCAL_STORAGE_KEY } from "@/consts";
+import { AiKeyType, VocabularyType } from "@/types";
 import { v4 as uuidv4 } from "uuid";
+
+// AI KEY functions
+export const getAiKey = (): AiKeyType => {
+  const defaultValue : AiKeyType = {OPEN_AI_TOKEN: "", GEMINI_AI_TOKEN: ""};
+
+  if (typeof window === "undefined") return defaultValue;
+
+  const aiKey = localStorage.getItem(LOCAL_STORAGE_KEY.AI_KEY);
+  return aiKey ? JSON.parse(aiKey) : defaultValue;
+};
+export const setAiKey = (value: AiKeyType) => {
+  if (typeof window === "undefined") return;
+
+  localStorage.setItem(LOCAL_STORAGE_KEY.AI_KEY, JSON.stringify(value));
+};
 
 // Vocabulary functions
 export const getVocabulary = (): VocabularyType[] => {
   if (typeof window === "undefined") return [];
 
-  const vocabulary = localStorage.getItem("vocabulary");
+  const vocabulary = localStorage.getItem(LOCAL_STORAGE_KEY.VOCABULARY);
   return vocabulary ? JSON.parse(vocabulary) : [];
 };
 
 export const saveVocabulary = (vocabulary: VocabularyType[]) => {
   if (typeof window === "undefined") return;
 
-  localStorage.setItem("vocabulary", JSON.stringify(vocabulary));
+  localStorage.setItem(LOCAL_STORAGE_KEY.VOCABULARY, JSON.stringify(vocabulary));
 };
 
 export const addVocabulary = (
@@ -53,8 +69,8 @@ export const getHistoryParagraph = (isWriting: boolean): string[] => {
   if (typeof window === "undefined") return [];
 
   const historyParagraph = isWriting
-    ? localStorage.getItem("writing_history_paragraph")
-    : localStorage.getItem("reading_history_paragraph");
+    ? localStorage.getItem(LOCAL_STORAGE_KEY.WRITING_HISTORY_PARAGRAPH)
+    : localStorage.getItem(LOCAL_STORAGE_KEY.READING_HISTORY_PARAGRAPH);
   return historyParagraph ? JSON.parse(historyParagraph) : [];
 };
 
@@ -65,7 +81,7 @@ export const saveHistoryParagraph = (
   if (typeof window === "undefined") return [];
 
   localStorage.setItem(
-    isWriting ? "writing_history_paragraph" : "reading_history_paragraph",
+    isWriting ? LOCAL_STORAGE_KEY.WRITING_HISTORY_PARAGRAPH : LOCAL_STORAGE_KEY.READING_HISTORY_PARAGRAPH,
     JSON.stringify(historyParagraph)
   );
   return historyParagraph ?? [];

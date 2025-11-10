@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Navigation } from "./navigation";
-import { OpenAIApiKeyModal } from "./settings/openai-api-key-modal";
+import { SettingAIKeyModal } from "./settings/setting-ai-key-modal";
 import Link from "next/link";
 
 export function Header() {
@@ -14,12 +14,12 @@ export function Header() {
         </div>
         <div className="flex items-center space-x-2">
           <Navigation />
-          <OpenAIApiKeyModal>
+          <SettingAIKeyModal>
             <Button variant="outline" size="icon">
               ⚙️
               <span className="sr-only">Cài đặt</span>
             </Button>
-          </OpenAIApiKeyModal>
+          </SettingAIKeyModal>
         </div>
       </div>
     </header>
