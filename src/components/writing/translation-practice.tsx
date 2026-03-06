@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,80 +18,15 @@ import {
 import { TYPE_VOCAB_LABELS } from "@/consts";
 import { getVocabulary, addVocabulary } from "@/lib/localStorage";
 import { VocabularyType } from "@/types";
-
-const API_KEY_STORAGE_KEY = "openai_api_key";
+import { useAppSelector } from "@/hooks/reduxHook";
+import { SentenceLayout } from "./sentence-layout";
+import { Feedback, Sentence } from "@/types/writing";
 
 interface TranslationPracticeProps {
   paragraph: string;
   level: string;
   onReset: () => void;
 }
-
-type Feedback = {
-  message: string;
-  vocabs: { word: string; type: string; meaning: string }[];
-  scope: number;
-};
-
-type Sentence = {
-  id: number;
-  text: string;
-  translation: string;
-  feedback: Feedback | null;
-  isCorrect: boolean | null;
-};
-
-interface SentenceLayoutProps {
-  sentence: Sentence;
-  isCurrent: boolean;
-  isLastSentence?: boolean;
-}
-
-const SentenceLayout = ({
-  sentence,
-  isCurrent,
-  isLastSentence,
-}: SentenceLayoutProps) => {
-  if (sentence.isCorrect) {
-    return (
-      <>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="border-l-2 border-green-500 rounded-sm py-0.5 bg-green-200/50">
-              <span className="font-semibold text-green-500 pl-1">
-                {sentence.translation}
-              </span>
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>
-            <span>{sentence.text}</span>
-          </TooltipContent>
-        </Tooltip>
-        <span>{!isLastSentence ? " " : ""}</span>
-      </>
-    );
-  }
-
-  if (isCurrent) {
-    return (
-      <>
-        <span className="border-l-2 border-amber-500 rounded-sm py-0.5 bg-amber-300/30">
-          <span className="font-semibold text-amber-500 pl-1">
-            {sentence.text}
-          </span>
-        </span>
-        <span>{!isLastSentence ? " " : ""}</span>
-      </>
-    );
-  }
-
-  return (
-    <span className="py-1">
-      {sentence.text}
-      {!isLastSentence ? " " : ""}
-    </span>
-  );
-};
 
 export function TranslationPractice({
   paragraph,
@@ -112,6 +46,8 @@ export function TranslationPractice({
         isCorrect: null,
       }));
   });
+
+  const savedAiKey = useAppSelector((state) => state.aiKey);
 
   // State lưu danh sách từ vựng
   const [vocabularyList, setVocabularyList] = useState<VocabularyType[]>([]);
@@ -156,9 +92,7 @@ export function TranslationPractice({
 
     setIsChecking(true);
 
-    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-
-    if (!apiKey) {
+    if (!savedAiKey.value) {
       return;
     }
 
@@ -166,18 +100,22 @@ export function TranslationPractice({
       const prompt = `Đây là bản dịch tiếng anh của tôi: "${currentSentence.translation}". Tương ứng với câu tiếng Việt: "${currentSentence.text}".`;
 
       const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
+        "https://api.openai.com/v1/responses",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${savedAiKey.value}`,
           },
           body: JSON.stringify({
-            // model: "gpt-5-2025-08-07",
             model: "gpt-5-mini-2025-08-07",
-            reasoning_effort: "medium",
-            messages: [
+            reasoning: {
+              effort: "low"
+            },
+            text: { 
+              verbosity: "low" 
+            },
+            input: [
               {
                 role: "system",
                 content: `Bạn là một trợ lý AI hữu ích, chuyên kiểm tra bản dịch tiếng Anh và thực hiện đánh giá và hướng dẫn cải thiện bản dịch cho tốt hơn.
@@ -224,7 +162,7 @@ export function TranslationPractice({
       }
 
       const data = await response.json();
-      const result = data.choices[0]?.message?.content?.trim();
+      const result = data?.output[data.output?.length - 1]?.content[0]?.text?.trim() ?? "";
 
       const res = result
         ? JSON.parse(result)
@@ -266,9 +204,8 @@ export function TranslationPractice({
 
   const suggestTranslate = async () => {
     const currentSentence = sentences[currentSentenceIndex];
-    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
 
-    if (!apiKey) {
+    if (!savedAiKey.value) {
       return;
     }
 
@@ -278,18 +215,22 @@ export function TranslationPractice({
       const prompt = `Đây là câu tiếng Anh mà tôi đang cần dịch sang tiếng việt: "${currentSentence.text}".`;
 
       const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
+        "https://api.openai.com/v1/responses",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${savedAiKey.value}`,
           },
           body: JSON.stringify({
-            // model: "gpt-5-2025-08-07",
             model: "gpt-5-mini-2025-08-07",
-            reasoning_effort: "minimal",
-            messages: [
+            reasoning: {
+              effort: "low"
+            },
+            text: { 
+              verbosity: "low" 
+            },
+            input: [
               {
                 role: "system",
                 content: `Bạn là một trợ lý AI hữu ích, chuyên đưa ra các gợi ý và từ vựng hỗ trợ giúp cho người dùng cải thiện khả năng dịch thuật 
@@ -331,7 +272,7 @@ export function TranslationPractice({
       }
 
       const data = await response.json();
-      const result = data.choices[0]?.message?.content?.trim();
+      const result = data?.output[data.output?.length - 1]?.content[0]?.text?.trim() ?? "";
 
       const res = result
         ? JSON.parse(result)

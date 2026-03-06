@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 
 // AI KEY functions
 export const getAiKey = (): AiKeyType => {
-  const defaultValue : AiKeyType = {OPEN_AI_TOKEN: "", GEMINI_AI_TOKEN: ""};
+  const defaultValue : AiKeyType = {label: LOCAL_STORAGE_KEY.GEMINI_AI_TOKEN, value: ''};
 
   if (typeof window === "undefined") return defaultValue;
 

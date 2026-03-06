@@ -4,8 +4,6 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const aiKey = getAiKey();
 
-console.log(aiKey);
-
 const initialState: AiKeyType = aiKey;
 
 const aiKeySlice = createSlice({

@@ -7,12 +7,11 @@ import { ReadingPractice } from "@/components/reading/reading-practice";
 import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
 import { ReadingPracticeType } from "@/types";
 import { DEFAULT_READING_TOPIC } from "@/consts";
-import { useAppDispatch } from "@/hooks/reduxHook";
+import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import { hideLoading, showLoading } from "@/store/loadingSlice";
 
-const API_KEY_STORAGE_KEY = "openai_api_key";
-
 export default function ReadingPage() {
+  const savedAiKey = useAppSelector((state) => state.aiKey);
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>("1");
   const [level, setLevel] = useState<string>("Trung cấp");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -42,9 +41,7 @@ export default function ReadingPage() {
     setGeneratedPractice(null);
     setShowPractice(false);
 
-    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-
-    if (!apiKey) {
+    if (!savedAiKey.value) {
       setErrorMessage("Vui lòng cài đặt OpenAI API key trong mục Cài đặt.");
       return;
     }
@@ -111,16 +108,22 @@ export default function ReadingPage() {
                       `;
 
       const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
+        "https://api.openai.com/v1/responses",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${savedAiKey.value}`,
           },
           body: JSON.stringify({
             model: "gpt-5-mini-2025-08-07",
-            messages: [
+            reasoning: {
+              effort: "low"
+            },
+            text: { 
+              verbosity: "low" 
+            },
+            input: [
               {
                 role: "system",
                 content:
@@ -137,8 +140,6 @@ export default function ReadingPage() {
                 content: prompt,
               },
             ],
-            // max_tokens: 250, // Adjusted for paragraph length
-            // temperature: 0.7, // Balances creativity and coherence
           }),
         }
       );
@@ -154,7 +155,7 @@ export default function ReadingPage() {
       }
 
       const data = await response.json();
-      const message = data.choices[0]?.message?.content?.trim();
+      const message = data?.output[data.output?.length - 1]?.content[0]?.text?.trim() ?? "";
 
       const practice = message
         ? JSON.parse(message)
@@ -250,10 +251,12 @@ export default function ReadingPage() {
             </div>
           )}
 
-          {!isGenerating &&
+          {((!isGenerating &&
             !generatedPractice &&
             !errorMessage &&
-            !selectedTopicId && (
+            !selectedTopicId) ||
+            !savedAiKey?.value
+          ) && (
               <p className="text-muted-foreground text-center py-4">
                 Vui lòng chọn chủ đề và cài đặt API Key (nếu chưa có) để bắt
                 đầu.

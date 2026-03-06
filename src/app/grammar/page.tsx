@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAppSelector } from "@/hooks/reduxHook";
 
 const GRAMMAR_TOPICS = [
   "Hiện tại đơn (Present Simple)",
@@ -48,6 +49,7 @@ type QuizQuestion = {
 };
 
 export default function GrammarPage() {
+  const savedAiKey = useAppSelector((state) => state.aiKey);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
@@ -63,16 +65,13 @@ export default function GrammarPage() {
   const checkAll = () => setSelectedTopics([...GRAMMAR_TOPICS]);
   const uncheckAll = () => setSelectedTopics([]);
 
-  const API_KEY_STORAGE_KEY = "openai_api_key";
-
   const startQuiz = async () => {
     setLoading(true);
     setShowResult(false);
     setQuiz([]);
     setUserAnswers([]);
 
-    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-    if (!apiKey) {
+    if (!savedAiKey.value) {
       alert(
         "Vui lòng nhập OpenAI API key trong phần cài đặt trước khi bắt đầu."
       );
@@ -99,21 +98,25 @@ export default function GrammarPage() {
 
     try {
       const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
+        "https://api.openai.com/v1/responses",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${savedAiKey.value}`,
           },
           body: JSON.stringify({
-            model: "gpt-5-2025-08-07",
-            messages: [
+            model: "gpt-5-mini-2025-08-07",
+            reasoning: {
+              effort: "low"
+            },
+            text: { 
+              verbosity: "low" 
+            },
+            input: [
               { role: "system", content: "You are a helpful assistant." },
               { role: "user", content: prompt },
             ],
-            // temperature: 0.7,
-            // max_tokens: 1800,
           }),
         }
       );
@@ -128,7 +131,7 @@ export default function GrammarPage() {
       const data = await response.json();
       let questions: QuizQuestion[] = [];
       try {
-        const content = data.choices[0].message.content.trim();
+        const content = data?.output[data.output?.length - 1]?.content[0]?.text?.trim() ?? "";
         const start = content.indexOf("[");
         const end = content.lastIndexOf("]");
         const jsonString = content.slice(start, end + 1);
@@ -194,9 +197,11 @@ export default function GrammarPage() {
             ))}
           </div>
         </div>
-        <p className="text-muted-foreground text-center py-4">
-          Vui lòng chọn chủ đề và cài đặt API Key (nếu chưa có) để bắt đầu.
-        </p>
+        {!savedAiKey?.value && (
+          <p className="text-muted-foreground text-center py-4">
+            Vui lòng chọn chủ đề và cài đặt API Key (nếu chưa có) để bắt đầu.
+          </p>
+        )}
         <Button
           onClick={startQuiz}
           disabled={selectedTopics.length === 0 || loading}

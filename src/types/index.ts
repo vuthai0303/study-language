@@ -52,6 +52,6 @@ export type MessageType = {
 };
 
 export type AiKeyType = {
-  OPEN_AI_TOKEN: string;
-  GEMINI_AI_TOKEN: string;
+  label: string;
+  value: string;
 }

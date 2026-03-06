@@ -8,8 +8,7 @@ import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
 import { Button } from "@/components/ui/button"; // Added for potential use, can be removed if not needed
 import { Textarea } from "@/components/ui/textarea"; // Added for displaying generated paragraph
 import { DEFAULT_WRITING_TOPIC } from "@/consts";
-
-const API_KEY_STORAGE_KEY = "openai_api_key";
+import { useAppSelector } from "@/hooks/reduxHook";
 
 export default function WritingPage() {
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>("0");
@@ -21,6 +20,8 @@ export default function WritingPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showTranslationPractice, setShowTranslationPractice] = useState(false);
   const [historyParagraph, setHistoryParagraph] = useState<string[]>([]);
+
+  const savedAiKey = useAppSelector((state) => state.aiKey);
 
   useEffect(() => {
     setHistoryParagraph(getHistoryParagraph(true));
@@ -46,10 +47,8 @@ export default function WritingPage() {
     setGeneratedParagraph(null);
     setShowTranslationPractice(false);
 
-    const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-
-    if (!apiKey) {
-      setErrorMessage("Vui lòng cài đặt OpenAI API key trong mục Cài đặt.");
+    if (!savedAiKey.value) {
+      setErrorMessage("Vui lòng cài đặt API key trong mục Cài đặt.");
       return;
     }
 
@@ -104,26 +103,31 @@ export default function WritingPage() {
       const prompt = `'${topic}' ${levelInstruction} Nội dung trả về chỉ bao gồm đoạn văn được tạo ra, không cần trả lời gì thêm.`;
 
       const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
+        "https://api.openai.com/v1/responses",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${savedAiKey.value}`,
           },
           body: JSON.stringify({
-            model: "gpt-5-2025-08-07",
-            reasoning_effort: "minimal",
-            messages: [
+            model: "gpt-5-mini-2025-08-07",
+            reasoning: {
+              effort: "minimal"
+            },
+            text: { 
+              verbosity: "low" 
+            },
+            input: [
               {
                 role: "system",
                 content:
-                  "Bạn là một trợ lý AI hữu ích, chuyên tạo ra các đoạn văn bằng tiếng Việt theo chủ đề cho mục đích học ngôn ngữ.",
+                  "Bạn là một trợ lý AI hữu ích, chuyên tạo ra các đoạn văn bằng tiếng Việt theo chủ đề cho mục đích học ngôn ngữ. Đảm bảo kết quả trả về không có các ký tự kì lạ như \n\r... ",
               },
               {
                 role: "system",
-                content: `Sau đây là các đoạn văn mà trước đó bạn đã giúp tôi tạo ra. 
-                          \n Hãy đảm bảo rằng đoạn văn mới được tạo ra sẽ khác 70% so với các đoạn văn trước đó.
+                content: `Sau đây là các đoạn văn mà trước đó bạn đã giúp tôi tạo ra.
+                          \n Hãy đảm bảo rằng đoạn văn mới được tạo ra sẽ khác 70% so với các đoạn văn trước đó
                           \n ${historyParagraph.join("\n")}`,
               },
               {
@@ -131,8 +135,7 @@ export default function WritingPage() {
                 content: prompt,
               },
             ],
-            // max_tokens: 250, // Adjusted for paragraph length
-            // temperature: 0.7, // Balances creativity and coherence
+            
           }),
         }
       );
@@ -148,7 +151,8 @@ export default function WritingPage() {
       }
 
       const data = await response.json();
-      const paragraph = data.choices[0]?.message?.content?.trim() ?? "";
+      console.log("data", data)
+      const paragraph = data?.output[data.output?.length - 1]?.content[0]?.text?.trim() ?? "";
 
       setHistoryParagraph(
         saveHistoryParagraph(
@@ -214,10 +218,10 @@ export default function WritingPage() {
 
           {errorMessage && (
             <div
-              className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"
+              className="mt-5 p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"
               role="alert"
             >
-              <span className="font-medium">Lỗi:</span> {errorMessage}
+              {errorMessage}
             </div>
           )}
 
@@ -245,13 +249,13 @@ export default function WritingPage() {
             />
           )}
 
-          {!isGenerating &&
+          {((!isGenerating &&
             !generatedParagraph &&
             !errorMessage &&
-            !selectedTopicId && (
+            !selectedTopicId) ||
+            !savedAiKey?.value) && (
               <p className="text-muted-foreground text-center py-4">
-                Vui lòng chọn chủ đề và cài đặt API Key (nếu chưa có) để bắt
-                đầu.
+                Vui lòng chọn chủ đề và cài đặt API Key (nếu chưa có) để bắt đầu.
               </p>
             )}
         </CardContent>
