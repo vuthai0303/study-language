@@ -5,13 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TopicSelector } from "@/components/reading/topic-selector";
 import { ReadingPractice } from "@/components/reading/reading-practice";
 import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
-import { ReadingPracticeType } from "@/types";
+import { CallAiResponse, ReadingPracticeType } from "@/types";
 import { DEFAULT_READING_TOPIC } from "@/consts";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import { hideLoading, showLoading } from "@/store/loadingSlice";
+import { useAI } from "@/hooks/useAI";
 
 export default function ReadingPage() {
   const savedAiKey = useAppSelector((state) => state.aiKey);
+  const { callAI } = useAI(savedAiKey.value || '');
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>("1");
   const [level, setLevel] = useState<string>("Trung cấp");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -94,8 +96,7 @@ export default function ReadingPage() {
       const prompt = `Hãy giúp tôi tạo ra 1 bài luyện tập khả năng đọc trong tiếng anh (tham khảo các bài thi về reading trong kì thi Toeic, Ielts,...). 
                       '${topic}'
                       \n ${levelInstruction}
-                      \n
-                      Kết quả sẽ trả về sẽ có kiểu json tương ứng như sau:
+                      Đảm bảo trả về kết quả chính xác dưới dạng JSON đúng với định dạng bên dưới:
                       {
                         paragraph: "abc" // Đây là đoạn văn,
                         questions: [{
@@ -105,57 +106,19 @@ export default function ReadingPage() {
                             explain: "Giải thích" // Giải thích ngắn gọn, dễ hiểu cho người dùng hiểu về kết quả đúng. Giải thích bằng tiếng việt.
                         }] // Danh sách gồm 5 câu hỏi bằng tiếng anh tương ứng với đoạn văn
                       }
+                      \n Bên cạnh đó dưới đây là các các bài luyện tập khả năng đọc tiếng anh mà trước đó bạn đã giúp tôi tạo ra. 
+                      \n Hãy đảm bảo rằng các bài luyện tập khả năng đọc tiếng anh mới được tạo ra sẽ khác 70% so với các đoạn văn trước đó.
+                      \n ${historyParagraph.join("\n")}
                       `;
 
-      const response = await fetch(
-        "https://api.openai.com/v1/responses",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${savedAiKey.value}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-5-mini-2025-08-07",
-            reasoning: {
-              effort: "low"
-            },
-            text: { 
-              verbosity: "low" 
-            },
-            input: [
-              {
-                role: "system",
-                content:
-                  "Bạn là một trợ lý AI hữu ích, chuyên tạo ra các bài luyện tập khả năng đọc tiếng anh theo nhiều chủ đề và trình độ.",
-              },
-              {
-                role: "system",
-                content: `Sau đây là các các bài luyện tập khả năng đọc tiếng anh mà trước đó bạn đã giúp tôi tạo ra. 
-                          \n Hãy đảm bảo rằng các bài luyện tập khả năng đọc tiếng anh mới được tạo ra sẽ khác 70% so với các đoạn văn trước đó.
-                          \n ${historyParagraph.join("\n")}`,
-              },
-              {
-                role: "user",
-                content: prompt,
-              },
-            ],
-          }),
-        }
-      );
+      const response: CallAiResponse = await callAI(prompt, 'openai');
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("OpenAI API error:", errorData);
-        const userFriendlyError =
-          errorData?.error?.message ||
-          `Lỗi ${response.status}. Vui lòng kiểm tra API key hoặc thử lại sau.`;
-        setErrorMessage(`Lỗi tạo đoạn văn: ${userFriendlyError}`);
-        throw new Error(`OpenAI API error: ${response.statusText}`);
+      if (!response.isSuccess || !response.data) {
+        setErrorMessage("Có lỗi xảy ra khi tạo bài tập. Vui lòng thử lại!");
+        return
       }
 
-      const data = await response.json();
-      const message = data?.output[data.output?.length - 1]?.content[0]?.text?.trim() ?? "";
+      const message = response.data ?? "";
 
       const practice = message
         ? JSON.parse(message)

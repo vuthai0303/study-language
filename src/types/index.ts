@@ -55,3 +55,9 @@ export type AiKeyType = {
   label: string;
   value: string;
 }
+
+export type CallAiResponse = {
+  data: string | null;
+  isSuccess: boolean;
+  msg: string | null;
+}

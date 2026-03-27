@@ -1,11 +1,12 @@
-"use client";
-
+"use client"
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppSelector } from "@/hooks/reduxHook";
+import { useAI } from "@/hooks/useAI";
+import { CallAiResponse } from "@/types";
 
 const GRAMMAR_TOPICS = [
   "Hiện tại đơn (Present Simple)",
@@ -50,6 +51,7 @@ type QuizQuestion = {
 
 export default function GrammarPage() {
   const savedAiKey = useAppSelector((state) => state.aiKey);
+  const { callAI } = useAI(savedAiKey.value || '');
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
@@ -83,58 +85,33 @@ export default function GrammarPage() {
       Bạn là giáo viên tiếng Anh. Tạo 10 câu hỏi trắc nghiệm (mỗi câu có 4 lựa chọn, chỉ có một câu trả lời đúng) để thực hành các chủ đề ngữ pháp sau: ${selectedTopics.join(
         ", "
       )}.
-      Trả về kết quả dưới dạng mảng JSON với định dạng này:
+      Đảm bảo trả về kết quả chính xác dưới dạng mảng JSON đúng với định dạng bên dưới và không bao gồm bất kỳ giải thích hoặc văn bản bổ sung nào khác:
       [
         {
-          "question": "string",
-          "options": ["string", "string", "string", "string"],
-          "answer": 0 // index of correct option
-          "feedback": "string" // Giải thích ngắn gọn, rõ ràng, dễ hiểu bằng tiếng việt về kết quả đúng
+          "question": "string", // Câu hỏi
+          "options": ["string", "string", "string", "string"], // 4 Đáp án của câu hỏi, nghiên cứu các câu hỏi thách đố, dễ nhầm lẫn để người dùng hiểu hơn về bản chất.
+          "answer": 0 // index của câu trả lời đúng
+          "feedback": "string" // Lưu ý giải thích ngắn gọn, rõ ràng, dễ hiểu bằng tiếng việt về kết quả đúng
         },
         ...
       ]
-      Không bao gồm bất kỳ giải thích hoặc văn bản bổ sung nào.
       `;
 
     try {
-      const response = await fetch(
-        "https://api.openai.com/v1/responses",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${savedAiKey.value}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-5-mini-2025-08-07",
-            reasoning: {
-              effort: "low"
-            },
-            text: { 
-              verbosity: "low" 
-            },
-            input: [
-              { role: "system", content: "You are a helpful assistant." },
-              { role: "user", content: prompt },
-            ],
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.text();
-        alert("Lỗi khi gọi OpenAI API: " + error);
+      const result : CallAiResponse = await callAI(prompt, 'openai');
+      console.log('result: ', result)
+      if (!result.isSuccess || !result.data) {
+        alert("Hệ thống AI đang bị lỗi, vui lòng phản hồi và thử lại sau!");
         setLoading(false);
         return;
       }
-
-      const data = await response.json();
       let questions: QuizQuestion[] = [];
       try {
-        const content = data?.output[data.output?.length - 1]?.content[0]?.text?.trim() ?? "";
+        const content = result.data ?? "";
         const start = content.indexOf("[");
         const end = content.lastIndexOf("]");
         const jsonString = content.slice(start, end + 1);
+        console.log('jsonString: ', jsonString)
         questions = JSON.parse(jsonString);
       } catch {
         alert("Không thể phân tích câu hỏi từ phản hồi của AI.");

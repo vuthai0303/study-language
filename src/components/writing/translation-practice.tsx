@@ -17,10 +17,11 @@ import {
 } from "@/components/ui/card";
 import { TYPE_VOCAB_LABELS } from "@/consts";
 import { getVocabulary, addVocabulary } from "@/lib/localStorage";
-import { VocabularyType } from "@/types";
+import { CallAiResponse, VocabularyType } from "@/types";
 import { useAppSelector } from "@/hooks/reduxHook";
 import { SentenceLayout } from "./sentence-layout";
 import { Feedback, Sentence } from "@/types/writing";
+import { useAI } from "@/hooks/useAI";
 
 interface TranslationPracticeProps {
   paragraph: string;
@@ -48,6 +49,7 @@ export function TranslationPractice({
   });
 
   const savedAiKey = useAppSelector((state) => state.aiKey);
+  const { callAI } = useAI(savedAiKey.value || '');
 
   // State lưu danh sách từ vựng
   const [vocabularyList, setVocabularyList] = useState<VocabularyType[]>([]);
@@ -97,40 +99,7 @@ export function TranslationPractice({
     }
 
     try {
-      const prompt = `Đây là bản dịch tiếng anh của tôi: "${currentSentence.translation}". Tương ứng với câu tiếng Việt: "${currentSentence.text}".`;
-
-      const response = await fetch(
-        "https://api.openai.com/v1/responses",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${savedAiKey.value}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-5-mini-2025-08-07",
-            reasoning: {
-              effort: "low"
-            },
-            text: { 
-              verbosity: "low" 
-            },
-            input: [
-              {
-                role: "system",
-                content: `Bạn là một trợ lý AI hữu ích, chuyên kiểm tra bản dịch tiếng Anh và thực hiện đánh giá và hướng dẫn cải thiện bản dịch cho tốt hơn.
-                        Hãy đảm bảo đánh giá bản dịch đúng ngữ nghĩa, ngữ cảnh của đoạn văn, ngữ pháp và từ vựng phải chính xác và phù hợp với ngữ cảnh.
-                        Thực hiện đánh giá phù hợp với người có trình độ ${level} - ${
-                  level == "Cơ bản"
-                    ? "Tương ứng với trình độ Toeic dưới 400, Ielts dưới 4."
-                    : level == "Trung cấp"
-                    ? "Tương ứng với trình độ Toeic từ 400 đến 700, Ielts từ 4 đến 7."
-                    : "Tương ứng với trình độ Toeic trên 700, Ielts trên 7."
-                }`,
-              },
-              {
-                role: "user",
-                content: `Đây là đoạn văn gốc bằng tiếng việt: "${paragraph}".
+      const prompt = `Đây là đoạn văn gốc bằng tiếng việt: "${paragraph}".
                       \nSau đây tôi sẽ thực hiện dịch từng câu của đoạn văn trên sang tiếng anh.
                       \nHãy giúp tôi kiểm tra bản dịch, thực hiện đánh giá trên 10 cấp độ và nêu phản hồi về cách cải thiện bản dịch tốt hơn.
                       \nĐảm bảo trả lời dưới dạng JSON với các trường "isCorrect" (boolean), "feedback" (string), "vocabs"(list) và scope(number). 
@@ -144,25 +113,28 @@ export function TranslationPractice({
                         (e) => e.id
                       ).join(",")}
                       \n
-                      \n${prompt}
+                      \nĐây là bản dịch tiếng anh của tôi: "${currentSentence.translation}". Tương ứng với câu tiếng Việt: "${currentSentence.text}".
                       \n
-                      `,
-              },
-            ],
-            // max_tokens: 250, // Adjusted for paragraph length
-            // temperature: 0.7, // Balances creativity and coherence
-          }),
-        }
-      );
+                      `;
+      const systemPropmt = `Bạn là một trợ lý AI hữu ích, chuyên kiểm tra bản dịch tiếng Anh và thực hiện đánh giá và hướng dẫn cải thiện bản dịch cho tốt hơn.
+                            Hãy đảm bảo đánh giá bản dịch đúng ngữ nghĩa, ngữ cảnh của đoạn văn, ngữ pháp và từ vựng phải chính xác và phù hợp với ngữ cảnh.
+                            Thực hiện đánh giá phù hợp với người có trình độ ${level} - ${
+                            level == "Cơ bản"
+                              ? "Tương ứng với trình độ Toeic dưới 400, Ielts dưới 4."
+                              : level == "Trung cấp"
+                              ? "Tương ứng với trình độ Toeic từ 400 đến 700, Ielts từ 4 đến 7."
+                              : "Tương ứng với trình độ Toeic trên 700, Ielts trên 7."}
+                            `
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      const response: CallAiResponse = await callAI(prompt, 'openai');
+
+      if (!response.isSuccess || !response.data) {
+        const errorData = response.msg;
         console.error("OpenAI API error:", errorData);
-        throw new Error(`OpenAI API error: ${response.statusText}`);
+        return;
       }
 
-      const data = await response.json();
-      const result = data?.output[data.output?.length - 1]?.content[0]?.text?.trim() ?? "";
+      const result = response.data ?? "";
 
       const res = result
         ? JSON.parse(result)
@@ -212,67 +184,38 @@ export function TranslationPractice({
     setIsSuggesting(true);
 
     try {
-      const prompt = `Đây là câu tiếng Anh mà tôi đang cần dịch sang tiếng việt: "${currentSentence.text}".`;
-
-      const response = await fetch(
-        "https://api.openai.com/v1/responses",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${savedAiKey.value}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-5-mini-2025-08-07",
-            reasoning: {
-              effort: "low"
-            },
-            text: { 
-              verbosity: "low" 
-            },
-            input: [
-              {
-                role: "system",
-                content: `Bạn là một trợ lý AI hữu ích, chuyên đưa ra các gợi ý và từ vựng hỗ trợ giúp cho người dùng cải thiện khả năng dịch thuật 
-                phù hợp với người có trình độ ${level} - ${
-                  level == "Cơ bản"
-                    ? "Tương ứng với trình độ Toeic dưới 400, Ielts dưới 4."
-                    : level == "Trung cấp"
-                    ? "Tương ứng với trình độ Toeic từ 400 đến 700, Ielts từ 4 đến 7."
-                    : "Tương ứng với trình độ Toeic trên 700, Ielts trên 7."
-                }
-                  \nHãy đảm bảo dịch sát ngữ nghĩa và đúng cấu trúc, ngữ pháp, ngữ cảnh.
-                    `,
-              },
-              {
-                role: "user",
-                content: `Đây là đoạn văn gốc bằng tiếng việt: "${paragraph}".
+      const prompt = `Đây là đoạn văn gốc bằng tiếng việt: "${paragraph}".
                       \nSau đây tôi sẽ thực hiện dịch từng câu của đoạn văn trên sang tiếng anh.
                       \nHãy giúp tôi đưa ra các gợi ý và từ vựng hỗ trợ giúp tôi có thể hoàn thiện bản dịch.
                       \nĐảm bảo trả lời dưới dạng JSON với các trường"feedback" (string), "vocabs"(list). 
                       \nNội dung feedback nên ngắn gọn (khoảng 100 từ), rõ ràng bằng tiếng việt, tập trung gợi ý các ngữ pháp có thể sử dụng, có thêm mô tả ngắn gọn nên sử dụng ngữ pháp nào và tại sao. Bên cạnh đó cần chỉ rõ các thì nên sử dụng trong ngữ cảnh.
                       \nNội dung vocabs nên là danh sách các từ vựng tiếng anh liên quan đến câu dịch, đảm bảo đúng ngữ nghĩa và ngữ cảnh.
                       \nVí dụ: {"feedback": "Nên sử dụng thì quá khứ đơn vì ngữ cảnh đang ở quá khứ,...", "vocabs": [{word: study, type: "verb", meaning: "học"}, {word: vocabulary, type: "noun", meaning: "từ vựng"}, {word: practice, type: "verb", meaning: "luyện tập"}]}
-                      \nType của từ vựng tương ứng với các type sau ${TYPE_VOCAB_LABELS.map(
-                        (e) => e.id
-                      ).join(",")}
+                      \nType của từ vựng tương ứng với các type sau ${TYPE_VOCAB_LABELS.map((e) => e.id).join(",")}
                       \n
-                      \n${prompt}
-                      `,
-              },
-            ],
-          }),
-        }
-      );
+                      \nĐây là câu tiếng Anh mà tôi đang cần dịch sang tiếng việt: "${currentSentence.text}".".
+                      \n
+                      `;
+      const systemPropmt = `Bạn là một trợ lý AI hữu ích, chuyên đưa ra các gợi ý và từ vựng hỗ trợ giúp cho người dùng cải thiện khả năng dịch thuật 
+                            phù hợp với người có trình độ ${level} - ${
+                              level == "Cơ bản"
+                                ? "Tương ứng với trình độ Toeic dưới 400, Ielts dưới 4."
+                                : level == "Trung cấp"
+                                ? "Tương ứng với trình độ Toeic từ 400 đến 700, Ielts từ 4 đến 7."
+                                : "Tương ứng với trình độ Toeic trên 700, Ielts trên 7."
+                            }
+                            \nHãy đảm bảo dịch sát ngữ nghĩa và đúng cấu trúc, ngữ pháp, ngữ cảnh.
+                            `
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      const response: CallAiResponse = await callAI(prompt, 'openai');
+
+      if (!response.isSuccess || !response.data) {
+        const errorData = response.msg;
         console.error("OpenAI API error:", errorData);
-        throw new Error(`OpenAI API error: ${response.statusText}`);
+        return;
       }
 
-      const data = await response.json();
-      const result = data?.output[data.output?.length - 1]?.content[0]?.text?.trim() ?? "";
+      const result = response.data ?? "";
 
       const res = result
         ? JSON.parse(result)

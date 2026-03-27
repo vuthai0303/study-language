@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"; // Added for potential use, can
 import { Textarea } from "@/components/ui/textarea"; // Added for displaying generated paragraph
 import { DEFAULT_WRITING_TOPIC } from "@/consts";
 import { useAppSelector } from "@/hooks/reduxHook";
+import { CallAiResponse } from "@/types";
+import { useAI } from "@/hooks/useAI";
 
 export default function WritingPage() {
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>("0");
@@ -22,6 +24,7 @@ export default function WritingPage() {
   const [historyParagraph, setHistoryParagraph] = useState<string[]>([]);
 
   const savedAiKey = useAppSelector((state) => state.aiKey);
+  const { callAI } = useAI(savedAiKey.value || '');
 
   useEffect(() => {
     setHistoryParagraph(getHistoryParagraph(true));
@@ -100,59 +103,26 @@ export default function WritingPage() {
                 Đoạn văn cần liền mạch, rõ ràng, có khả năng giúp tôi thực hiện luyện tập dịch từ tiếng việt sang tiếng anh.`;
       }
 
-      const prompt = `'${topic}' ${levelInstruction} Nội dung trả về chỉ bao gồm đoạn văn được tạo ra, không cần trả lời gì thêm.`;
+      const prompt = `
+                      '${topic}' ${levelInstruction} 
+                      \n Nội dung trả về chỉ bao gồm đoạn văn được tạo ra, không cần trả lời gì thêm.
+                      \n Sau đây là các đoạn văn mà trước đó bạn đã giúp tôi tạo ra.
+                      \n Hãy đảm bảo rằng đoạn văn mới được tạo ra sẽ khác 70% so với các đoạn văn trước đó
+                      \n ${historyParagraph.join("\n")}
+                      `;
 
-      const response = await fetch(
-        "https://api.openai.com/v1/responses",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${savedAiKey.value}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-5-mini-2025-08-07",
-            reasoning: {
-              effort: "minimal"
-            },
-            text: { 
-              verbosity: "low" 
-            },
-            input: [
-              {
-                role: "system",
-                content:
-                  "Bạn là một trợ lý AI hữu ích, chuyên tạo ra các đoạn văn bằng tiếng Việt theo chủ đề cho mục đích học ngôn ngữ. Đảm bảo kết quả trả về không có các ký tự kì lạ như \n\r... ",
-              },
-              {
-                role: "system",
-                content: `Sau đây là các đoạn văn mà trước đó bạn đã giúp tôi tạo ra.
-                          \n Hãy đảm bảo rằng đoạn văn mới được tạo ra sẽ khác 70% so với các đoạn văn trước đó
-                          \n ${historyParagraph.join("\n")}`,
-              },
-              {
-                role: "user",
-                content: prompt,
-              },
-            ],
-            
-          }),
-        }
-      );
+      const response: CallAiResponse = await callAI(prompt, 'openai');
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!response.isSuccess || !response.data) {
+        const errorData = response.msg;
         console.error("OpenAI API error:", errorData);
-        const userFriendlyError =
-          errorData?.error?.message ||
-          `Lỗi ${response.status}. Vui lòng kiểm tra API key hoặc thử lại sau.`;
+        const userFriendlyError = errorData || `Vui lòng kiểm tra API key hoặc thử lại sau.`;
         setErrorMessage(`Lỗi tạo đoạn văn: ${userFriendlyError}`);
-        throw new Error(`OpenAI API error: ${response.statusText}`);
+        return;
       }
 
-      const data = await response.json();
-      console.log("data", data)
-      const paragraph = data?.output[data.output?.length - 1]?.content[0]?.text?.trim() ?? "";
+      console.log("response", response)
+      const paragraph = response.data ?? "";
 
       setHistoryParagraph(
         saveHistoryParagraph(
