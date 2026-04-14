@@ -51,9 +51,11 @@ export type MessageType = {
   text: string 
 };
 
+export type ProviderAIType = "OPENAI" | "GEMINI";
 export type AiKeyType = {
-  label: string;
-  value: string;
+  provider: ProviderAIType;
+  key: string;
+  model: string;
 }
 
 export type CallAiResponse = {

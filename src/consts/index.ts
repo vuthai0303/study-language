@@ -49,7 +49,9 @@ export const LOCAL_STORAGE_KEY = {
   VOCABULARY: "vocabulary",
   WRITING_HISTORY_PARAGRAPH: "writing_history_paragraph",
   READING_HISTORY_PARAGRAPH: "reading_history_paragraph",
-  AI_KEY: "AI_KEY",
-  OPEN_AI_TOKEN: "OPEN_AI_TOKEN",
-  GEMINI_AI_TOKEN: "GEMINI_AI_TOKEN"
+  AI_CONFIG: "AI_CONFIG",
+};
+export const PROVIDER_AI = {
+  OPENAI: "OPENAI",
+  GEMINI: "GEMINI"
 };

@@ -48,8 +48,7 @@ export function TranslationPractice({
       }));
   });
 
-  const savedAiKey = useAppSelector((state) => state.aiKey);
-  const { callAI } = useAI(savedAiKey.value || '');
+  const { callAI, isHasKey } = useAI();
 
   // State lưu danh sách từ vựng
   const [vocabularyList, setVocabularyList] = useState<VocabularyType[]>([]);
@@ -94,7 +93,7 @@ export function TranslationPractice({
 
     setIsChecking(true);
 
-    if (!savedAiKey.value) {
+    if (!isHasKey()) {
       return;
     }
 
@@ -126,7 +125,7 @@ export function TranslationPractice({
                               : "Tương ứng với trình độ Toeic trên 700, Ielts trên 7."}
                             `
 
-      const response: CallAiResponse = await callAI(prompt, 'openai');
+      const response: CallAiResponse = await callAI(prompt, 'openai', 'gpt-5.4-mini-2026-03-17', systemPropmt);
 
       if (!response.isSuccess || !response.data) {
         const errorData = response.msg;
@@ -177,7 +176,7 @@ export function TranslationPractice({
   const suggestTranslate = async () => {
     const currentSentence = sentences[currentSentenceIndex];
 
-    if (!savedAiKey.value) {
+    if (!isHasKey()) {
       return;
     }
 
@@ -207,7 +206,7 @@ export function TranslationPractice({
                             \nHãy đảm bảo dịch sát ngữ nghĩa và đúng cấu trúc, ngữ pháp, ngữ cảnh.
                             `
 
-      const response: CallAiResponse = await callAI(prompt, 'openai');
+      const response: CallAiResponse = await callAI(prompt, 'openai', 'gpt-5.4-mini-2026-03-17', systemPropmt);
 
       if (!response.isSuccess || !response.data) {
         const errorData = response.msg;

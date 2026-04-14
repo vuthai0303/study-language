@@ -1,10 +1,13 @@
 import { CallAiResponse } from '@/types';
+import { useAppSelector } from './reduxHook';
 
 interface UseAIResult {
-  callAI: (prompt: string, provider: 'openai' | 'gemini', model?: string) => Promise<any>;
+  callAI: (prompt: string, provider: 'openai' | 'gemini', model?: string, systemPrompt?: string) => Promise<any>;
+  isHasKey: () => boolean
 }
 
-export const useAI = (apiKey: string): UseAIResult => {
+export const useAI = (): UseAIResult => {
+  const savedAiKey = useAppSelector((state) => state.aiKey);
   const callAI = async (prompt: string, provider: 'openai' | 'gemini', model?: string, systemPrompt?: string): Promise<CallAiResponse> => {
 
     try {
@@ -14,7 +17,7 @@ export const useAI = (apiKey: string): UseAIResult => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${savedAiKey}`,
           },
           body: JSON.stringify({
             model: model || 'gpt-5.4-mini-2026-03-17',
@@ -25,7 +28,7 @@ export const useAI = (apiKey: string): UseAIResult => {
           }),
         });
       } else if (provider === 'gemini') {
-        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-pro'}:generateContent?key=${apiKey}`, {
+        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-pro'}:generateContent?key=${savedAiKey}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -79,5 +82,9 @@ export const useAI = (apiKey: string): UseAIResult => {
     return null
   }
 
-  return { callAI };
+  const isHasKey = () => {
+    return !!savedAiKey
+  }
+
+  return { callAI, isHasKey };
 };

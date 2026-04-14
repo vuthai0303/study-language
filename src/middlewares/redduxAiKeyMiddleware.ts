@@ -5,7 +5,7 @@ import { Middleware } from "@reduxjs/toolkit";
 export const saveAiKeyMiddleware: Middleware = () => next => action => {
   const result = next(action);
   if (saveAiKey.match(action)) {
-    setAiKey(action.payload ?? {OPEN_AI_TOKEN: "", GEMINI_AI_TOKEN: ""});
+    setAiKey(action.payload ?? {provider: "OPENAI", key: "", model: "gpt-5.4-mini-2026-03-17"});
   }
   return result;
 };

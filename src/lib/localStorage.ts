@@ -6,17 +6,17 @@ import { v4 as uuidv4 } from "uuid";
 
 // AI KEY functions
 export const getAiKey = (): AiKeyType => {
-  const defaultValue : AiKeyType = {label: LOCAL_STORAGE_KEY.GEMINI_AI_TOKEN, value: ''};
+  const defaultValue : AiKeyType = {provider: "OPENAI", key: "", model: "gpt-5.4-mini-2026-03-17"};
 
   if (typeof window === "undefined") return defaultValue;
 
-  const aiKey = localStorage.getItem(LOCAL_STORAGE_KEY.AI_KEY);
+  const aiKey = localStorage.getItem(LOCAL_STORAGE_KEY.AI_CONFIG);
   return aiKey ? JSON.parse(aiKey) : defaultValue;
 };
 export const setAiKey = (value: AiKeyType) => {
   if (typeof window === "undefined") return;
 
-  localStorage.setItem(LOCAL_STORAGE_KEY.AI_KEY, JSON.stringify(value));
+  localStorage.setItem(LOCAL_STORAGE_KEY.AI_CONFIG, JSON.stringify(value));
 };
 
 // Vocabulary functions

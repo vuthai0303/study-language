@@ -50,8 +50,7 @@ type QuizQuestion = {
 };
 
 export default function GrammarPage() {
-  const savedAiKey = useAppSelector((state) => state.aiKey);
-  const { callAI } = useAI(savedAiKey.value || '');
+  const { callAI, isHasKey } = useAI();
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
@@ -73,7 +72,7 @@ export default function GrammarPage() {
     setQuiz([]);
     setUserAnswers([]);
 
-    if (!savedAiKey.value) {
+    if (!isHasKey()) {
       alert(
         "Vui lòng nhập OpenAI API key trong phần cài đặt trước khi bắt đầu."
       );
@@ -98,7 +97,7 @@ export default function GrammarPage() {
       `;
 
     try {
-      const result : CallAiResponse = await callAI(prompt, 'openai');
+      const result : CallAiResponse = await callAI(prompt, 'openai', 'gpt-5.4-mini-2026-03-17');
       console.log('result: ', result)
       if (!result.isSuccess || !result.data) {
         alert("Hệ thống AI đang bị lỗi, vui lòng phản hồi và thử lại sau!");
@@ -174,7 +173,7 @@ export default function GrammarPage() {
             ))}
           </div>
         </div>
-        {!savedAiKey?.value && (
+        {!isHasKey() && (
           <p className="text-muted-foreground text-center py-4">
             Vui lòng chọn chủ đề và cài đặt API Key (nếu chưa có) để bắt đầu.
           </p>

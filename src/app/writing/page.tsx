@@ -23,8 +23,7 @@ export default function WritingPage() {
   const [showTranslationPractice, setShowTranslationPractice] = useState(false);
   const [historyParagraph, setHistoryParagraph] = useState<string[]>([]);
 
-  const savedAiKey = useAppSelector((state) => state.aiKey);
-  const { callAI } = useAI(savedAiKey.value || '');
+  const { callAI, isHasKey } = useAI();
 
   useEffect(() => {
     setHistoryParagraph(getHistoryParagraph(true));
@@ -50,7 +49,7 @@ export default function WritingPage() {
     setGeneratedParagraph(null);
     setShowTranslationPractice(false);
 
-    if (!savedAiKey.value) {
+    if (!isHasKey()) {
       setErrorMessage("Vui lòng cài đặt API key trong mục Cài đặt.");
       return;
     }
@@ -111,7 +110,7 @@ export default function WritingPage() {
                       \n ${historyParagraph.join("\n")}
                       `;
 
-      const response: CallAiResponse = await callAI(prompt, 'openai');
+      const response: CallAiResponse = await callAI(prompt, 'openai', 'gpt-5.4-mini-2026-03-17');
 
       if (!response.isSuccess || !response.data) {
         const errorData = response.msg;
@@ -223,7 +222,7 @@ export default function WritingPage() {
             !generatedParagraph &&
             !errorMessage &&
             !selectedTopicId) ||
-            !savedAiKey?.value) && (
+            !isHasKey()) && (
               <p className="text-muted-foreground text-center py-4">
                 Vui lòng chọn chủ đề và cài đặt API Key (nếu chưa có) để bắt đầu.
               </p>

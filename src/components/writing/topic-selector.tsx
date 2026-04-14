@@ -91,7 +91,7 @@ export function TopicSelector({
         </div>
         <Button
           onClick={generateParagraph}
-          disabled={!selectedTopicId || isGenerating || showTranslationPractice || !savedAiKey?.value}
+          disabled={!selectedTopicId || isGenerating || showTranslationPractice || !savedAiKey?.key}
         >
           {isGenerating ? "Đang tạo..." : "Tạo đoạn văn"}
         </Button>

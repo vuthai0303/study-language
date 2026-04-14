@@ -12,8 +12,7 @@ import { hideLoading, showLoading } from "@/store/loadingSlice";
 import { useAI } from "@/hooks/useAI";
 
 export default function ReadingPage() {
-  const savedAiKey = useAppSelector((state) => state.aiKey);
-  const { callAI } = useAI(savedAiKey.value || '');
+  const { callAI, isHasKey } = useAI();
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>("1");
   const [level, setLevel] = useState<string>("Trung cấp");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -43,7 +42,7 @@ export default function ReadingPage() {
     setGeneratedPractice(null);
     setShowPractice(false);
 
-    if (!savedAiKey.value) {
+    if (!isHasKey()) {
       setErrorMessage("Vui lòng cài đặt OpenAI API key trong mục Cài đặt.");
       return;
     }
@@ -111,7 +110,7 @@ export default function ReadingPage() {
                       \n ${historyParagraph.join("\n")}
                       `;
 
-      const response: CallAiResponse = await callAI(prompt, 'openai');
+      const response: CallAiResponse = await callAI(prompt, 'openai', 'gpt-5.4-mini-2026-03-17');
 
       if (!response.isSuccess || !response.data) {
         setErrorMessage("Có lỗi xảy ra khi tạo bài tập. Vui lòng thử lại!");
@@ -218,7 +217,7 @@ export default function ReadingPage() {
             !generatedPractice &&
             !errorMessage &&
             !selectedTopicId) ||
-            !savedAiKey?.value
+            !isHasKey()
           ) && (
               <p className="text-muted-foreground text-center py-4">
                 Vui lòng chọn chủ đề và cài đặt API Key (nếu chưa có) để bắt
