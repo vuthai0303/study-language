@@ -110,7 +110,7 @@ export default function WritingPage() {
                       \n ${historyParagraph.join("\n")}
                       `;
 
-      const response: CallAiResponse = await callAI(prompt, 'openai', 'gpt-5.4-mini-2026-03-17');
+      const response: CallAiResponse = await callAI(prompt);
 
       if (!response.isSuccess || !response.data) {
         const errorData = response.msg;
@@ -121,7 +121,7 @@ export default function WritingPage() {
       }
 
       console.log("response", response)
-      const paragraph = response.data ?? "";
+      const paragraph = response.data.text ?? "";
 
       setHistoryParagraph(
         saveHistoryParagraph(

@@ -97,8 +97,7 @@ export default function GrammarPage() {
       `;
 
     try {
-      const result : CallAiResponse = await callAI(prompt, 'openai', 'gpt-5.4-mini-2026-03-17');
-      console.log('result: ', result)
+      const result : CallAiResponse = await callAI(prompt);
       if (!result.isSuccess || !result.data) {
         alert("Hệ thống AI đang bị lỗi, vui lòng phản hồi và thử lại sau!");
         setLoading(false);
@@ -106,7 +105,7 @@ export default function GrammarPage() {
       }
       let questions: QuizQuestion[] = [];
       try {
-        const content = result.data ?? "";
+        const content = result.data.text ?? "";
         const start = content.indexOf("[");
         const end = content.lastIndexOf("]");
         const jsonString = content.slice(start, end + 1);

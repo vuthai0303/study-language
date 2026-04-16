@@ -58,8 +58,14 @@ export type AiKeyType = {
   model: string;
 }
 
+export type AIResponseType = {
+  text: string | null;
+  provider: "OPENAI" | "GEMINI" | "UNKNOWN";
+  raw: any;
+  token: number;
+}
 export type CallAiResponse = {
-  data: string | null;
+  data: AIResponseType | null;
   isSuccess: boolean;
   msg: string | null;
 }

@@ -110,14 +110,14 @@ export default function ReadingPage() {
                       \n ${historyParagraph.join("\n")}
                       `;
 
-      const response: CallAiResponse = await callAI(prompt, 'openai', 'gpt-5.4-mini-2026-03-17');
+      const response: CallAiResponse = await callAI(prompt);
 
       if (!response.isSuccess || !response.data) {
         setErrorMessage("Có lỗi xảy ra khi tạo bài tập. Vui lòng thử lại!");
         return
       }
 
-      const message = response.data ?? "";
+      const message = response.data.text ?? "";
 
       const practice = message
         ? JSON.parse(message)

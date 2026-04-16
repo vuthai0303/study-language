@@ -125,7 +125,7 @@ export function TranslationPractice({
                               : "Tương ứng với trình độ Toeic trên 700, Ielts trên 7."}
                             `
 
-      const response: CallAiResponse = await callAI(prompt, 'openai', 'gpt-5.4-mini-2026-03-17', systemPropmt);
+      const response: CallAiResponse = await callAI(prompt, systemPropmt);
 
       if (!response.isSuccess || !response.data) {
         const errorData = response.msg;
@@ -133,7 +133,7 @@ export function TranslationPractice({
         return;
       }
 
-      const result = response.data ?? "";
+      const result = response.data.text ?? "";
 
       const res = result
         ? JSON.parse(result)
@@ -206,7 +206,7 @@ export function TranslationPractice({
                             \nHãy đảm bảo dịch sát ngữ nghĩa và đúng cấu trúc, ngữ pháp, ngữ cảnh.
                             `
 
-      const response: CallAiResponse = await callAI(prompt, 'openai', 'gpt-5.4-mini-2026-03-17', systemPropmt);
+      const response: CallAiResponse = await callAI(prompt, systemPropmt);
 
       if (!response.isSuccess || !response.data) {
         const errorData = response.msg;
@@ -214,7 +214,7 @@ export function TranslationPractice({
         return;
       }
 
-      const result = response.data ?? "";
+      const result = response.data.text ?? "";
 
       const res = result
         ? JSON.parse(result)
