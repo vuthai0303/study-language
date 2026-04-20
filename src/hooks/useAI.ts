@@ -1,5 +1,7 @@
 import { AIResponseType, CallAiResponse } from '@/types';
 import { getLocalStoreAiKey } from '@/lib/localStorage';
+import { useAppDispatch } from './reduxHook';
+import { hideLoading, showLoading } from '@/store/loadingSlice';
 
 interface UseAIResult {
   callAI: (prompt: string, systemPrompt?: string) => Promise<CallAiResponse>;
@@ -7,6 +9,7 @@ interface UseAIResult {
 }
 
 export const useAI = (): UseAIResult => {
+  const dispatch = useAppDispatch();
   const AIConfig = getLocalStoreAiKey()
 
   const callAI = async (prompt: string, systemPrompt?: string): Promise<CallAiResponse> => {
@@ -20,6 +23,7 @@ export const useAI = (): UseAIResult => {
     }
 
     try {
+      dispatch(showLoading());
       let response;
       if (AIConfig.provider === 'OPENAI') {
         response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -79,6 +83,8 @@ export const useAI = (): UseAIResult => {
           data: null,
           msg: errorMessage,
         }
+    } finally {
+      dispatch(hideLoading());
     }
   };
 
@@ -117,7 +123,7 @@ export const useAI = (): UseAIResult => {
       const content = output.content?.length > 0 ? output.content[result.output.length - 1] : null;
       if (!content) return rs;
 
-      rs.text = content.text?.trim() ?? null
+      rs.text = content.text?.replaceAll("```", "").replaceAll("json", "").replaceAll("\n", "").trim() ?? null
     }
 
     if (result.usage) {
@@ -143,7 +149,7 @@ export const useAI = (): UseAIResult => {
       const content = output.message?.content ?? null;
       if (!content) return rs;
 
-      rs.text = content.trim() ?? null
+      rs.text = content.replaceAll("```", "").replaceAll("json", "").replaceAll("\n", "").trim() ?? null
     }
 
     if (result.usage) {
@@ -162,8 +168,14 @@ export const useAI = (): UseAIResult => {
     }
     if (!result) return rs;
 
-    if (result?.choices) {
-      return result?.choices[0]?.message?.content?.trim() ?? null
+    if (result?.candidates && result.candidates.length > 0) {
+      const parts = result.candidates[result.candidates.length - 1]?.content?.parts;
+      if (!parts || parts.length === 0) return rs;
+      rs.text = parts[parts.length - 1]?.text?.replaceAll("```", "").replaceAll("json", "").replaceAll("\n", "").trim() ?? null
+    }
+
+    if (result?.usageMetadata) {
+      rs.token = result.usageMetadata.totalTokenCount ?? 0
     }
 
     return rs;

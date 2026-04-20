@@ -29,9 +29,9 @@ export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
   const savedAiKey = getLocalStoreAiKey();
   
   const [isOpen, setIsOpen] = useState(false);
-  const [aiKey, setAiKey] = useState("");
-  const [modelAI, setModelAI] = useState("gpt-5.4-mini-2026-03-17");
-  const [provider, setProvider] = useState<ProviderAIType>("GEMINI");
+  const [aiKey, setAiKey] = useState(savedAiKey?.key || "");
+  const [modelAI, setModelAI] = useState(savedAiKey?.model || "");
+  const [provider, setProvider] = useState<ProviderAIType>(savedAiKey?.provider || "GEMINI");
   const [message, setMessage] = useState<MessageType | null>(null);
 
   useEffect(() => {
@@ -40,13 +40,13 @@ export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
         setProvider(savedAiKey.provider);
         setAiKey(savedAiKey.key);
       } else {
-        // Clear if no key is stored
+        // Clear if no key is stored 
         setProvider("GEMINI")
         setAiKey(""); 
       }
       setMessage(null); // Clear previous messages when modal opens
     }
-  }, [isOpen, savedAiKey]);
+  }, [isOpen]);
 
   const handleSave = () => {
     setMessage(null);
