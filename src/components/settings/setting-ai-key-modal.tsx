@@ -15,23 +15,24 @@ import { Input } from "@/components/ui/input";
 import { showLoading, hideLoading } from "@/store/loadingSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import { MessageType, ProviderAIType } from "@/types";
-import { saveAiKey } from "@/store/aiKey";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { PROVIDER_AI } from "@/consts";
+import { getLocalStoreAiKey, setLocalStoreAiKey } from "@/lib/localStorage";
 
 interface SettingAIKeyModalProps {
   children: React.ReactNode; // To wrap the trigger button
 }
 
 export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
+  const dispatch = useAppDispatch();
+  const isLoading = useAppSelector((state) => state.isLoading);
+  const savedAiKey = getLocalStoreAiKey();
+  
   const [isOpen, setIsOpen] = useState(false);
   const [aiKey, setAiKey] = useState("");
   const [modelAI, setModelAI] = useState("gpt-5.4-mini-2026-03-17");
   const [provider, setProvider] = useState<ProviderAIType>("GEMINI");
   const [message, setMessage] = useState<MessageType | null>(null);
-  const isLoading = useAppSelector((state) => state.isLoading);
-  const savedAiKey = useAppSelector((state) => state.aiKey);
-  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (isOpen) {
@@ -63,7 +64,7 @@ export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
 
     dispatch(showLoading());
     try {
-      dispatch(saveAiKey({provider: provider, key: aiKey, model: modelAI}));
+      setLocalStoreAiKey({provider: provider, key: aiKey, model: modelAI});
       setMessage({ type: "success", text: "Đã lưu API key!" });
     } catch (error) {
       console.error("Lỗi lưu API key:", error);

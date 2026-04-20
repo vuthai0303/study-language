@@ -5,7 +5,7 @@ import { AiKeyType, VocabularyType } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
 // AI KEY functions
-export const getAiKey = (): AiKeyType => {
+export const getLocalStoreAiKey = (): AiKeyType => {
   const defaultValue : AiKeyType = {provider: "OPENAI", key: "", model: "gpt-5.4-mini-2026-03-17"};
 
   if (typeof window === "undefined") return defaultValue;
@@ -13,7 +13,7 @@ export const getAiKey = (): AiKeyType => {
   const aiKey = localStorage.getItem(LOCAL_STORAGE_KEY.AI_CONFIG);
   return aiKey ? JSON.parse(aiKey) : defaultValue;
 };
-export const setAiKey = (value: AiKeyType) => {
+export const setLocalStoreAiKey = (value: AiKeyType) => {
   if (typeof window === "undefined") return;
 
   localStorage.setItem(LOCAL_STORAGE_KEY.AI_CONFIG, JSON.stringify(value));

@@ -13,6 +13,7 @@ import { Topic } from "@/types";
 import { DEFAULT_WRITING_TOPIC } from "@/consts";
 import { Textarea } from "../ui/textarea";
 import { useAppSelector } from "@/hooks/reduxHook";
+import { useAI } from "@/hooks/useAI";
 
 interface TopicSelectorProps {
   onTopicSelect: (topicId: string) => void;
@@ -33,9 +34,10 @@ export function TopicSelector({
   level,
   onLevelChange,
 }: TopicSelectorProps) {
-  const savedAiKey = useAppSelector((state) => state.aiKey);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [paragraph, setParagraph] = useState<string>("");
+
+  const { isHasKey } = useAI();
 
   useEffect(() => {
     const defaultTopics: Topic[] = DEFAULT_WRITING_TOPIC;
@@ -91,7 +93,7 @@ export function TopicSelector({
         </div>
         <Button
           onClick={generateParagraph}
-          disabled={!selectedTopicId || isGenerating || showTranslationPractice || !savedAiKey?.key}
+          disabled={!selectedTopicId || isGenerating || showTranslationPractice || !isHasKey}
         >
           {isGenerating ? "Đang tạo..." : "Tạo đoạn văn"}
         </Button>

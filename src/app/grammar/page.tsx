@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAppSelector } from "@/hooks/reduxHook";
 import { useAI } from "@/hooks/useAI";
 import { CallAiResponse } from "@/types";
 
