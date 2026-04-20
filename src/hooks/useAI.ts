@@ -47,6 +47,9 @@ export const useAI = (): UseAIResult => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            system_instruction: {
+              parts: { "text": systemPrompt ?? 'Bạn là một trợ lý có kinh nghiệm hơn 10 năm trong việc hỗ trợ người dùng học tiếng anh. Chuyên tạo ra các bài luyện tập khả năng đọc, viết tiếng anh theo nhiều chủ đề và trình độ. Đảm bảo kết quả trả về không có các ký tự kì lạ như \n\r...' }
+            },
             contents: [{
               parts: [{
                 text: prompt
