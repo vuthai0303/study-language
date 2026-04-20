@@ -7,7 +7,7 @@ import { ReadingPractice } from "@/components/reading/reading-practice";
 import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
 import { CallAiResponse, ReadingPracticeType } from "@/types";
 import { DEFAULT_READING_TOPIC } from "@/consts";
-import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
+import { useAppDispatch } from "@/hooks/reduxHook";
 import { hideLoading, showLoading } from "@/store/loadingSlice";
 import { useAI } from "@/hooks/useAI";
 

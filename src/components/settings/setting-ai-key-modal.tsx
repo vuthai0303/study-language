@@ -46,7 +46,7 @@ export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
       }
       setMessage(null); // Clear previous messages when modal opens
     }
-  }, [isOpen]);
+  }, [isOpen, savedAiKey]);
 
   const handleSave = () => {
     setMessage(null);

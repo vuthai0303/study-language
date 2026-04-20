@@ -18,7 +18,6 @@ import {
 import { TYPE_VOCAB_LABELS } from "@/consts";
 import { getVocabulary, addVocabulary } from "@/lib/localStorage";
 import { CallAiResponse, VocabularyType } from "@/types";
-import { useAppSelector } from "@/hooks/reduxHook";
 import { SentenceLayout } from "./sentence-layout";
 import { Feedback, Sentence } from "@/types/writing";
 import { useAI } from "@/hooks/useAI";

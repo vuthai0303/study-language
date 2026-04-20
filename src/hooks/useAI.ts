@@ -2,7 +2,7 @@ import { AIResponseType, CallAiResponse } from '@/types';
 import { getLocalStoreAiKey } from '@/lib/localStorage';
 
 interface UseAIResult {
-  callAI: (prompt: string, systemPrompt?: string) => Promise<any>;
+  callAI: (prompt: string, systemPrompt?: string) => Promise<CallAiResponse>;
   isHasKey: () => boolean
 }
 
@@ -37,7 +37,7 @@ export const useAI = (): UseAIResult => {
           }),
         });
       } else if (AIConfig.provider === 'GEMINI') {
-        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${AIConfig.model || 'gemini-pro'}:generateContent?key=${AIConfig.key}`, {
+        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${AIConfig.model || 'gemini-flash-latest'}:generateContent?key=${AIConfig.key}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export const useAI = (): UseAIResult => {
 
   const getResponse = (result: any): AIResponseType => {
     if (AIConfig.provider === 'OPENAI') {
-      let rs = extractOpenAIResponses(result);
+      const rs = extractOpenAIResponses(result);
       return rs?.text ? rs : extractOpenAIChatCompletions(result);
     } else if (AIConfig.provider === 'GEMINI') {
       return extractGemini(result);
@@ -111,10 +111,10 @@ export const useAI = (): UseAIResult => {
     if (!result) return rs;
 
     if (result.output?.length > 0) {
-      let output = result.output[result.output.length - 1];
+      const output = result.output[result.output.length - 1];
       if (!output) return rs;
 
-      let content = output.content?.length > 0 ? output.content[result.output.length - 1] : null;
+      const content = output.content?.length > 0 ? output.content[result.output.length - 1] : null;
       if (!content) return rs;
 
       rs.text = content.text?.trim() ?? null
@@ -137,10 +137,10 @@ export const useAI = (): UseAIResult => {
     if (!result) return rs;
 
     if (result.choices?.length > 0) {
-      let output = result.choices[result.choices.length - 1];
+      const output = result.choices[result.choices.length - 1];
       if (!output) return rs;
 
-      let content = output.message?.content ?? null;
+      const content = output.message?.content ?? null;
       if (!content) return rs;
 
       rs.text = content.trim() ?? null
@@ -156,7 +156,7 @@ export const useAI = (): UseAIResult => {
   const extractGemini = (result: any): AIResponseType => {
     const rs : AIResponseType = {
       text: null,
-      provider: "OPENAI",
+      provider: "GEMINI",
       raw: result,
       token: 0,
     }

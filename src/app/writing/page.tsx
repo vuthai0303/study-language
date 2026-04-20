@@ -8,7 +8,6 @@ import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
 import { Button } from "@/components/ui/button"; // Added for potential use, can be removed if not needed
 import { Textarea } from "@/components/ui/textarea"; // Added for displaying generated paragraph
 import { DEFAULT_WRITING_TOPIC } from "@/consts";
-import { useAppSelector } from "@/hooks/reduxHook";
 import { CallAiResponse } from "@/types";
 import { useAI } from "@/hooks/useAI";
 

@@ -12,7 +12,6 @@ import {
 import { Topic } from "@/types";
 import { DEFAULT_WRITING_TOPIC } from "@/consts";
 import { Textarea } from "../ui/textarea";
-import { useAppSelector } from "@/hooks/reduxHook";
 import { useAI } from "@/hooks/useAI";
 
 interface TopicSelectorProps {
