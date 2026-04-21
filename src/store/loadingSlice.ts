@@ -8,14 +8,11 @@ const loadingSlice = createSlice({
   name: "loading",
   initialState,
   reducers: {
-    showLoading(state) {
-      state.value = true;
-    },
-    hideLoading(state) {
-      state.value = false;
+    setLoading(state, actions) {
+      state.value = actions.payload;
     },
   },
 });
 
-export const { showLoading, hideLoading } = loadingSlice.actions;
+export const { setLoading } = loadingSlice.actions;
 export const loadingReducer = loadingSlice.reducer;

@@ -8,7 +8,7 @@ import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
 import { CallAiResponse, ReadingPracticeType } from "@/types";
 import { DEFAULT_READING_TOPIC } from "@/consts";
 import { useAppDispatch } from "@/hooks/reduxHook";
-import { hideLoading, showLoading } from "@/store/loadingSlice";
+import { setLoading } from "@/store/loadingSlice";
 import { useAI } from "@/hooks/useAI";
 
 export default function ReadingPage() {
@@ -53,7 +53,7 @@ export default function ReadingPage() {
     }
 
     setIsGenerating(true);
-    dispatch(showLoading());
+    dispatch(setLoading(true));
 
     try {
       const topics = DEFAULT_READING_TOPIC;
@@ -149,7 +149,7 @@ export default function ReadingPage() {
       }
     } finally {
       setIsGenerating(false);
-      dispatch(hideLoading());
+      dispatch(setLoading(false));
     }
   };
 

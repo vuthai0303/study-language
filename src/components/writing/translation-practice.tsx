@@ -306,7 +306,7 @@ export function TranslationPractice({
   }
 
   return (
-    <div className="pt-6 h-full flex flex-col overflow-hidden">
+    <div className="pt-6 h-full flex flex-col overflow-hidden min-h-[450px]">
       <div className="w-full bg-gray-200 rounded-full h-2.5">
         <div
           className="bg-primary h-2.5 rounded-full"
@@ -314,16 +314,16 @@ export function TranslationPractice({
         ></div>
       </div>
 
-      <div className="pt-2 h-full overflow-hidden flex flex-row gap-3 ">
-        <Card className="w-3/4 h-full">
+      <div className="h-fit overflow-hidden flex flex-row gap-3 py-2">
+        <Card className="w-3/4 h-full min-h-[400px]">
           <CardHeader>
             <CardTitle>
               Câu {currentSentenceIndex + 1}/{sentences.length}
             </CardTitle>
             <CardDescription>Dịch câu sau sang tiếng Anh</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col overflow-hidden">
-            <div className="p-4 bg-muted rounded-md overflow-scroll">
+          <CardContent className="flex flex-col min-h-[230px] overflow-hidden">
+            <div className="p-4 bg-muted rounded-md overflow-x-auto min-h-[90px]">
               <p className="text-base/7">
                 {sentences.map((sentence, idx) => (
                   <SentenceLayout
@@ -336,7 +336,7 @@ export function TranslationPractice({
               </p>
             </div>
 
-            <div className="pt-6">
+            <div className="pt-3">
               <label className="block text-sm font-medium pb-2">
                 Bản dịch của bạn:
               </label>
@@ -380,7 +380,7 @@ export function TranslationPractice({
             )}
           </CardFooter>
         </Card>
-        <Card className="w-1/4 ">
+        <Card className="w-1/4 min-h-[400px]">
           <CardHeader>
             <CardTitle>
               <div className="flex flex-row justify-between">
@@ -389,7 +389,7 @@ export function TranslationPractice({
               </div>
             </CardTitle>
           </CardHeader>
-          <CardContent className="h-1/2 space-y-4 overflow-scroll">
+          <CardContent className="h-1/2 overflow-x-auto min-h-[100px]">
             {currentSentence.feedback && (
               <div
                 className={`p-4 rounded-md ${
@@ -402,7 +402,7 @@ export function TranslationPractice({
               </div>
             )}
           </CardContent>
-          <CardFooter className="flex flex-1 justify-between overflow-scroll">
+          <CardFooter className="flex flex-1 justify-between overflow-x-auto min-h-[100px]">
             {currentSentence.feedback && (
               <div className={`py-4 h-full`}>
                 {currentSentence.feedback.vocabs.map((vocab, index) => {

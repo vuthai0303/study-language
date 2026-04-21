@@ -1,7 +1,9 @@
 import { AIResponseType, CallAiResponse } from '@/types';
 import { getLocalStoreAiKey } from '@/lib/localStorage';
-import { useAppDispatch } from './reduxHook';
-import { hideLoading, showLoading } from '@/store/loadingSlice';
+import { useAppDispatch, useAppSelector } from './reduxHook';
+import { setLoading } from '@/store/loadingSlice';
+import { useEffect } from 'react';
+import { setAIConfig } from '@/store/aiConfigSlice';
 
 interface UseAIResult {
   callAI: (prompt: string, systemPrompt?: string) => Promise<CallAiResponse>;
@@ -10,11 +12,18 @@ interface UseAIResult {
 
 export const useAI = (): UseAIResult => {
   const dispatch = useAppDispatch();
-  const AIConfig = getLocalStoreAiKey()
+  const AIConfig = useAppSelector((state) => state.AIConfig);
+  
+  useEffect(() => {
+    const AIConfigLocal = getLocalStoreAiKey()
+    if (AIConfigLocal.key && (AIConfigLocal.key != AIConfig.key)) {
+      dispatch(setAIConfig(AIConfigLocal))
+    }
+  }, [])
 
   const callAI = async (prompt: string, systemPrompt?: string): Promise<CallAiResponse> => {
 
-    if (!isHasKey()) {
+    if (!AIConfig || !isHasKey()) {
       return {
           isSuccess: false,
           data: null,
@@ -23,7 +32,7 @@ export const useAI = (): UseAIResult => {
     }
 
     try {
-      dispatch(showLoading());
+      dispatch(setLoading(true));
       let response;
       if (AIConfig.provider === 'OPENAI') {
         response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -74,40 +83,45 @@ export const useAI = (): UseAIResult => {
       }
 
       const result = await response.json();
+      const data = getResponse(result);
+      if (!data || !data.text) {
+        return {
+          isSuccess: false,
+          data: data,
+          msg: "An error occurred during the process; please contact the administrator and try again later!",
+        }
+      }
       return {
           isSuccess: true,
-          data: getResponse(result),
+          data: data,
           msg: null,
         }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = err instanceof Error ? err.message : '' + err;
       return {
           isSuccess: false,
           data: null,
           msg: errorMessage,
         }
     } finally {
-      dispatch(hideLoading());
+      dispatch(setLoading(false));
     }
   };
 
   const isHasKey = () => {
-    return !!(AIConfig.provider && AIConfig.key && AIConfig.model)
+    return !!(AIConfig && AIConfig.provider && AIConfig.key && AIConfig.model)
   }
 
   const getResponse = (result: any): AIResponseType => {
+    if (!AIConfig) throw "Please setting AI Config!"
     if (AIConfig.provider === 'OPENAI') {
       const rs = extractOpenAIResponses(result);
       return rs?.text ? rs : extractOpenAIChatCompletions(result);
     } else if (AIConfig.provider === 'GEMINI') {
       return extractGemini(result);
+    } else {
+      throw "Not support " + AIConfig.provider + ", please using Gemini or OpenAI!"
     }
-    return {
-      text: null,
-      provider: "UNKNOWN",
-      raw: result,
-      token: 0,
-    };
   }
 
   const extractOpenAIResponses = (result: any): AIResponseType => {

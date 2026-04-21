@@ -12,37 +12,40 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { showLoading, hideLoading } from "@/store/loadingSlice";
+import { setLoading } from "@/store/loadingSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
-import { MessageType, ProviderAIType } from "@/types";
+import { AiKeyType, MessageType, ProviderAIType } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { PROVIDER_AI } from "@/consts";
 import { getLocalStoreAiKey, setLocalStoreAiKey } from "@/lib/localStorage";
+import { setAIConfig } from "@/store/aiConfigSlice";
 
 interface SettingAIKeyModalProps {
-  children: React.ReactNode; // To wrap the trigger button
+  children: React.ReactNode;
 }
 
 export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
   const dispatch = useAppDispatch();
   const isLoading = useAppSelector((state) => state.isLoading);
-  const savedAiKey = getLocalStoreAiKey();
   
   const [isOpen, setIsOpen] = useState(false);
-  const [aiKey, setAiKey] = useState(savedAiKey?.key || "");
-  const [modelAI, setModelAI] = useState(savedAiKey?.model || "");
-  const [provider, setProvider] = useState<ProviderAIType>(savedAiKey?.provider || "GEMINI");
+  const [provider, setProvider] = useState<ProviderAIType>("GEMINI");
+  const [aiKey, setAiKey] = useState("");
+  const [modelAI, setModelAI] = useState("");
   const [message, setMessage] = useState<MessageType | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      const savedAiKey = getLocalStoreAiKey();
       if (savedAiKey?.provider && savedAiKey.key) {
-        setProvider(savedAiKey.provider);
-        setAiKey(savedAiKey.key);
+        setProvider(savedAiKey.provider ?? "GEMINI");
+        setAiKey(savedAiKey.key ?? "");
+        setModelAI(savedAiKey.model ?? "")
       } else {
-        // Clear if no key is stored 
+        // set default value if data not existed in localstorage
         setProvider("GEMINI")
-        setAiKey(""); 
+        setAiKey("");
+        setModelAI("")
       }
       setMessage(null); // Clear previous messages when modal opens
     }
@@ -62,15 +65,17 @@ export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
       return;
     }
 
-    dispatch(showLoading());
+    dispatch(setLoading(true));
     try {
-      setLocalStoreAiKey({provider: provider, key: aiKey, model: modelAI});
+      const AIConfig: AiKeyType = {provider: provider, key: aiKey, model: modelAI};
+      setLocalStoreAiKey(AIConfig);
+      dispatch(setAIConfig(AIConfig))
       setMessage({ type: "success", text: "Đã lưu API key!" });
     } catch (error) {
       console.error("Lỗi lưu API key:", error);
       setMessage({ type: "error", text: "Lỗi khi lưu API key. Vui lòng thử lại." });
     } finally {
-      dispatch(hideLoading());
+      dispatch(setLoading(false));
     }
   };
 

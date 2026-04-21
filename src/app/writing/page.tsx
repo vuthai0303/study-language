@@ -156,11 +156,11 @@ export default function WritingPage() {
   };
 
   return (
-    <div className={`container mx-auto py-6 flex flex-col ${!generatedParagraph ? 'h-fit' : 'h-full'}`}>
+    <div className={`container mx-auto py-6 flex flex-col ${!generatedParagraph ? 'h-fit' : 'h-full min-h-[700px]'} overflow-x-auto`}>
       <h1 className="text-3xl font-bold pb-6">Học viết Tiếng Anh</h1>
 
       <Card className="overflow-hidden">
-        <CardContent className="h-full flex flex-col overflow-hidden">
+        <CardContent className="h-full flex flex-col">
           <div>
             <p className="text-muted-foreground mb-4">
               Chọn một chủ đề, sau đó nhấn &ldquo;Tạo đoạn văn&rdquo; để AI tạo
