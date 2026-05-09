@@ -4,7 +4,6 @@ import { ReadingPractice } from "@/components/reading/reading-practice";
 import { TopicSelector } from "@/components/reading/topic-selector";
 import { Card, CardContent } from "@/components/ui/card";
 import { DEFAULT_READING_TOPIC } from "@/consts";
-import { useAppDispatch } from "@/hooks/reduxHook";
 import { useAI } from "@/hooks/useAI";
 import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
 import { CallAiResponse, ReadingPracticeType } from "@/types";
@@ -21,8 +20,6 @@ export default function ReadingPage() {
   const [showPractice, setShowPractice] = useState(false);
   const [historyParagraph, setHistoryParagraph] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
-
-  const dispatch = useAppDispatch();
 
   useEffect(() => {
     setHistoryParagraph(getHistoryParagraph(false));
