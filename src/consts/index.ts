@@ -1,4 +1,4 @@
-import { VocabularyStudyType, VocabularyType, Topic } from "@/types";
+import { Topic, VocabularyStudyType, VocabularyType } from "@/types";
 
 export const TYPE_VOCAB_LABELS = [
   { id: "noun", name: "Danh từ (Noun)" },
@@ -31,7 +31,7 @@ export const DEFAULT_WRITING_TOPIC: Topic[] = [
   { id: "5", name: "Thể thao" },
   { id: "6", name: "Công việc" },
   { id: "7", name: "Giới thiệu bản thân" },
-  { id: "8", name: "Phỏng vấn" },
+  { id: "8", name: "Hội thoại phỏng vấn" },
   { id: "-1", name: "Đoạn văn tự điền" },
 ];
 
