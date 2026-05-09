@@ -16,11 +16,55 @@ import { useEffect, useState } from "react";
 
 interface VocabularyWritingStudyProps {
   vocabulary: VocabularyType[];
-  selectedStatus: VocabularyType["status"];
   quizStarted: boolean;
   onRefresh: () => void;
   startQuiz: () => void;
   onCloseQuiz: () => void;
+}
+
+/**
+ * Handle level and status on correct answer (writing: +2 level).
+ * When level reaches 10 → promote status (to_learn → learning → mastered), reset level to 0.
+ */
+function handleCorrectAnswer(wordObj: VocabularyType): VocabularyType {
+  const newLevel = Math.min(10, (wordObj.level ?? 0) + 2);
+  if (newLevel >= 10) {
+    // Promote status
+    const nextStatus: Record<VocabularyType["status"], VocabularyType["status"]> = {
+      to_learn: "learning",
+      learning: "mastered",
+      mastered: "mastered",
+    };
+    return {
+      ...wordObj,
+      level: 0,
+      status: nextStatus[wordObj.status],
+    };
+  }
+  return { ...wordObj, level: newLevel };
+}
+
+/**
+ * Handle level and status on incorrect answer (writing: -2 level).
+ * When level drops below 0 at learning/mastered → demote status, reset level to 5.
+ */
+function handleIncorrectAnswer(wordObj: VocabularyType): VocabularyType {
+  const currentLevel = wordObj.level ?? 0;
+  const newLevel = currentLevel - 2;
+  if (newLevel < 0 && wordObj.status !== "to_learn") {
+    // Demote status, reset level to 5
+    const prevStatus: Record<VocabularyType["status"], VocabularyType["status"]> = {
+      to_learn: "to_learn",
+      learning: "to_learn",
+      mastered: "learning",
+    };
+    return {
+      ...wordObj,
+      level: 5,
+      status: prevStatus[wordObj.status],
+    };
+  }
+  return { ...wordObj, level: Math.max(0, newLevel) };
 }
 
 // Randomly select at least 1 character, approximately 1/5 of the total number of characters (rounded up).
@@ -48,7 +92,6 @@ function getRandomRevealedIndexes(word: string): number[] {
 
 export function VocabularyWritingStudy({
   vocabulary,
-  selectedStatus,
   quizStarted,
   onRefresh,
   startQuiz,
@@ -133,30 +176,17 @@ export function VocabularyWritingStudy({
     }));
     checkCorrectIndexes();
 
-    // If quiz is on "mastered" and answer is incorrect, move word to "learning", quiz is on "learning" move word to "to_learn"
-    if (!correct && selectedStatus != "to_learn") {
-      const wordId = questions[currentQuestionIndex].id;
-      const wordObj = vocabulary.find((v) => v.id === wordId);
-      if (wordObj) {
-        updateVocabulary({
-          ...wordObj,
-          status: wordObj.status === "mastered" ? "learning" : "to_learn",
-        });
-        onRefresh();
+    const wordId = questions[currentQuestionIndex].id;
+    const wordObj = vocabulary.find((v) => v.id === wordId);
+    if (wordObj) {
+      if (correct) {
+        const updated = handleCorrectAnswer(wordObj);
+        updateVocabulary(updated);
+      } else {
+        const updated = handleIncorrectAnswer(wordObj);
+        updateVocabulary(updated);
       }
-    }
-
-    // If quiz is on "to_learn" and answer is correct, move word to "learning", quiz is on "learning" move word to "mastered"
-    if (correct && selectedStatus != "mastered") {
-      const wordId = questions[currentQuestionIndex].id;
-      const wordObj = vocabulary.find((v) => v.id === wordId);
-      if (wordObj) {
-        updateVocabulary({
-          ...wordObj,
-          status: wordObj.status == "to_learn" ? "learning" : "mastered",
-        });
-        onRefresh();
-      }
+      onRefresh();
     }
   };
 

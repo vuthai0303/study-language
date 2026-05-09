@@ -18,6 +18,7 @@ export const useAI = (): UseAIResult => {
     if (AIConfigLocal.key && (AIConfigLocal.key != AIConfig.key)) {
       dispatch(setAIConfig(AIConfigLocal))
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const callAI = async (prompt: string, systemPrompt?: string): Promise<CallAiResponse> => {

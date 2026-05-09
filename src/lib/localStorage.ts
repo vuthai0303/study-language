@@ -34,13 +34,14 @@ export const saveVocabulary = (vocabulary: VocabularyType[]) => {
 };
 
 export const addVocabulary = (
-  vocabulary: Omit<VocabularyType, "id" | "createdAt">
+  vocabulary: Omit<VocabularyType, "id" | "createdAt" | "level">
 ) => {
   const existingVocabulary = getVocabulary();
   const newVocabulary = {
     ...vocabulary,
     id: uuidv4(),
     createdAt: new Date().toISOString(),
+    level: 0,
   };
 
   saveVocabulary([...existingVocabulary, newVocabulary]);

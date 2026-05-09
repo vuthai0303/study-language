@@ -20,18 +20,14 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   addVocabulary,
   deleteVocabulary,
+  getVocabulary,
   updateVocabulary,
 } from "@/lib/localStorage";
 import { VocabularyType } from "@/types";
 import { CopyIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import { VocabularyForm } from "./vocabulary-form";
-
-interface VocabularyTableProps {
-  vocabulary: VocabularyType[];
-  onRefresh: () => void;
-}
 
 const STATUS_LABELS: Record<VocabularyType["status"], string> = {
   to_learn: "Cần học",
@@ -39,10 +35,23 @@ const STATUS_LABELS: Record<VocabularyType["status"], string> = {
   mastered: "Đã thuộc",
 };
 
-export function VocabularyTable({
-  vocabulary,
-  onRefresh,
-}: VocabularyTableProps) {
+export function VocabularyTable() {
+  const [vocabulary, setVocabulary] = useState<VocabularyType[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+
+  const loadVocabulary = () => {
+    const data = getVocabulary();
+    setVocabulary(data);
+  };
+
+  const onRefresh = loadVocabulary;
+
+  useEffect(() => {
+    loadVocabulary();
+    setHydrated(true);
+  }, []);
+
+
   const [openForm, setOpenForm] = useState(false);
   const [selectedVocabulary, setSelectedVocabulary] = useState<
     VocabularyType | undefined
@@ -61,6 +70,10 @@ export function VocabularyTable({
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const importTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  if (!hydrated) {
+    return null;
+  }
 
   const handleAdd = () => {
     setSelectedVocabulary(undefined);
@@ -128,7 +141,7 @@ export function VocabularyTable({
         statusLists["learning"].find((item) => item.id === draggedId) ||
         statusLists["mastered"].find((item) => item.id === draggedId);
       if (word && word.status !== status) {
-        updateVocabulary({ ...word, status });
+        updateVocabulary({ ...word, status, level: 0 });
         onRefresh();
       }
     }
@@ -214,7 +227,7 @@ export function VocabularyTable({
           v.type === item.type &&
           v.meaning === item.meaning
       );
-    const newWords: Omit<VocabularyType, "id" | "createdAt">[] = parsed
+    const newWords: Omit<VocabularyType, "id" | "createdAt" | "level">[] = parsed
       .filter(
         (item) => item.word && item.type && item.meaning && !isDuplicate(item)
       )
@@ -383,7 +396,12 @@ export function VocabularyTable({
                       onDragEnd={handleDragEnd}
                     >
                       <CardHeader>
-                        <CardTitle className="text-lg">{item.word}</CardTitle>
+                        <CardTitle className="text-lg">
+                          <div className="flex items-center justify-between gap-2">
+                            {item.word}
+                            <span className="font-light">level: {item.level ?? 0}</span>
+                          </div>
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="mb-2">

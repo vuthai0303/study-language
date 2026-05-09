@@ -12,7 +12,7 @@
 
 | Module | Route | Mô tả |
 |---|---|---|
-| Học từ vựng | `/vocabulary` | CRUD từ vựng, Kanban 3 trạng thái, quiz trắc nghiệm / viết tay, import/export JSON |
+| Học từ vựng | `/vocabulary` | CRUD từ vựng, Kanban 3 trạng thái, quiz trắc nghiệm / viết tay, import/export JSON, hệ thống level tự động |
 | Học viết | `/writing` | AI sinh đoạn văn tiếng Việt, người dùng dịch từng câu sang tiếng Anh, AI chấm điểm & gợi ý |
 | Học ngữ pháp | `/grammar` | Chọn chủ điểm ngữ pháp, AI sinh 10 câu trắc nghiệm, hiển thị kết quả & giải thích |
 | Luyện đọc | `/reading` | AI sinh đoạn văn tiếng Anh + 5 câu hỏi reading comprehension, người dùng trả lời |
@@ -46,7 +46,7 @@ src/
 │   ├── layout.tsx              # Root layout: StoreProvider + Header + LoadingOverlay
 │   ├── page.tsx                # Trang chủ (danh sách module)
 │   ├── globals.css             # CSS toàn cục + Tailwind theme tokens (OKLCH)
-│   ├── vocabulary/page.tsx     # Trang học từ vựng
+│   ├── vocabulary/page.tsx     # Trang học từ vựng (chỉ chứa Tabs, không load data)
 │   ├── writing/page.tsx        # Trang học viết (page-level state machine)
 │   ├── reading/page.tsx        # Trang luyện đọc (page-level state machine)
 │   └── grammar/page.tsx        # Trang học ngữ pháp
@@ -58,12 +58,12 @@ src/
 │   ├── ui/                     # shadcn/ui primitives (không chỉnh sửa)
 │   │   └── button, card, dialog, form, input, select, tabs, ...
 │   ├── vocabulary/
-│   │   ├── vocabulary-table.tsx    # Kanban 3 cột + drag-drop native + export/import
+│   │   ├── vocabulary-table.tsx    # Kanban 3 cột + drag-drop native + export/import (tự load data)
 │   │   ├── vocabulary-form.tsx     # Form thêm/sửa từ vựng (react-hook-form + Zod)
-│   │   ├── vocabulary-study.tsx    # Tabs chọn chế độ luyện
+│   │   ├── vocabulary-study.tsx    # Chọn chế độ luyện + chọn từ theo level (tự load data)
 │   │   └── vocabulary-study/
-│   │       ├── multi-choice.tsx    # Quiz trắc nghiệm
-│   │       └── writing.tsx         # Quiz viết tay
+│   │       ├── multi-choice.tsx    # Quiz trắc nghiệm (level +1/-1)
+│   │       └── writing.tsx         # Quiz viết tay (level +2/-2)
 │   ├── writing/
 │   │   ├── topic-selector.tsx      # Chọn chủ đề + trình độ + nút tạo đoạn văn
 │   │   ├── translation-practice.tsx # Dịch câu + AI chấm + gợi ý + lưu vocab
@@ -124,11 +124,41 @@ useAI (hooks/useAI.ts)
 ### Vocabulary Data Flow
 
 ```
-localStorage ←→ lib/localStorage.ts ←→ Components
+localStorage ←→ lib/localStorage.ts ←→ Components (tự load data)
     ├── getVocabulary()
-    ├── addVocabulary(item: Omit<VocabularyType, "id"|"createdAt">)  ← tự sinh UUID
+    ├── addVocabulary(item: Omit<VocabularyType, "id"|"createdAt"|"level">)  ← tự sinh UUID, level=0
     ├── updateVocabulary(item: VocabularyType)
     └── deleteVocabulary(id: string)
+
+Vocabulary Page (app/vocabulary/page.tsx)
+    └── Chỉ chứa Tabs UI, KHÔNG load data
+        ├── <VocabularyTable />     ← tự gọi getVocabulary() trong useEffect
+        └── <VocabularyStudy />     ← tự gọi getVocabulary() trong useEffect
+```
+
+### Vocabulary Level System
+
+```
+Mỗi từ vựng có:
+    ├── level: number (0-10)     ← mức độ thành thạo trong bậc hiện tại
+    └── status: "to_learn" | "learning" | "mastered"
+
+Khi luyện tập:
+    ├── MultiChoice: đúng → level +1, sai → level -1
+    ├── Writing:     đúng → level +2, sai → level -2
+    ├── Level đạt 10 → tăng bậc status, reset level về 0
+    │   └── to_learn → learning → mastered
+    ├── Level về 0 (ở learning/mastered) → hạ bậc status
+    │   └── mastered → learning → to_learn
+    └── Level không xuống dưới 0
+
+Chọn từ để luyện tập (10 từ):
+    ├── 7 từ có level thấp nhất (cùng level → random)
+    └── 3 từ có level cao nhất (cùng level → random, không trùng với 7 từ trên)
+    └── Nếu tổng từ < 10 → lấy tất cả
+
+Kéo thả (drag-drop) thủ công trong Kanban:
+    └── Thay đổi status + reset level về 0
 ```
 
 ### AI Config Flow
@@ -156,6 +186,7 @@ type VocabularyType = {
   meaning: string;
   createdAt: string;   // ISO string
   status: "to_learn" | "learning" | "mastered";
+  level: number;       // 0-10, mức độ thành thạo trong bậc hiện tại
 };
 
 // AI Config
@@ -230,6 +261,7 @@ PROVIDER_AI = { OPENAI: "OPENAI", GEMINI: "GEMINI" };
 - **KHÔNG tạo backend route** – ứng dụng hoàn toàn client-side, không có `app/api/` route handlers.
 - **KHÔNG dùng database** – mọi persistence phải qua `src/lib/localStorage.ts`. Nếu cần thêm key mới → thêm vào `LOCAL_STORAGE_KEY` trong `src/consts/index.ts` và thêm hàm tương ứng trong `localStorage.ts`.
 - **Không để logic nghiệp vụ trong Page file** – Page chỉ chứa state management và orchestration. Logic gọi AI, xử lý dữ liệu phải tách vào hook hoặc component chuyên biệt.
+- **Components tự load data** – Các component con (VocabularyTable, VocabularyStudy) tự gọi `getVocabulary()` từ localStorage thay vì nhận data qua props từ page. Page chỉ chứa layout và tabs.
 - **Components theo module** – component thuộc module nào đặt trong `src/components/<module>/`.
 
 ### 7.2 TypeScript
@@ -244,7 +276,7 @@ PROVIDER_AI = { OPENAI: "OPENAI", GEMINI: "GEMINI" };
 
 - **`"use client"`** – thêm directive ở đầu file nếu component dùng: state, effect, event handlers, browser APIs, Redux hooks, useAI.
 - **Server Components** – chỉ dùng cho layout tĩnh và các component không cần interactivity (VD: `app/layout.tsx`, `app/page.tsx`).
-- **Hydration** – khi đọc localStorage trong useEffect, phải dùng pattern `hydrated` state (xem `vocabulary/page.tsx`) để tránh hydration mismatch.
+- **Hydration** – khi đọc localStorage trong useEffect, phải dùng pattern `hydrated` state (xem `vocabulary-table.tsx`, `vocabulary-study.tsx`) để tránh hydration mismatch.
 - **`next/link`** thay vì `<a>` cho internal routing.
 
 ### 7.4 State Management
@@ -276,22 +308,32 @@ PROVIDER_AI = { OPENAI: "OPENAI", GEMINI: "GEMINI" };
 
 - **Loại từ** (word type) phải lấy từ mảng `TYPE_VOCAB_LABELS` trong `src/consts/index.ts`, không hardcode string tùy ý.
 - **Trạng thái từ vựng** chỉ có 3 giá trị: `"to_learn"` | `"learning"` | `"mastered"`.
+- **Level từ vựng** là số nguyên từ 0 đến 10, mặc định 0 khi tạo mới.
 - **Topic ID** phải là string số (`"0"`, `"1"`, `"-1"`). ID `-1` là "Đoạn văn tự điền" (writing).
 
-### 7.8 Prompt Engineering cho AI
+### 7.8 Vocabulary Level Logic
+
+- **Chọn từ luyện tập** dựa theo level (không theo status): 7 từ level thấp nhất + 3 từ level cao nhất.
+- **MultiChoice**: đúng +1 level, sai -1 level.
+- **Writing**: đúng +2 level, sai -2 level.
+- **Level đạt 10**: tăng bậc status (`to_learn` → `learning` → `mastered`), reset level về 0.
+- **Level < 0 ở learning/mastered**: hạ bậc status, reset level về 5.
+- **Drag-drop thủ công**: thay đổi status + reset level về 0.
+
+### 7.9 Prompt Engineering cho AI
 
 - Prompt luôn yêu cầu **trả về JSON**, không có text thừa.
 - Kết hợp **history paragraph** (tối đa 10 mục) vào prompt để AI không lặp nội dung.
 - **systemPrompt** cần chỉ rõ: trình độ người dùng (Cơ bản / Trung cấp / Chuyên nghiệp), vai trò AI, ngôn ngữ phản hồi (tiếng Việt).
 - Khi AI trả về JSON array/object lồng trong text, dùng pattern `content.slice(content.indexOf('['), content.lastIndexOf(']') + 1)` để extract.
 
-### 7.9 Error Handling
+### 7.10 Error Handling
 
 - Mọi lời gọi AI phải có `try/catch/finally` với `setLoading(false)` trong finally.
 - Hiển thị lỗi thân thiện bằng **tiếng Việt** cho người dùng.
 - `console.error()` để log lỗi kỹ thuật, không hiển thị raw error cho user.
 
-### 7.10 Những thứ KHÔNG được làm
+### 7.11 Những thứ KHÔNG được làm
 
 - ❌ Không cài thêm thư viện state management khác (Zustand, Jotai, …).
 - ❌ Không dùng `axios` cho AI calls – dùng native `fetch`.
@@ -307,8 +349,8 @@ PROVIDER_AI = { OPENAI: "OPENAI", GEMINI: "GEMINI" };
 1. **Thêm type** vào `src/types/` nếu cần kiểu dữ liệu mới.
 2. **Thêm constant** vào `src/consts/index.ts` nếu cần.
 3. **Thêm localStorage function** vào `src/lib/localStorage.ts` và `LOCAL_STORAGE_KEY` nếu cần persist data.
-4. **Tạo component** trong `src/components/<module>/`.
-5. **Tạo/cập nhật Page** trong `src/app/<module>/page.tsx` – thêm `"use client"`.
+4. **Tạo component** trong `src/components/<module>/` – component tự load data từ localStorage.
+5. **Tạo/cập nhật Page** trong `src/app/<module>/page.tsx` – thêm `"use client"`, page chỉ chứa layout.
 6. **Thêm route** vào `src/components/navigation.tsx` nếu là module mới.
 7. **Test** thủ công với cả hai provider (OPENAI, GEMINI).
 
@@ -367,6 +409,34 @@ export const saveMyNewFeature = (data: MyType[]) => {
   if (typeof window === "undefined") return;
   localStorage.setItem(LOCAL_STORAGE_KEY.MY_NEW_FEATURE, JSON.stringify(data));
 };
+```
+
+### Component tự load data (pattern mới)
+
+```tsx
+"use client";
+import { getVocabulary } from "@/lib/localStorage";
+import { VocabularyType } from "@/types";
+import { useEffect, useState } from "react";
+
+export function MyVocabularyComponent() {
+  const [vocabulary, setVocabulary] = useState<VocabularyType[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+
+  const loadVocabulary = () => {
+    const data = getVocabulary();
+    setVocabulary(data);
+  };
+
+  useEffect(() => {
+    loadVocabulary();
+    setHydrated(true);
+  }, []);
+
+  if (!hydrated) return null;
+
+  // render component...
+}
 ```
 
 ---

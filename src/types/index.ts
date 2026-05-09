@@ -5,6 +5,7 @@ export type VocabularyType = {
   meaning: string;
   createdAt: string;
   status: "to_learn" | "learning" | "mastered";
+  level: number;
 };
 
 export type QuizQuestion = {

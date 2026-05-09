@@ -57,7 +57,8 @@ export function ReadingPractice({
     setResults(res);
     const correct = res.filter(Boolean).length;
     setSummary({ correct, incorrect: res.length - correct });
-  }, [isCompleted])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCompleted]);
 
   return (
     <div className="h-fit">
