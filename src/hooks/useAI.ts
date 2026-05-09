@@ -1,9 +1,8 @@
-import { AIResponseType, CallAiResponse } from '@/types';
 import { getLocalStoreAiKey } from '@/lib/localStorage';
-import { useAppDispatch, useAppSelector } from './reduxHook';
-import { setLoading } from '@/store/loadingSlice';
-import { useEffect } from 'react';
 import { setAIConfig } from '@/store/aiConfigSlice';
+import { AIResponseType, CallAiResponse } from '@/types';
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from './reduxHook';
 
 interface UseAIResult {
   callAI: (prompt: string, systemPrompt?: string) => Promise<CallAiResponse>;
@@ -32,7 +31,7 @@ export const useAI = (): UseAIResult => {
     }
 
     try {
-      dispatch(setLoading(true));
+      // dispatch(setLoading(true));
       let response;
       if (AIConfig.provider === 'OPENAI') {
         response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -104,7 +103,7 @@ export const useAI = (): UseAIResult => {
           msg: errorMessage,
         }
     } finally {
-      dispatch(setLoading(false));
+      // dispatch(setLoading(false));
     }
   };
 

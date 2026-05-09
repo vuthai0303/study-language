@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { TYPE_VOCAB_LABELS } from "@/consts";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -15,6 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -22,19 +23,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { VocabularyType } from "@/types";
+import { STATUS_LABELS, TYPE_VOCAB_LABELS } from "@/consts";
 import { addVocabulary, updateVocabulary } from "@/lib/localStorage";
+import { VocabularyType } from "@/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const formSchema = z.object({
   word: z.string().min(1, { message: "Từ vựng không được để trống" }),
   type: z.string().min(1, { message: "Loại từ không được để trống" }),
   meaning: z.string().min(1, { message: "Nghĩa của từ không được để trống" }),
+  status: z.enum(["to_learn", "learning", "mastered"]).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -61,6 +62,7 @@ export function VocabularyForm({
       word: "",
       type: "",
       meaning: "",
+      status: "to_learn",
     },
   });
 
@@ -70,12 +72,14 @@ export function VocabularyForm({
         word: vocabulary.word,
         type: vocabulary.type,
         meaning: vocabulary.meaning,
+        status: vocabulary.status,
       });
     } else {
       form.reset({
         word: "",
         type: "",
         meaning: "",
+        status: "to_learn",
       });
     }
   }, [isEditing, vocabulary, form]);
@@ -166,6 +170,33 @@ export function VocabularyForm({
                 </FormItem>
               )}
             />
+            {isEditing && (<FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Trạng thái</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn trạng thái" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />)}
             <div className="flex justify-end space-x-2 pt-4">
               <Button
                 variant="outline"

@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,10 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { VocabularyType, QuizResult, WritingQuestion } from "@/types";
+import { Input } from "@/components/ui/input";
 import { updateVocabulary } from "@/lib/localStorage";
 import { isEmpty } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
+import { QuizResult, VocabularyType, WritingQuestion } from "@/types";
+import { useEffect, useState } from "react";
 
 interface VocabularyWritingStudyProps {
   vocabulary: VocabularyType[];
@@ -232,7 +232,7 @@ export function VocabularyWritingStudy({
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
-    <Card className="w-fit max-w-3/4 min-w-md mx-auto">
+    <Card className="w-fit max-w-3/4 min-w-[380px] mx-auto">
       <CardHeader>
         <CardTitle>
           Câu hỏi {currentQuestionIndex + 1}/{questions.length}

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ReadingPracticeType } from "@/types";
+import { useEffect, useState } from "react";
 import { ScrollArea } from "../ui/scroll-area";
 
 interface TranslationPracticeProps {
@@ -61,7 +61,7 @@ export function ReadingPractice({
 
   return (
     <div className="h-fit">
-      <div className="h-full flex flex-row gap-2 overflow-hidden">
+      <div className="h-full flex flex-col md:flex-row gap-2 overflow-hidden">
         <Card className="w-full h-full min-h-[400px] gap-3 py-3 flex flex-col">
           <CardHeader>
             <CardTitle>Đoạn văn</CardTitle>

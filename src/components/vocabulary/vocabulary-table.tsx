@@ -1,32 +1,32 @@
 "use client";
 
-import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardHeader,
-  CardTitle,
   CardContent,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
   DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { VocabularyType } from "@/types";
-import { VocabularyForm } from "./vocabulary-form";
 import {
   addVocabulary,
   deleteVocabulary,
   updateVocabulary,
 } from "@/lib/localStorage";
+import { VocabularyType } from "@/types";
 import { CopyIcon } from "lucide-react";
+import { useRef, useState } from "react";
 import { ScrollArea } from "../ui/scroll-area";
+import { VocabularyForm } from "./vocabulary-form";
 
 interface VocabularyTableProps {
   vocabulary: VocabularyType[];
@@ -343,7 +343,7 @@ export function VocabularyTable({
           return (
             <div
               key={status}
-              className={`border rounded-md bg-muted min-h-[200px] transition-all duration-200
+              className={`border rounded-md bg-muted min-h-[200px] max-h-[400px] md:max-h-full transition-all duration-200
                 ${
                   isActiveDrop
                     ? "ring-4 ring-blue-400 border-blue-500 bg-blue-50 animate-pulse"

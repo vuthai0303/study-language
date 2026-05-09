@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { VocabularyTable } from "@/components/vocabulary/vocabulary-table";
 import { VocabularyStudy } from "@/components/vocabulary/vocabulary-study";
-import { VocabularyType } from "@/types";
+import { VocabularyTable } from "@/components/vocabulary/vocabulary-table";
 import { getVocabulary } from "@/lib/localStorage";
+import { VocabularyType } from "@/types";
+import { useEffect, useState } from "react";
 
 export default function VocabularyPage() {
   const [vocabulary, setVocabulary] = useState<VocabularyType[]>([]);
@@ -27,7 +27,7 @@ export default function VocabularyPage() {
   }
 
   return (
-    <div className="container h-full mx-auto py-10 overflow-hidden">
+    <div className="w-full h-fit md:h-full mx-auto py-5 md:py-10 px-2">
       <Tabs defaultValue="list" value={activeTab} onValueChange={setActiveTab} className="h-full overflow-hidden">
         <TabsList className="">
           <TabsTrigger value="list">Danh sách từ vựng</TabsTrigger>

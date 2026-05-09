@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -9,8 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Topic } from "@/types";
 import { DEFAULT_READING_TOPIC } from "@/consts";
+import { Topic } from "@/types";
+import { useEffect, useState } from "react";
 
 interface TopicSelectorProps {
   onTopicSelect: (topicId: string) => void;
@@ -45,8 +45,8 @@ export function TopicSelector({
   }, []);
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 items-end">
-      <div className="w-fit flex flex-col">
+    <div className="flex flex-row flex-wrap gap-y-4 md:gap-x-4 items-end">
+      <div className="order-1 w-1/2 md:w-fit flex flex-col">
         <label className="block text-sm font-medium mb-2">Chọn chủ đề</label>
         <Select
           value={selectedTopicId || ""}
@@ -65,7 +65,7 @@ export function TopicSelector({
           </SelectContent>
         </Select>
       </div>
-      <div className="w-fit flex flex-col">
+      <div className="order-1 w-1/2 md:w-fit flex flex-col">
         <label className="block text-sm font-medium mb-2">Chọn trình độ</label>
         <Select
           value={level}
@@ -83,7 +83,7 @@ export function TopicSelector({
         </Select>
       </div>
       {showPractice && (
-        <div className="flex justify-between">
+        <div className="order-2 w-full md:w-fit flex justify-between">
           <div className="flex gap-2 justify-end">
               <Button onClick={cancelPractice} disabled={false}>
                 Hủy
@@ -96,6 +96,7 @@ export function TopicSelector({
       )}
       {!showPractice && (
         <Button
+          className="order-2 w-full md:w-fit"
           onClick={onGeneratePractice}
           disabled={!selectedTopicId || !level || showPractice || isGenerating}
         >

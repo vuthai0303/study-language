@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button"; // Added for potential use, can be removed if not needed
 import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea"; // Added for displaying generated paragraph
 import { TopicSelector } from "@/components/writing/topic-selector";
 import { TranslationPractice } from "@/components/writing/translation-practice";
-import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
-import { Button } from "@/components/ui/button"; // Added for potential use, can be removed if not needed
-import { Textarea } from "@/components/ui/textarea"; // Added for displaying generated paragraph
 import { DEFAULT_WRITING_TOPIC } from "@/consts";
-import { CallAiResponse } from "@/types";
 import { useAI } from "@/hooks/useAI";
+import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
+import { CallAiResponse } from "@/types";
+import { useEffect, useState } from "react";
 
 export default function WritingPage() {
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>("0");
@@ -156,10 +156,10 @@ export default function WritingPage() {
   };
 
   return (
-    <div className={`container mx-auto py-6 flex flex-col ${!generatedParagraph ? 'h-fit' : 'h-full min-h-[700px]'} overflow-x-auto`}>
+    <div className={`container mx-auto px-2 py-6 flex flex-col ${!generatedParagraph ? 'h-fit' : 'h-full min-h-[700px]'}`}>
       <h1 className="text-3xl font-bold pb-6">Học viết Tiếng Anh</h1>
 
-      <Card className="overflow-hidden">
+      <Card className="">
         <CardContent className="h-full flex flex-col">
           <div>
             <p className="text-muted-foreground mb-4">

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { VocabularyStudyType, VocabularyType } from "@/types";
 import { STATUS_LABELS, STUDY_LABELS } from "@/consts";
+import { VocabularyStudyType, VocabularyType } from "@/types";
+import { useState } from "react";
 import { VocabularyMultiChoiceStudy } from "./vocabulary-study/multi-choice";
 import { VocabularyWritingStudy } from "./vocabulary-study/writing";
 
@@ -57,7 +57,7 @@ export function VocabularyStudy({
           Bắt đầu bài kiểm tra trắc nghiệm để kiểm tra kiến thức từ vựng của
           bạn.
         </p>
-        <div className="mb-4 flex flex-row gap-2">
+        <div className="mb-4 flex flex-col md:flex-row gap-2">
           <label htmlFor="status-select" className="mr-2 font-medium">
             Chọn nhóm từ vựng:
           </label>

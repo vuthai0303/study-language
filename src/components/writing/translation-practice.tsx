@@ -1,12 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
 import {
   Card,
   CardContent,
@@ -15,12 +8,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { TYPE_VOCAB_LABELS } from "@/consts";
-import { getVocabulary, addVocabulary } from "@/lib/localStorage";
-import { CallAiResponse, VocabularyType } from "@/types";
-import { SentenceLayout } from "./sentence-layout";
-import { Feedback, Sentence } from "@/types/writing";
 import { useAI } from "@/hooks/useAI";
+import { addVocabulary, getVocabulary } from "@/lib/localStorage";
+import { CallAiResponse, VocabularyType } from "@/types";
+import { Feedback, Sentence } from "@/types/writing";
+import { useEffect, useState } from "react";
+import { SentenceLayout } from "./sentence-layout";
 
 interface TranslationPracticeProps {
   paragraph: string;
@@ -314,8 +314,8 @@ export function TranslationPractice({
         ></div>
       </div>
 
-      <div className="h-fit overflow-hidden flex flex-row gap-3 py-2">
-        <Card className="w-3/4 h-full min-h-[400px]">
+      <div className="h-fit overflow-hidden flex flex-col md:flex-row gap-3 py-2">
+        <Card className="w-full md:w-3/5 h-full min-h-[400px]">
           <CardHeader>
             <CardTitle>
               Câu {currentSentenceIndex + 1}/{sentences.length}
@@ -380,7 +380,7 @@ export function TranslationPractice({
             )}
           </CardFooter>
         </Card>
-        <Card className="w-1/4 min-h-[400px]">
+        <Card className="w-full md:w-2/5 min-h-[400px]">
           <CardHeader>
             <CardTitle>
               <div className="flex flex-row justify-between">
@@ -390,7 +390,15 @@ export function TranslationPractice({
             </CardTitle>
           </CardHeader>
           <CardContent className="h-1/2 overflow-x-auto min-h-[100px]">
-            {currentSentence.feedback && (
+            {(isSuggesting || isChecking) && (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p className="ml-2">
+                  {isSuggesting ? "AI đang đưa ra gợi ý..." : "AI đang kiểm tra..."}
+                </p>
+              </div>
+            )}
+            {(currentSentence.feedback && !(isSuggesting || isChecking)) && (
               <div
                 className={`p-4 rounded-md ${
                   currentSentence.isCorrect
@@ -403,7 +411,7 @@ export function TranslationPractice({
             )}
           </CardContent>
           <CardFooter className="flex flex-1 justify-between overflow-x-auto min-h-[100px]">
-            {currentSentence.feedback && (
+            {(currentSentence.feedback && !(isSuggesting || isChecking)) && (
               <div className={`py-4 h-full`}>
                 {currentSentence.feedback.vocabs.map((vocab, index) => {
                   // Check vocabulary is existed in list

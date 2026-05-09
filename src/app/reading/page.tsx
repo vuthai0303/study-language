@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { TopicSelector } from "@/components/reading/topic-selector";
 import { ReadingPractice } from "@/components/reading/reading-practice";
-import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
-import { CallAiResponse, ReadingPracticeType } from "@/types";
+import { TopicSelector } from "@/components/reading/topic-selector";
+import { Card, CardContent } from "@/components/ui/card";
 import { DEFAULT_READING_TOPIC } from "@/consts";
 import { useAppDispatch } from "@/hooks/reduxHook";
-import { setLoading } from "@/store/loadingSlice";
 import { useAI } from "@/hooks/useAI";
+import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
+import { CallAiResponse, ReadingPracticeType } from "@/types";
+import { useEffect, useState } from "react";
 
 export default function ReadingPage() {
   const { callAI, isHasKey } = useAI();
@@ -53,7 +52,6 @@ export default function ReadingPage() {
     }
 
     setIsGenerating(true);
-    dispatch(setLoading(true));
 
     try {
       const topics = DEFAULT_READING_TOPIC;
@@ -149,7 +147,6 @@ export default function ReadingPage() {
       }
     } finally {
       setIsGenerating(false);
-      dispatch(setLoading(false));
     }
   };
 
@@ -174,9 +171,9 @@ export default function ReadingPage() {
   }
 
   return (
-    <div className="w-full h-full overflow-auto mx-auto px-10 py-6 flex flex-col gap-3">
+    <div className="w-full h-full overflow-auto mx-auto px-2 md:px-10 py-6 flex flex-col gap-3">
       <h1 className="text-3xl font-bold">Luyện đọc Tiếng Anh</h1>
-      <Card className="gap-3 py-3">
+      <Card className="min-w-[380px] gap-3 py-3">
         <CardContent className="space-y-3">
           <div>
             <p className="text-muted-foreground mb-2">
@@ -197,12 +194,12 @@ export default function ReadingPage() {
             />
           </div>
 
-          {/* {isGenerating && (
+          {isGenerating && (
             <div className="flex items-center justify-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <p className="ml-2">Đang tạo bài tập...</p>
             </div>
-          )} */}
+          )}
 
           {errorMessage && (
             <div

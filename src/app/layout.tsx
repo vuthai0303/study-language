@@ -1,9 +1,9 @@
+import { Header } from "@/components/header";
+import { LoadingOverlay } from "@/components/loading";
+import { StoreProvider } from "@/store/provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/header";
-import { StoreProvider } from "@/store/provider";
-import { LoadingOverlay } from "@/components/loading";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         <StoreProvider>
           <Header />
-          <main className="h-[calc(100%_-_65px)] overflow-auto">
+          <main className="h-[calc(100%_-_90px)] md:h-[calc(100%_-_65px)] overflow-auto">
             {children}
           </main>
           <LoadingOverlay />

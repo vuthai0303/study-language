@@ -1,11 +1,11 @@
 "use client"
-import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAI } from "@/hooks/useAI";
 import { CallAiResponse } from "@/types";
+import { useState } from "react";
 
 const GRAMMAR_TOPICS = [
   "Hiện tại đơn (Present Simple)",
@@ -138,8 +138,8 @@ export default function GrammarPage() {
   };
 
   return (
-    <div className="w-full h-full mx-auto p-8 flex flex-row flex-wrap justify-center gap-5">
-      <Card className="p-6 max-w-2/5 h-full overflow-hidden">
+    <div className="w-full h-full mx-auto p-8 flex flex-row flex-wrap justify-center gap-5 overflow-auto">
+      <Card className="p-6 md:max-w-2/5 w-full h-fit">
         <h1 className="text-2xl font-bold mb-3">Luyện tập ngữ pháp</h1>
         <Label htmlFor="grammar-topics" className="mb-2 block">
           Chọn ngữ pháp để thực hành:
@@ -182,10 +182,16 @@ export default function GrammarPage() {
         >
           {loading ? "Đang tạo câu hỏi..." : "Bắt đầu"}
         </Button>
+        {loading && (
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p className="ml-2">Đang tạo bài tập...</p>
+          </div>
+        )}
       </Card>
 
       {quiz.length > 0 && (
-        <Card className="p-6 w-full h-full max-w-1/2 overflow-hidden flex flex-col gap-3">
+        <Card className="p-6 w-full h-full max-w-full md:max-w-1/2 overflow-hidden flex flex-col gap-3">
           <h2 className="text-xl font-semibold">Quiz</h2>
           <ScrollArea className="h-[calc(100%-88px)]">
             <form

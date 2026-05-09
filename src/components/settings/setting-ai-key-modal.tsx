@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,13 +11,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { setLoading } from "@/store/loadingSlice";
-import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
-import { AiKeyType, MessageType, ProviderAIType } from "@/types";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { PROVIDER_AI } from "@/consts";
+import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import { getLocalStoreAiKey, setLocalStoreAiKey } from "@/lib/localStorage";
 import { setAIConfig } from "@/store/aiConfigSlice";
+import { setLoading } from "@/store/loadingSlice";
+import { AiKeyType, MessageType, ProviderAIType } from "@/types";
+import { useEffect, useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 interface SettingAIKeyModalProps {
   children: React.ReactNode;
@@ -82,7 +82,7 @@ export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="w-2/3 min-w-[425px]" style={{maxWidth: "80%"}}>
+      <DialogContent className="w-2/3 min-w-[380px]" style={{maxWidth: "80%"}}>
         <DialogHeader>
           <DialogTitle>Cài đặt AI API Key</DialogTitle>
           <DialogDescription>
@@ -92,7 +92,7 @@ export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
         <div className="grid gap-4 py-4">
 
           <div className="grid grid-cols-12 items-center gap-4">
-            <div className="col-span-2">
+            <div className="col-span-12 md:col-span-2">
               <Select
                 value={provider}
                 onValueChange={(value) => setProvider(value == "OPENAI" ? "OPENAI" : "GEMINI")}
@@ -117,7 +117,7 @@ export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
                 setAiKey(e.target.value);
               }}
               placeholder="Nhập key AI của bạn"
-              className="col-span-7"
+              className="col-span-12 md:col-span-7"
             />
             <Input
               id="model"
@@ -126,7 +126,7 @@ export function SettingAIKeyModal({ children }: SettingAIKeyModalProps) {
                 setModelAI(e.target.value);
               }}
               placeholder="Nhập model AI sẽ sử dụng"
-              className="col-span-3"
+              className="col-span-12 md:col-span-3"
             />
           </div>
 
