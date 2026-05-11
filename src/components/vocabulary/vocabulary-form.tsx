@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { STATUS_LABELS, TYPE_VOCAB_LABELS } from "@/consts";
-import { addVocabulary, updateVocabulary } from "@/lib/localStorage";
+import { addLocalVocabulary, updateLocalVocabulary } from "@/lib/localStorage";
 import { VocabularyType } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
@@ -89,12 +89,12 @@ export function VocabularyForm({
 
     try {
       if (isEditing && vocabulary) {
-        updateVocabulary({
+        updateLocalVocabulary({
           ...vocabulary,
           ...values,
         });
       } else {
-        addVocabulary({ ...values, status: "to_learn" });
+        addLocalVocabulary({ ...values, status: "to_learn" });
       }
 
       form.reset();

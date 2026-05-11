@@ -5,7 +5,7 @@ import { TopicSelector } from "@/components/reading/topic-selector";
 import { Card, CardContent } from "@/components/ui/card";
 import { DEFAULT_READING_TOPIC } from "@/consts";
 import { useAI } from "@/hooks/useAI";
-import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
+import { getLocalHistoryParagraph, saveLocalHistoryParagraph } from "@/lib/localStorage";
 import { CallAiResponse, ReadingPracticeType } from "@/types";
 import { useEffect, useState } from "react";
 
@@ -22,7 +22,7 @@ export default function ReadingPage() {
   const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
-    setHistoryParagraph(getHistoryParagraph(false));
+    setHistoryParagraph(getLocalHistoryParagraph(false));
   }, []);
 
   const handleTopicSelect = (topicId: string) => {
@@ -122,7 +122,7 @@ export default function ReadingPage() {
           };
 
       setHistoryParagraph(
-        saveHistoryParagraph(
+        saveLocalHistoryParagraph(
           false,
           [practice?.paragraph ?? "", ...historyParagraph].splice(0, 10)
         )

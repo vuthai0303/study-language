@@ -125,15 +125,15 @@ useAI (hooks/useAI.ts)
 
 ```
 localStorage ←→ lib/localStorage.ts ←→ Components (tự load data)
-    ├── getVocabulary()
-    ├── addVocabulary(item: Omit<VocabularyType, "id"|"createdAt"|"level">)  ← tự sinh UUID, level=0
-    ├── updateVocabulary(item: VocabularyType)
-    └── deleteVocabulary(id: string)
+    ├── getLocalVocabulary()
+    ├── addLocalVocabulary(item: Omit<VocabularyType, "id"|"createdAt"|"level">)  ← tự sinh UUID, level=0
+    ├── updateLocalVocabulary(item: VocabularyType)
+    └── deleteLocalVocabulary(id: string)
 
 Vocabulary Page (app/vocabulary/page.tsx)
     └── Chỉ chứa Tabs UI, KHÔNG load data
-        ├── <VocabularyTable />     ← tự gọi getVocabulary() trong useEffect
-        └── <VocabularyStudy />     ← tự gọi getVocabulary() trong useEffect
+        ├── <VocabularyTable />     ← tự gọi getLocalVocabulary() trong useEffect
+        └── <VocabularyStudy />     ← tự gọi getLocalVocabulary() trong useEffect
 ```
 
 ### Vocabulary Level System
@@ -415,7 +415,7 @@ export const saveMyNewFeature = (data: MyType[]) => {
 
 ```tsx
 "use client";
-import { getVocabulary } from "@/lib/localStorage";
+import { getLocalVocabulary } from "@/lib/localStorage";
 import { VocabularyType } from "@/types";
 import { useEffect, useState } from "react";
 
@@ -424,7 +424,7 @@ export function MyVocabularyComponent() {
   const [hydrated, setHydrated] = useState(false);
 
   const loadVocabulary = () => {
-    const data = getVocabulary();
+    const data = getLocalVocabulary();
     setVocabulary(data);
   };
 

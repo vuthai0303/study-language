@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/tooltip";
 import { TYPE_VOCAB_LABELS } from "@/consts";
 import { useAI } from "@/hooks/useAI";
-import { addVocabulary, getVocabulary } from "@/lib/localStorage";
+import { addLocalVocabulary, getLocalVocabulary } from "@/lib/localStorage";
 import { CallAiResponse, VocabularyType } from "@/types";
 import { Feedback, Sentence } from "@/types/writing";
 import { useEffect, useState } from "react";
@@ -54,12 +54,12 @@ export function TranslationPractice({
 
   // Load danh sách từ vựng khi mount hoặc khi thêm mới
   useEffect(() => {
-    setVocabularyList(getVocabulary());
+    setVocabularyList(getLocalVocabulary());
   }, []);
 
   // Hàm reload vocab khi thêm mới
   const reloadVocabulary = () => {
-    setVocabularyList(getVocabulary());
+    setVocabularyList(getLocalVocabulary());
   };
 
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
@@ -448,7 +448,7 @@ export function TranslationPractice({
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  addVocabulary({
+                                  addLocalVocabulary({
                                     word: vocab.word,
                                     type: vocab.type,
                                     meaning: vocab.meaning,

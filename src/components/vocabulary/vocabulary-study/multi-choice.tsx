@@ -13,7 +13,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { updateVocabulary } from "@/lib/localStorage";
+import { updateLocalVocabulary } from "@/lib/localStorage";
 import { QuizQuestion, QuizResult, VocabularyType } from "@/types";
 import { useEffect, useState } from "react";
 
@@ -122,7 +122,7 @@ export function VocabularyMultiChoiceStudy({
     setQuizFinished(false);
     setResult({ total: generatedQuestions.length, correct: 0, incorrect: 0 });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quizStarted]);
+  }, [quizStarted, vocabulary]);
 
   const handleOptionSelect = (option: string) => {
     if (isAnswered) return;
@@ -143,10 +143,10 @@ export function VocabularyMultiChoiceStudy({
     if (wordObj) {
       if (isCorrect) {
         const updated = handleCorrectAnswer(wordObj);
-        updateVocabulary(updated);
+        updateLocalVocabulary(updated);
       } else {
         const updated = handleIncorrectAnswer(wordObj);
-        updateVocabulary(updated);
+        updateLocalVocabulary(updated);
       }
       onRefresh();
     }

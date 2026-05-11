@@ -7,7 +7,7 @@ import { TopicSelector } from "@/components/writing/topic-selector";
 import { TranslationPractice } from "@/components/writing/translation-practice";
 import { DEFAULT_WRITING_TOPIC } from "@/consts";
 import { useAI } from "@/hooks/useAI";
-import { getHistoryParagraph, saveHistoryParagraph } from "@/lib/localStorage";
+import { getLocalHistoryParagraph, saveLocalHistoryParagraph } from "@/lib/localStorage";
 import { CallAiResponse } from "@/types";
 import { useEffect, useState } from "react";
 
@@ -25,7 +25,7 @@ export default function WritingPage() {
   const { callAI, isHasKey } = useAI();
 
   useEffect(() => {
-    setHistoryParagraph(getHistoryParagraph(true));
+    setHistoryParagraph(getLocalHistoryParagraph(true));
   }, []);
 
   const handleTopicSelect = (topicId: string) => {
@@ -123,7 +123,7 @@ export default function WritingPage() {
       const paragraph = response.data.text ?? "";
 
       setHistoryParagraph(
-        saveHistoryParagraph(
+        saveLocalHistoryParagraph(
           true,
           [paragraph, ...historyParagraph].splice(0, 10)
         )

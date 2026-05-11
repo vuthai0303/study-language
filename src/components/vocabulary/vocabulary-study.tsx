@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { STUDY_LABELS } from "@/consts";
-import { getVocabulary } from "@/lib/localStorage";
+import { getLocalVocabulary } from "@/lib/localStorage";
 import { VocabularyStudyType, VocabularyType } from "@/types";
 import { useEffect, useState } from "react";
 import { VocabularyMultiChoiceStudy } from "./vocabulary-study/multi-choice";
@@ -51,7 +51,7 @@ export function VocabularyStudy() {
     useState<VocabularyStudyType>("multiple_choice");
 
   const loadVocabulary = () => {
-    const data = getVocabulary();
+    const data = getLocalVocabulary();
     setVocabulary(data);
   };
 
@@ -66,8 +66,7 @@ export function VocabularyStudy() {
 
   const startQuiz = () => {
     // Reload fresh data before starting
-    const freshData = getVocabulary();
-    setVocabulary(freshData);
+    const freshData = getLocalVocabulary();
 
     if (
       selectedStudyType == "multiple_choice" &&

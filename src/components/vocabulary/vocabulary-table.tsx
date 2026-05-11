@@ -18,10 +18,10 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  addVocabulary,
-  deleteVocabulary,
-  getVocabulary,
-  updateVocabulary,
+  addLocalVocabulary,
+  deleteLocalVocabulary,
+  getLocalVocabulary,
+  updateLocalVocabulary,
 } from "@/lib/localStorage";
 import { VocabularyType } from "@/types";
 import { CopyIcon } from "lucide-react";
@@ -40,7 +40,7 @@ export function VocabularyTable() {
   const [hydrated, setHydrated] = useState(false);
 
   const loadVocabulary = () => {
-    const data = getVocabulary();
+    const data = getLocalVocabulary();
     setVocabulary(data);
   };
 
@@ -87,7 +87,7 @@ export function VocabularyTable() {
 
   const handleDelete = (id: string) => {
     if (confirm("Bạn có chắc chắn muốn xóa từ vựng này?")) {
-      deleteVocabulary(id);
+      deleteLocalVocabulary(id);
       onRefresh();
     }
   };
@@ -141,7 +141,7 @@ export function VocabularyTable() {
         statusLists["learning"].find((item) => item.id === draggedId) ||
         statusLists["mastered"].find((item) => item.id === draggedId);
       if (word && word.status !== status) {
-        updateVocabulary({ ...word, status, level: 0 });
+        updateLocalVocabulary({ ...word, status, level: 0 });
         onRefresh();
       }
     }
@@ -246,7 +246,7 @@ export function VocabularyTable() {
     }
     try {
       newWords.forEach((item) => {
-        addVocabulary(item);
+        addLocalVocabulary(item);
       });
       setImportSuccess(`Đã thêm ${newWords.length} từ mới!`);
       onRefresh();

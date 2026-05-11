@@ -20,23 +20,23 @@ export const setLocalStoreAiKey = (value: AiKeyType) => {
 };
 
 // Vocabulary functions
-export const getVocabulary = (): VocabularyType[] => {
+export const getLocalVocabulary = (): VocabularyType[] => {
   if (typeof window === "undefined") return [];
 
   const vocabulary = localStorage.getItem(LOCAL_STORAGE_KEY.VOCABULARY);
   return vocabulary ? JSON.parse(vocabulary) : [];
 };
 
-export const saveVocabulary = (vocabulary: VocabularyType[]) => {
+export const saveLocalVocabulary = (vocabulary: VocabularyType[]) => {
   if (typeof window === "undefined") return;
 
   localStorage.setItem(LOCAL_STORAGE_KEY.VOCABULARY, JSON.stringify(vocabulary));
 };
 
-export const addVocabulary = (
+export const addLocalVocabulary = (
   vocabulary: Omit<VocabularyType, "id" | "createdAt" | "level">
 ) => {
-  const existingVocabulary = getVocabulary();
+  const existingVocabulary = getLocalVocabulary();
   const newVocabulary = {
     ...vocabulary,
     id: uuidv4(),
@@ -44,29 +44,29 @@ export const addVocabulary = (
     level: 0,
   };
 
-  saveVocabulary([...existingVocabulary, newVocabulary]);
+  saveLocalVocabulary([...existingVocabulary, newVocabulary]);
   return newVocabulary;
 };
 
-export const updateVocabulary = (vocabulary: VocabularyType) => {
-  const existingVocabulary = getVocabulary();
+export const updateLocalVocabulary = (vocabulary: VocabularyType) => {
+  const existingVocabulary = getLocalVocabulary();
   const updatedVocabulary = existingVocabulary.map((item) =>
     item.id === vocabulary.id ? vocabulary : item
   );
 
-  saveVocabulary(updatedVocabulary);
+  saveLocalVocabulary(updatedVocabulary);
   return vocabulary;
 };
 
-export const deleteVocabulary = (id: string) => {
-  const existingVocabulary = getVocabulary();
+export const deleteLocalVocabulary = (id: string) => {
+  const existingVocabulary = getLocalVocabulary();
   const updatedVocabulary = existingVocabulary.filter((item) => item.id !== id);
 
-  saveVocabulary(updatedVocabulary);
+  saveLocalVocabulary(updatedVocabulary);
 };
 
 // history paragraph function
-export const getHistoryParagraph = (isWriting: boolean): string[] => {
+export const getLocalHistoryParagraph = (isWriting: boolean): string[] => {
   if (typeof window === "undefined") return [];
 
   const historyParagraph = isWriting
@@ -75,7 +75,7 @@ export const getHistoryParagraph = (isWriting: boolean): string[] => {
   return historyParagraph ? JSON.parse(historyParagraph) : [];
 };
 
-export const saveHistoryParagraph = (
+export const saveLocalHistoryParagraph = (
   isWriting: boolean,
   historyParagraph: string[]
 ): string[] => {

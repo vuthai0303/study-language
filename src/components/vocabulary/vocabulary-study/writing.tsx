@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { updateVocabulary } from "@/lib/localStorage";
+import { updateLocalVocabulary } from "@/lib/localStorage";
 import { isEmpty } from "@/lib/utils";
 import { QuizResult, VocabularyType, WritingQuestion } from "@/types";
 import { useEffect, useState } from "react";
@@ -181,10 +181,10 @@ export function VocabularyWritingStudy({
     if (wordObj) {
       if (correct) {
         const updated = handleCorrectAnswer(wordObj);
-        updateVocabulary(updated);
+        updateLocalVocabulary(updated);
       } else {
         const updated = handleIncorrectAnswer(wordObj);
-        updateVocabulary(updated);
+        updateLocalVocabulary(updated);
       }
       onRefresh();
     }
