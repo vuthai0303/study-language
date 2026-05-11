@@ -5,8 +5,8 @@ import { TopicSelector } from "@/components/reading/topic-selector";
 import { Card, CardContent } from "@/components/ui/card";
 import { DEFAULT_READING_TOPIC } from "@/consts";
 import { useAI } from "@/hooks/useAI";
-import { getLocalHistoryParagraph, saveLocalHistoryParagraph } from "@/lib/localStorage";
-import { CallAiResponse, ReadingPracticeType } from "@/types";
+import { getLocalHistoryParagraph, getLocalVocabulary, saveLocalHistoryParagraph } from "@/lib/localStorage";
+import { CallAiResponse, ReadingPracticeType, VocabularyType } from "@/types";
 import { useEffect, useState } from "react";
 
 export default function ReadingPage() {
@@ -20,9 +20,11 @@ export default function ReadingPage() {
   const [showPractice, setShowPractice] = useState(false);
   const [historyParagraph, setHistoryParagraph] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [vocabularies, setVocabularies] = useState<VocabularyType[]>([]);
 
   useEffect(() => {
     setHistoryParagraph(getLocalHistoryParagraph(false));
+    setVocabularies(getLocalVocabulary());
   }, []);
 
   const handleTopicSelect = (topicId: string) => {
@@ -66,16 +68,16 @@ export default function ReadingPage() {
           "Đoạn văn nên sử dụng từ vựng dễ nhớ, phổ thông và cấu trúc câu cơ bản, phù hợp cho người có trình độ tiếng anh căn bản. Tương ứng với trình độ Toeic dưới 400, Ielts dưới 4.";
       } else if (level === "Trung cấp") {
         levelInstruction =
-          "Đoạn văn nên sử dụng từ vựng phổ biến và cấu trúc câu ở mức trung cấp, phù hợp cho người có trình độ tiếng anh trung cấp. Tương ứng với trình độ Toeic từ 400 đến 700, Ielts từ 4 đến 7.";
+          "Đoạn văn nên sử dụng từ vựng phổ biến, cấu trúc câu từ và độ khó câu hỏi ở mức trung cấp, phù hợp cho người có trình độ tiếng anh trung cấp. Tương ứng với trình độ Toeic từ 400 đến 700, Ielts từ 4 đến 7.";
       } else if (level === "Chuyên nghiệp") {
         levelInstruction =
-          "Đoạn văn nên sử dụng từ vựng chuyên nghiệp, chính xác với tình huống và cấu trúc câu nâng cao, thể hiện sự tự nhiên và chuyên nghiệp, phù hợp cho người học trình độ tiếng anh chuyên nghiệp. Tương ứng với trình độ Toeic trên 700, Ielts trên 7.";
+          "Đoạn văn nên sử dụng từ vựng chuyên nghiệp, chính xác với tình huống và cấu trúc câu nâng cao, độ khó câu hỏi ở mức nâng cao, thể hiện sự tự nhiên và chuyên nghiệp, phù hợp cho người học trình độ tiếng anh chuyên nghiệp. Tương ứng với trình độ Toeic trên 700, Ielts trên 7.";
       } else {
         levelInstruction = "";
       }
 
       let topic = "";
-      if (selectedTopic.name == "Sách / Tiểu thuyết") {
+      if (+selectedTopicId == 0) {
         topic = `Nội dung sẽ là 1 đoạn trích (khoảng 600 từ) hay, tâm đắc, phổ biến bằng tiếng anh trong các cuốn sách / tiểu thuyết sau: 
         Không Gia Đình - Hector Malot, Ông Già Và Biển Cả - Ernest Hemingway, Âm Thanh Và Cuồng Nộ - William Faulkner, Thép Đã Tôi Thế Đấy - Nikolai Ostrovsky,
         Nhà Giả Kim - Paulo Coelho, Lược Sử Thời Gian - Stephen Hawking, Cuốn Theo Chiều Gió - Margaret Munnerlyn Mitchell, Những Người Khốn Khổ - Victor Hugo,
@@ -83,6 +85,23 @@ export default function ReadingPage() {
         Trăm Năm Cô Đơn - Gabriel Garcia Marquez, Từ Thăm Thẳm Lãng Quên - Patrick Modiano, Nếu Em Không Phải Một Giấc Mơ - Marc Levy.
         Hãy nhớ có thêm 1 dòng bằng tiếng anh mô tả đoạn văn trên được trích từ sách / tiểu thuyết nào?, trang bao nhiêu? vào cuối câu.
         Và khoảng 5 câu hỏi trắc nghiệm để người dùng dựa vào thông tin đã đọc từ đoạn trích để trả lời.`;
+      } else if (+selectedTopicId == 7) {
+        topic = `Nội dung sẽ gồm 1 đoạn văn khoảng 500-600 từ được tạo từ các từ vựng sau \n ${JSON.stringify(vocabularies.map(item => ({ word: item.word, type: item.type, meaning: item.meaning })))} \n
+                Đảm bảo sử dụng ít nhất 10 từ trong danh sách từ vựng trên. Đồng thời đoạn văn phải liền mạch, có ý nghĩa và có thể giúp đỡ người dùng luyện khả năng dịch và ghi nhớ từ vựng.
+                Cùng với đó là khoảng 5 câu hỏi trắc nghiệm để người dùng dựa vào thông tin đã đọc từ đoạn văn trên để trả lời. Đảm bảo câu hỏi phải có ý nghĩa, phù hợp với đoạn văn.
+                `;
+      } else if (+selectedTopicId == 8) {
+        topic = `Nội dung sẽ gồm 1 đoạn văn khoảng 500-600 về chủ đề công nghệ trong lĩnh vực lập trình full-stacks.
+                Đoạn văn sẽ tập trung vào 1 chủ đề mới hoặc nổi tiếng trong giới lập trình và có khả năng giúp người dùng cải thiện tiếng anh cùng với cải thiện kỹ năng chuyên môn của mình để phát triển hướng tới vai trò Technical Leader/Architect.
+                Ví dụ: 
+                - Giới thiệu để hiểu rõ hơn về SOLID | Clean Architecture | Domain Driven Design,... hoặc kiến trúc hệ thống như monolith | microservice | event-driven,...
+                - Giới thiệu về Kubernetes | Message Queue | kafka | Docker | CI/CD | gRPC | GraphQL,... (Bài giới thiệu nên trả lời được cho các câu hỏi sau: đó là gì?, vai trò của nó như thế nào? ưu và nhược điểm là gì? có thể ứng dụng với các hệ thống như thế nào?,...)
+                - Các bài toán gặp phải khi xây dựng hệ thống chịu tải cao | realtime streaming | ngân hàng | security,... (Bài viết nên trả lời được cho các câu hỏi sau: vấn đề gặp phải là gì?, cách giải quyết như thế nào cho hiệu quả,...)
+                - Các lỗi security thường gặp, nguyên nhân và cách phòng chống,...
+                - Các design pattern phổ biến trong lập trình và ứng dụng thực tế,...
+                - Cách đánh giá performance của một hệ thống, tối ưu hiệu năng của hệ thống,...
+                - ...
+                Cùng với đó là khoảng 5 câu hỏi trắc nghiệm để người dùng dựa vào thông tin đã đọc từ đoạn văn trên để trả lời. Đảm bảo câu hỏi phải có ý nghĩa, phù hợp với đoạn văn.'`;
       } else {
         topic = `Nội dung sẽ gồm 1 đoạn văn khoảng 600 từ về chủ đề '${selectedTopic.name} và khoảng 5 câu hỏi trắc nghiệm để người dùng dựa vào thông tin đã đọc từ đoạn văn để trả lời.'`;
       }

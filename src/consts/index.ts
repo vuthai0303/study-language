@@ -32,6 +32,7 @@ export const DEFAULT_WRITING_TOPIC: Topic[] = [
   { id: "6", name: "Công việc" },
   { id: "7", name: "Giới thiệu bản thân" },
   { id: "8", name: "Hội thoại phỏng vấn" },
+  { id: "9", name: "Từ vựng hiện có" },
   { id: "-1", name: "Đoạn văn tự điền" },
 ];
 
@@ -43,6 +44,8 @@ export const DEFAULT_READING_TOPIC: Topic[] = [
   { id: "4", name: "Sức khỏe" },
   { id: "5", name: "Thể thao" },
   { id: "6", name: "Công việc" },
+  { id: "7", name: "Từ vựng hiện có" },
+  { id: "8", name: "Công nghệ thông tin" },
 ];
 
 export const LOCAL_STORAGE_KEY = {

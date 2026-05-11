@@ -97,7 +97,7 @@ export function VocabularyMultiChoiceStudy({
       // Get 3 random incorrect options from all vocabulary
       const incorrectOptions = optionPool
         .filter((v) => v.id !== item.id)
-        .sort(() => 0.5 - Math.random())
+        .sort((a, b) => (a.type === item.type ? 0 : 1) - (b.type === item.type ? 0 : 1) || Math.random() - 0.5)
         .slice(0, 3)
         .map((v) => `(${v.type}) ${v.meaning}`);
 
