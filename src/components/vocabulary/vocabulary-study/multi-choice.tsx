@@ -13,8 +13,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { updateLocalVocabulary } from "@/lib/localStorage";
 import { QuizQuestion, QuizResult, VocabularyType } from "@/types";
+import { Speech } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface VocabularyMultiChoiceStudyProps {
@@ -89,6 +91,7 @@ export function VocabularyMultiChoiceStudy({
     correct: 0,
     incorrect: 0,
   });
+  const { speak, isSupported } = useTextToSpeech();
 
   useEffect(() => {
     // Generate questions - use allVocabulary for wrong options to ensure variety
@@ -121,7 +124,7 @@ export function VocabularyMultiChoiceStudy({
     setIsAnswered(false);
     setQuizFinished(false);
     setResult({ total: generatedQuestions.length, correct: 0, incorrect: 0 });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizStarted, vocabulary]);
 
   const handleOptionSelect = (option: string) => {
@@ -218,10 +221,19 @@ export function VocabularyMultiChoiceStudy({
         <CardDescription>Chọn nghĩa đúng của từ vựng sau</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-6">
+        <div className="mb-6 flex flex-row flex-wrap gap-2 justify-center items-center">
           <h3 className="text-2xl font-bold text-center">
             {currentQuestion?.word}
           </h3>
+          {isSupported && (
+            <Button
+              onClick={() => speak(currentQuestion?.word)}
+              variant="outline"
+              size="icon"
+            >
+              <Speech />
+            </Button>
+          )}
         </div>
         <div className="space-y-2">
           {currentQuestion?.options?.map((option, index) => (
@@ -232,8 +244,8 @@ export function VocabularyMultiChoiceStudy({
                   ? option === currentQuestion?.correctAnswer
                     ? "default"
                     : option === selectedOption
-                    ? "destructive"
-                    : "outline"
+                      ? "destructive"
+                      : "outline"
                   : "outline"
               }
               className="w-full justify-start text-left"

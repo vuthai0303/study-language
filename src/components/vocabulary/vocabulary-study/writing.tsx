@@ -9,9 +9,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { updateLocalVocabulary } from "@/lib/localStorage";
 import { isEmpty } from "@/lib/utils";
 import { QuizResult, VocabularyType, WritingQuestion } from "@/types";
+import { Speech } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface VocabularyWritingStudyProps {
@@ -99,7 +101,7 @@ export function VocabularyWritingStudy({
 }: VocabularyWritingStudyProps) {
   const [questions, setQuestions] = useState<WritingQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswer, setUserAnswer] = useState<string>();
+  const [userAnswer, setUserAnswer] = useState("");
   const [revealedIndexes, setRevealedIndexes] = useState<number[]>([]);
   const [correctIndexes, setCorrectIndexes] = useState<number[]>([]);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -110,6 +112,8 @@ export function VocabularyWritingStudy({
     correct: 0,
     incorrect: 0,
   });
+
+  const { speak, isSupported } = useTextToSpeech();
 
   // Create quiz
   useEffect(() => {
@@ -158,7 +162,7 @@ export function VocabularyWritingStudy({
       (questions[currentQuestionIndex].word ?? "").split("") ?? [];
 
     (userAnswer ?? "").split("").map((e, idx: number) => {
-      if (userAnswer[idx] == word[idx]) result.push(idx);
+      if (userAnswer[idx]?.toLocaleLowerCase() == word[idx]?.toLocaleLowerCase()) result.push(idx);
     });
     setCorrectIndexes(result);
   };
@@ -278,25 +282,33 @@ export function VocabularyWritingStudy({
               key={idx}
               type="text"
               maxLength={1}
-              className={`w-10 h-12 text-center text-xl border rounded ${
-                isAnswered && correctIndexes.includes(idx)
-                  ? "bg-green-200 text-black font-bold"
-                  : isAnswered
+              className={`w-10 h-12 text-center text-xl border rounded ${isAnswered && correctIndexes.includes(idx)
+                ? "bg-green-200 text-black font-bold"
+                : isAnswered
                   ? "bg-red-200 text-black font-bold"
                   : revealedIndexes.includes(idx)
-                  ? "bg-gray-200 text-black font-bold"
-                  : "bg-white"
-              }`}
+                    ? "bg-gray-200 text-black font-bold"
+                    : "bg-white"
+                }`}
               value={revealedIndexes.includes(idx) || isAnswered ? char : ""}
               disabled={true}
               autoComplete="off"
             />
           ))}
         </div>
-        <div className="mb-4 text-center">
+        <div className="mb-4 text-center flex flex-row flex-wrap justify-center items-center gap-2">
           <span className="text-muted-foreground text-lg">
             ({currentQuestion.type}) {currentQuestion.meaning}
           </span>
+          {isSupported && (
+            <Button
+              onClick={() => speak(currentQuestion.word)}
+              variant="outline"
+              size="icon"
+            >
+              <Speech />
+            </Button>
+          )}
         </div>
         <div className="mb-4 text-center">
           <Input

@@ -24,10 +24,11 @@ import {
   updateLocalVocabulary,
 } from "@/lib/localStorage";
 import { VocabularyType } from "@/types";
-import { CopyIcon } from "lucide-react";
+import { CopyIcon, Speech } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import { VocabularyForm } from "./vocabulary-form";
+import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 
 const STATUS_LABELS: Record<VocabularyType["status"], string> = {
   to_learn: "Cần học",
@@ -70,6 +71,7 @@ export function VocabularyTable() {
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const importTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const { speak, isSupported } = useTextToSpeech();
 
   if (!hydrated) {
     return null;
@@ -116,8 +118,8 @@ export function VocabularyTable() {
   vocabulary.forEach((item) => {
     const status: VocabularyType["status"] =
       item.status === "to_learn" ||
-      item.status === "learning" ||
-      item.status === "mastered"
+        item.status === "learning" ||
+        item.status === "mastered"
         ? item.status
         : "to_learn";
     statusLists[status].push({ ...item, status });
@@ -357,10 +359,9 @@ export function VocabularyTable() {
             <div
               key={status}
               className={`border rounded-md bg-muted min-h-[200px] max-h-[400px] md:max-h-full transition-all duration-200
-                ${
-                  isActiveDrop
-                    ? "ring-4 ring-blue-400 border-blue-500 bg-blue-50 animate-pulse"
-                    : ""
+                ${isActiveDrop
+                  ? "ring-4 ring-blue-400 border-blue-500 bg-blue-50 animate-pulse"
+                  : ""
                 }
               `}
               onDrop={() => handleDrop(status)}
@@ -386,21 +387,29 @@ export function VocabularyTable() {
                   typeof item.id === "string" && item.id ? (
                     <Card
                       key={item.id}
-                      className={`shadow-md transition-all duration-300 gap-2 py-4 mb-3 ${
-                        draggedId === item.id
-                          ? "bg-blue-100 scale-105 shadow-2xl z-20"
-                          : "bg-white"
-                      }`}
+                      className={`shadow-md transition-all duration-300 gap-2 py-4 mb-3 ${draggedId === item.id
+                        ? "bg-blue-100 scale-105 shadow-2xl z-20"
+                        : "bg-white"
+                        }`}
                       draggable
                       onDragStart={() => handleDragStart(item.id)}
                       onDragEnd={handleDragEnd}
                     >
                       <CardHeader>
-                        <CardTitle className="text-lg">
-                          <div className="flex items-center justify-between gap-2">
+                        <CardTitle className="flex flex-row justify-between">
+                          <div className="text-lg flex items-center justify-start gap-2">
                             {item.word}
-                            <span className="font-light">level: {item.level ?? 0}</span>
+                            {isSupported && (
+                              <Button
+                                onClick={() => speak(item.word)}
+                                variant="outline"
+                                size="icon"
+                              >
+                                <Speech />
+                              </Button>
+                            )}
                           </div>
+                          <span className="font-light">level: {item.level ?? 0}</span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -432,7 +441,7 @@ export function VocabularyTable() {
                     </Card>
                   ) : null
                 )}
-                </ScrollArea>
+              </ScrollArea>
             </div>
           );
         })}
