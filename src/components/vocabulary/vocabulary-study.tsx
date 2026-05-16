@@ -8,38 +8,40 @@ import { useEffect, useState } from "react";
 import { VocabularyMultiChoiceStudy } from "./vocabulary-study/multi-choice";
 import { VocabularyWritingStudy } from "./vocabulary-study/writing";
 
+// Weighted shuffle function that favors lower level words
+// alpha controls how much more likely lower level words are chosen (0.7 is a good starting point)
+// alpha = 0 means pure random, higher alpha means more bias towards lower levels
+const weightedShuffleByLevel = (vocabylaries: VocabularyType[], alpha = 0.7) => {
+  return [...vocabylaries].map(item => {
+    const statusLevel = item.status === "mastered" ? 2 : item.status === "learning" ? 1 : 0;
+    const level = (item?.level ?? 0) + statusLevel * 10; // Ensure mastered words are weighted lower than learning and learning words are weighted lower than to_learn
+     // The lower the level, the higher the weight.
+     //   level 0: weight = 1
+     //   level 1: weight lower level 0
+     //   level 2: weight lower level 1
+     const weight = Math.exp(-alpha * level);
+     // Efraimidis-Spirakis weighted random key
+     const key = -Math.log(Math.random()) / weight;
+     return {item,key};
+  }).sort((a, b) => a.key - b.key).map(entry => entry.item);
+}
+
 /**
- * Select 10 words for practice based on level:
- * - 7 words with the lowest level (prioritize from the bottom, random if same level)
- * - 3 words with the highest level (prioritize from the top, random if same level)
- * - If total vocabulary < 10, select all
+ * Select 10 words for practice based on weighted shuffle by level (the lower level, the higher the chance of being selected at the top of the list):
+ * - If total vocabulary >= 10, select 7 first words in list, 3 end words in list
+ * - If total vocabulary < 10, random list and select all
  */
-function selectStudyVocabulary(vocabulary: VocabularyType[]): VocabularyType[] {
-  if (vocabulary.length <= 10) {
-    return [...vocabulary].sort(() => 0.5 - Math.random());
+function selectStudyVocabulary(vocabularies: VocabularyType[]): VocabularyType[] {
+  if (vocabularies.length <= 10) {
+    // If total words less than or equal to 10, shuffle all and return
+    return [...vocabularies].sort(() => 0.5 - Math.random());
   }
 
-  // Sort by level ascending, shuffle within same level
-  const shuffled = [...vocabulary].sort(() => 0.5 - Math.random());
-  const sortedAsc = [...shuffled].sort((a, b) => (a.level ?? 0) - (b.level ?? 0));
-  const sortedDesc = [...shuffled].sort((a, b) => (b.level ?? 0) - (a.level ?? 0));
+  // Shuffle weighted list
+  const shuffledWeightedVocabularies = weightedShuffleByLevel(vocabularies, 1);
 
-  // Pick 7 lowest-level words
-  const lowLevelWords = sortedAsc.slice(0, 7);
-  const lowLevelIds = new Set(lowLevelWords.map((w) => w.id));
-
-  // Pick 3 highest-level words (not already in low-level set)
-  const highLevelWords: VocabularyType[] = [];
-  for (const word of sortedDesc) {
-    if (!lowLevelIds.has(word.id)) {
-      highLevelWords.push(word);
-      if (highLevelWords.length >= 3) break;
-    }
-  }
-
-  // Combine and shuffle the final set
-  const selected = [...lowLevelWords, ...highLevelWords];
-  return selected.sort(() => 0.5 - Math.random());
+  // Combine and shuffle final selection
+  return [...shuffledWeightedVocabularies.slice(0, 7), ...shuffledWeightedVocabularies.slice(-3)];
 }
 
 export function VocabularyStudy() {

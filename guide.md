@@ -60,7 +60,7 @@ src/
 │   ├── vocabulary/
 │   │   ├── vocabulary-table.tsx    # Kanban 3 cột + drag-drop native + export/import (tự load data)
 │   │   ├── vocabulary-form.tsx     # Form thêm/sửa từ vựng (react-hook-form + Zod)
-│   │   ├── vocabulary-study.tsx    # Chọn chế độ luyện + chọn từ theo level (tự load data)
+│   │   ├── vocabulary-study.tsx    # Chọn chế độ luyện + chọn 10 từ vựng để luyện tập (sort random từ vựng dựa theo tỉ lệ level (từ vựng có level thấp sẽ có khả năng đứng đầu danh sách) chọn 7 từ vựng đầu tiên và 3 từ vựng cuối cùng của danh sách)
 │   │   └── vocabulary-study/
 │   │       ├── multi-choice.tsx    # Quiz trắc nghiệm (level +1/-1)
 │   │       └── writing.tsx         # Quiz viết tay (level +2/-2)
@@ -126,7 +126,8 @@ useAI (hooks/useAI.ts)
 ```
 localStorage ←→ lib/localStorage.ts ←→ Components (tự load data)
     ├── getLocalVocabulary()
-    ├── addLocalVocabulary(item: Omit<VocabularyType, "id"|"createdAt"|"level">)  ← tự sinh UUID, level=0
+    ├── addLocalVocabulary(item: Omit<VocabularyType, "id"|"createdAt">)  ← tự sinh UUID
+    ├── addLocalVocabularyList(itemList: Omit<VocabularyType, "id"|"createdAt">[])  ← add list, tự sinh UUID
     ├── updateLocalVocabulary(item: VocabularyType)
     └── deleteLocalVocabulary(id: string)
 
