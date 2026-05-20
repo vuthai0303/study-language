@@ -12,7 +12,7 @@ export type QuizQuestion = {
   id: string;
   word: string;
   correctAnswer: string;
-  options: string[];
+  options: VocabularyType[];
 };
 
 export type QuizResult = {

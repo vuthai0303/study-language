@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
@@ -81,6 +82,7 @@ export function VocabularyMultiChoiceStudy({
   startQuiz,
   onCloseQuiz,
 }: VocabularyMultiChoiceStudyProps) {
+  const { speak, isSupported } = useTextToSpeech();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -91,7 +93,7 @@ export function VocabularyMultiChoiceStudy({
     correct: 0,
     incorrect: 0,
   });
-  const { speak, isSupported } = useTextToSpeech();
+  const [isHiddenWord, setIsHiddenWord] = useState(true);
 
   useEffect(() => {
     // Generate questions - use allVocabulary for wrong options to ensure variety
@@ -102,11 +104,10 @@ export function VocabularyMultiChoiceStudy({
         .filter((v) => v.id !== item.id)
         .sort((a, b) => (a.type === item.type ? 0 : 1) - (b.type === item.type ? 0 : 1) || Math.random() - 0.5)
         .slice(0, 3)
-        .map((v) => `(${v.type}) ${v.meaning}`);
 
       // Combine correct and incorrect options and shuffle
       const options = [
-        `(${item.type}) ${item.meaning}`,
+        item,
         ...incorrectOptions,
       ].sort(() => 0.5 - Math.random());
 
@@ -213,18 +214,24 @@ export function VocabularyMultiChoiceStudy({
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-3xl mx-auto">
       <CardHeader>
-        <CardTitle>
-          Câu hỏi {currentQuestionIndex + 1}/{questions.length}
+        <CardTitle className="flex flex-row justify-between">
+          <div className="">Câu hỏi {currentQuestionIndex + 1}/{questions.length}</div>
+          <div className="flex items-center gap-2">
+            <Switch defaultChecked={!isHiddenWord} onCheckedChange={(checked) => setIsHiddenWord(!checked)}></Switch>
+            Hiện từ vựng
+          </div>
         </CardTitle>
         <CardDescription>Chọn nghĩa đúng của từ vựng sau</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-6 flex flex-row flex-wrap gap-2 justify-center items-center">
-          <h3 className="text-2xl font-bold text-center">
-            {currentQuestion?.word}
-          </h3>
+          {(!isSupported || !isHiddenWord || isAnswered) && (
+            <h3 className="text-2xl font-bold text-center">
+              {currentQuestion?.word}
+            </h3>
+          )}
           {isSupported && (
             <Button
               onClick={() => speak(currentQuestion?.word)}
@@ -241,22 +248,25 @@ export function VocabularyMultiChoiceStudy({
               key={index}
               variant={
                 isAnswered
-                  ? option === currentQuestion?.correctAnswer
+                  ? `(${option.type}) ${option.meaning}` === currentQuestion?.correctAnswer
                     ? "default"
-                    : option === selectedOption
+                    : `(${option.type}) ${option.meaning}` === selectedOption
                       ? "destructive"
                       : "outline"
                   : "outline"
               }
-              className="w-full justify-start text-left"
-              onClick={() => handleOptionSelect(option)}
+              className="w-full justify-start text-left h-fit"
+              onClick={() => handleOptionSelect(`(${option.type}) ${option.meaning}`)}
             >
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <p className="truncate">{option}</p>
+                  <div>
+                    <p className="text-wrap md:truncate">{`(${option.type}) ${option.meaning}`}</p>
+                    {isAnswered && (<p className="display lg:hidden font-bold">{`-${option.word}-`}</p>)}
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <span>{option}</span>
+                  <span>{isAnswered ? `${option.word}` : `(${option.type}) ${option.meaning}`}</span>
                 </TooltipContent>
               </Tooltip>
             </Button>

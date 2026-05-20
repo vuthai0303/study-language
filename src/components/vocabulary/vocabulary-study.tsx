@@ -15,14 +15,14 @@ const weightedShuffleByLevel = (vocabylaries: VocabularyType[], alpha = 0.7) => 
   return [...vocabylaries].map(item => {
     const statusLevel = item.status === "mastered" ? 2 : item.status === "learning" ? 1 : 0;
     const level = (item?.level ?? 0) + statusLevel * 10; // Ensure mastered words are weighted lower than learning and learning words are weighted lower than to_learn
-     // The lower the level, the higher the weight.
-     //   level 0: weight = 1
-     //   level 1: weight lower level 0
-     //   level 2: weight lower level 1
-     const weight = Math.exp(-alpha * level);
-     // Efraimidis-Spirakis weighted random key
-     const key = -Math.log(Math.random()) / weight;
-     return {item,key};
+    // The lower the level, the higher the weight.
+    //   level 0: weight = 1
+    //   level 1: weight lower level 0
+    //   level 2: weight lower level 1
+    const weight = Math.exp(-alpha * level);
+    // Efraimidis-Spirakis weighted random key
+    const key = -Math.log(Math.random()) / weight;
+    return { item, key };
   }).sort((a, b) => a.key - b.key).map(entry => entry.item);
 }
 
@@ -38,7 +38,7 @@ function selectStudyVocabulary(vocabularies: VocabularyType[]): VocabularyType[]
   }
 
   // Shuffle weighted list
-  const shuffledWeightedVocabularies = weightedShuffleByLevel(vocabularies, 1);
+  const shuffledWeightedVocabularies = weightedShuffleByLevel(vocabularies, 0.7);
 
   // Combine and shuffle final selection
   return [...shuffledWeightedVocabularies.slice(0, 7), ...shuffledWeightedVocabularies.slice(-3)];
