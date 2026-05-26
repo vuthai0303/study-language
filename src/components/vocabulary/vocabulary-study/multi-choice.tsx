@@ -57,7 +57,7 @@ function handleCorrectAnswer(wordObj: VocabularyType): VocabularyType {
  */
 function handleIncorrectAnswer(wordObj: VocabularyType): VocabularyType {
   const currentLevel = wordObj.level ?? 0;
-  const newLevel = currentLevel - 1;
+  const newLevel = currentLevel - 2;
   if (newLevel < 0 && wordObj.status !== "to_learn") {
     // Demote status, reset level to 5
     const prevStatus: Record<VocabularyType["status"], VocabularyType["status"]> = {
