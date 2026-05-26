@@ -38,7 +38,7 @@ function selectStudyVocabulary(vocabularies: VocabularyType[]): VocabularyType[]
   }
 
   // Shuffle weighted list
-  const shuffledWeightedVocabularies = weightedShuffleByLevel(vocabularies, 0.7);
+  const shuffledWeightedVocabularies = weightedShuffleByLevel(vocabularies, 0.3);
 
   // Combine and shuffle final selection
   return [...shuffledWeightedVocabularies.slice(0, 7), ...shuffledWeightedVocabularies.slice(-3)];
