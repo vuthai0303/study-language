@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ReadingPracticeType } from "@/types";
+import { ReadingPracticeType } from "@/types/reading";
 import { useEffect, useState } from "react";
 import { ScrollArea } from "../ui/scroll-area";
 

@@ -8,7 +8,8 @@ import { TranslationPractice } from "@/components/writing/translation-practice";
 import { DEFAULT_WRITING_TOPIC } from "@/consts";
 import { useAI } from "@/hooks/useAI";
 import { getLocalHistoryParagraph, getLocalVocabulary, saveLocalHistoryParagraph } from "@/lib/localStorage";
-import { CallAiResponse, VocabularyType } from "@/types";
+import { CallAiResponse } from "@/types/ai";
+import { VocabularyType } from "@/types/vocabulary";
 import { useEffect, useState } from "react";
 
 export default function WritingPage() {

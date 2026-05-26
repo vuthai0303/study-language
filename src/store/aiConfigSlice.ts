@@ -1,4 +1,4 @@
-import { AiKeyType } from "@/types";
+import { AiKeyType } from "@/types/ai";
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState : AiKeyType = {provider: "OPENAI", key: "", model: "gpt-5.4-mini-2026-03-17"}

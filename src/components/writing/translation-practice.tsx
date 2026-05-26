@@ -17,7 +17,8 @@ import {
 import { TYPE_VOCAB_LABELS } from "@/consts";
 import { useAI } from "@/hooks/useAI";
 import { addLocalVocabulary, getLocalVocabulary } from "@/lib/localStorage";
-import { CallAiResponse, VocabularyType } from "@/types";
+import { CallAiResponse } from "@/types/ai";
+import { VocabularyType } from "@/types/vocabulary";
 import { Feedback, Sentence } from "@/types/writing";
 import { useEffect, useState } from "react";
 import { SentenceLayout } from "./sentence-layout";

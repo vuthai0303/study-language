@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { updateLocalVocabulary } from "@/lib/localStorage";
-import { QuizQuestion, QuizResult, VocabularyType } from "@/types";
+import { QuizQuestion, QuizResult, VocabularyType } from "@/types/vocabulary";
 import { Speech } from "lucide-react";
 import { useEffect, useState } from "react";
 

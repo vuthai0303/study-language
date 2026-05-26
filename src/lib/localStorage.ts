@@ -1,7 +1,8 @@
 "use client";
 
 import { LOCAL_STORAGE_KEY } from "@/consts";
-import { AiKeyType, VocabularyType } from "@/types";
+import { AiKeyType } from "@/types/ai";
+import { VocabularyType } from "@/types/vocabulary";
 import { v4 as uuidv4 } from "uuid";
 
 // AI KEY functions

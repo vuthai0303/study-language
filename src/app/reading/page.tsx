@@ -6,7 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DEFAULT_READING_TOPIC } from "@/consts";
 import { useAI } from "@/hooks/useAI";
 import { getLocalHistoryParagraph, getLocalVocabulary, saveLocalHistoryParagraph } from "@/lib/localStorage";
-import { CallAiResponse, ReadingPracticeType, VocabularyType } from "@/types";
+import { CallAiResponse } from "@/types/ai";
+import { ReadingPracticeType } from "@/types/reading";
+import { VocabularyType } from "@/types/vocabulary";
 import { useEffect, useState } from "react";
 
 export default function ReadingPage() {

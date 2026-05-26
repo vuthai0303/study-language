@@ -11,3 +11,4 @@ export type Sentence = {
   feedback: Feedback | null;
   isCorrect: boolean | null;
 };
+

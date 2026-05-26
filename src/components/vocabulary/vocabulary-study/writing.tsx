@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { updateLocalVocabulary } from "@/lib/localStorage";
 import { isEmpty } from "@/lib/utils";
-import { QuizResult, VocabularyType, WritingQuestion } from "@/types";
+import { QuizResult, VocabularyType, WritingQuestion } from "@/types/vocabulary";
 import { Speech } from "lucide-react";
 import { useEffect, useState } from "react";
 

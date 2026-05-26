@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { STUDY_LABELS } from "@/consts";
 import { getLocalVocabulary } from "@/lib/localStorage";
-import { VocabularyStudyType, VocabularyType } from "@/types";
+import { VocabularyStudyType, VocabularyType } from "@/types/vocabulary";
 import { useEffect, useState } from "react";
 import { VocabularyMultiChoiceStudy } from "./vocabulary-study/multi-choice";
 import { VocabularyWritingStudy } from "./vocabulary-study/writing";

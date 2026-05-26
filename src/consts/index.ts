@@ -1,4 +1,5 @@
-import { Topic, VocabularyStudyType, VocabularyType } from "@/types";
+import { Topic } from "@/types";
+import { VocabularyStudyType, VocabularyType } from "@/types/vocabulary";
 
 export const TYPE_VOCAB_LABELS = [
   { id: "noun", name: "Danh từ (Noun)" },

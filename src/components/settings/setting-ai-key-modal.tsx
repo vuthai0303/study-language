@@ -16,7 +16,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/reduxHook";
 import { getLocalStoreAiKey, setLocalStoreAiKey } from "@/lib/localStorage";
 import { setAIConfig } from "@/store/aiConfigSlice";
 import { setLoading } from "@/store/loadingSlice";
-import { AiKeyType, MessageType, ProviderAIType } from "@/types";
+import { AiKeyType, MessageType, ProviderAIType } from "@/types/ai";
 import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 

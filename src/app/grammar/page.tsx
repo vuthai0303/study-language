@@ -4,7 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAI } from "@/hooks/useAI";
-import { CallAiResponse } from "@/types";
+import { CallAiResponse } from "@/types/ai";
+import { GrammarQuestion } from "@/types/grammar";
 import { useState } from "react";
 
 const GRAMMAR_TOPICS = [
@@ -41,18 +42,11 @@ const GRAMMAR_TOPICS = [
   "Thán từ (Interjections)",
 ];
 
-type QuizQuestion = {
-  question: string;
-  options: string[];
-  answer: number;
-  feedback: string;
-};
-
 export default function GrammarPage() {
   const { callAI, isHasKey } = useAI();
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
+  const [quiz, setQuiz] = useState<GrammarQuestion[]>([]);
   const [userAnswers, setUserAnswers] = useState<number[]>([]);
   const [showResult, setShowResult] = useState(false);
 
@@ -81,8 +75,8 @@ export default function GrammarPage() {
 
     const prompt = `
       Bạn là giáo viên tiếng Anh. Tạo 10 câu hỏi trắc nghiệm (mỗi câu có 4 lựa chọn, chỉ có một câu trả lời đúng) để thực hành các chủ đề ngữ pháp sau: ${selectedTopics.join(
-        ", "
-      )}.
+      ", "
+    )}.
       Đảm bảo trả về kết quả chính xác dưới dạng mảng JSON đúng với định dạng bên dưới và không bao gồm bất kỳ giải thích hoặc văn bản bổ sung nào khác:
       [
         {
@@ -96,13 +90,13 @@ export default function GrammarPage() {
       `;
 
     try {
-      const result : CallAiResponse = await callAI(prompt);
+      const result: CallAiResponse = await callAI(prompt);
       if (!result.isSuccess || !result.data) {
         alert("Hệ thống AI đang bị lỗi, vui lòng phản hồi và thử lại sau!");
         setLoading(false);
         return;
       }
-      let questions: QuizQuestion[] = [];
+      let questions: GrammarQuestion[] = [];
       try {
         const content = result.data.text ?? "";
         const start = content.indexOf("[");
@@ -209,15 +203,14 @@ export default function GrammarPage() {
                     {q.options.map((opt, optIdx) => (
                       <label
                         key={optIdx}
-                        className={`flex items-center gap-2 cursor-pointer ${
-                          showResult
+                        className={`flex items-center gap-2 cursor-pointer ${showResult
                             ? optIdx === q.answer
                               ? "text-green-600 font-bold"
                               : userAnswers[qIdx] === optIdx
-                              ? "text-red-600"
-                              : ""
+                                ? "text-red-600"
+                                : ""
                             : ""
-                        }`}
+                          }`}
                       >
                         <input
                           type="radio"
@@ -249,17 +242,17 @@ export default function GrammarPage() {
           </ScrollArea>
           <div className="h-[36px]">
             {!showResult && (
-                <Button type="submit" className="" onClick={submitQuiz} disabled={userAnswers.includes(-1)}>
-                  Submit
-                </Button>
-              )}
-              {showResult && (
-                <div className="mt-4 font-semibold">
-                  Score:{" "}
-                  {userAnswers.filter((a, i) => a === quiz[i].answer).length} /{" "}
-                  {quiz.length}
-                </div>
-              )}
+              <Button type="submit" className="" onClick={submitQuiz} disabled={userAnswers.includes(-1)}>
+                Submit
+              </Button>
+            )}
+            {showResult && (
+              <div className="mt-4 font-semibold">
+                Score:{" "}
+                {userAnswers.filter((a, i) => a === quiz[i].answer).length} /{" "}
+                {quiz.length}
+              </div>
+            )}
           </div>
         </Card>
       )}

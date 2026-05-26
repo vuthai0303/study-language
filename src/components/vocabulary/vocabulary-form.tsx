@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { STATUS_LABELS, TYPE_VOCAB_LABELS } from "@/consts";
 import { addLocalVocabulary, updateLocalVocabulary } from "@/lib/localStorage";
-import { VocabularyType } from "@/types";
+import { VocabularyType } from "@/types/vocabulary";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";

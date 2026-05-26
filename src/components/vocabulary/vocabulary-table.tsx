@@ -23,7 +23,7 @@ import {
   getLocalVocabulary,
   updateLocalVocabulary,
 } from "@/lib/localStorage";
-import { VocabularyType } from "@/types";
+import { VocabularyType } from "@/types/vocabulary";
 import { CopyIcon, Speech } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "../ui/scroll-area";

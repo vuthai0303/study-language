@@ -1,6 +1,6 @@
 import { getLocalStoreAiKey } from '@/lib/localStorage';
 import { setAIConfig } from '@/store/aiConfigSlice';
-import { AIResponseType, CallAiResponse } from '@/types';
+import { AIResponseType, CallAiResponse } from "@/types/ai";
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from './reduxHook';
 
