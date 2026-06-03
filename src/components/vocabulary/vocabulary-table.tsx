@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  addLocalVocabulary,
+  addLocalVocabularyList,
   deleteLocalVocabulary,
   getLocalVocabulary,
   updateLocalVocabulary,
@@ -229,7 +229,7 @@ export function VocabularyTable() {
           v.type === item.type &&
           v.meaning === item.meaning
       );
-    const newWords: Omit<VocabularyType, "id" | "createdAt" | "level">[] = parsed
+    const newWords: Omit<VocabularyType, "id" | "createdAt">[] = parsed
       .filter(
         (item) => item.word && item.type && item.meaning && !isDuplicate(item)
       )
@@ -239,6 +239,7 @@ export function VocabularyTable() {
           type: e.type,
           meaning: e.meaning,
           status: e.status,
+          level: e.level,
         };
       });
     if (newWords.length === 0) {
@@ -247,9 +248,7 @@ export function VocabularyTable() {
       return;
     }
     try {
-      newWords.forEach((item) => {
-        addLocalVocabulary(item);
-      });
+      addLocalVocabularyList(newWords);
       setImportSuccess(`Đã thêm ${newWords.length} từ mới!`);
       onRefresh();
     } catch {

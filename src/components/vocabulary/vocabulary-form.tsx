@@ -94,7 +94,7 @@ export function VocabularyForm({
           ...values,
         });
       } else {
-        addLocalVocabulary({ ...values, status: "to_learn" });
+        addLocalVocabulary({ ...values, status: "to_learn", level: 0 });
       }
 
       form.reset();

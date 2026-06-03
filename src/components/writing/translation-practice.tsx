@@ -454,6 +454,7 @@ export function TranslationPractice({
                                     type: vocab.type,
                                     meaning: vocab.meaning,
                                     status: "to_learn",
+                                    level: 0,
                                   });
                                   reloadVocabulary();
                                 }}

@@ -35,18 +35,31 @@ export const saveLocalVocabulary = (vocabulary: VocabularyType[]) => {
 };
 
 export const addLocalVocabulary = (
-  vocabulary: Omit<VocabularyType, "id" | "createdAt" | "level">
+  vocabulary: Omit<VocabularyType, "id" | "createdAt">
 ) => {
   const existingVocabulary = getLocalVocabulary();
   const newVocabulary = {
-    ...vocabulary,
     id: uuidv4(),
     createdAt: new Date().toISOString(),
-    level: 0,
+    ...vocabulary,
   };
 
   saveLocalVocabulary([...existingVocabulary, newVocabulary]);
   return newVocabulary;
+};
+
+export const addLocalVocabularyList = (
+  vocabularyList: Omit<VocabularyType, "id" | "createdAt">[]
+) => {
+  const existingVocabulary = getLocalVocabulary();
+  const newVocabularyList = vocabularyList.map((vocabulary) => ({
+    ...vocabulary,
+    id: uuidv4(),
+    createdAt: new Date().toISOString(),
+  }));
+  
+  saveLocalVocabulary([...existingVocabulary, ...newVocabularyList]);
+  return newVocabularyList;
 };
 
 export const updateLocalVocabulary = (vocabulary: VocabularyType) => {
