@@ -21,7 +21,9 @@ export type QuizResult = {
   incorrect: number;
 };
 
-export type VocabularyStudyType = "multiple_choice" | "writing";
+export type VocabularyStudyType = "multiple_choice" | "writing" | "sentence";
+
+export type StudyDirection = "en_to_vi" | "vi_to_en";
 
 export type WritingQuestion = {
   id: string;
@@ -30,3 +32,10 @@ export type WritingQuestion = {
   type: string;
 };
 
+export type SentenceQuestion = {
+  id: string;
+  englishSentence: string;
+  vietnameseSentence: string;
+  options: string[];     // 4 đáp án (Việt khi en→vi, Anh khi vi→en)
+  correctAnswer: string; // đáp án đúng
+};

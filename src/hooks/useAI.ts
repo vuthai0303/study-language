@@ -33,7 +33,7 @@ export const useAI = (): UseAIResult => {
 
     try {
       // dispatch(setLoading(true));
-      let response;
+      let response: any;
       if (AIConfig.provider === 'OPENAI') {
         response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -78,7 +78,7 @@ export const useAI = (): UseAIResult => {
         return {
           isSuccess: false,
           data: null,
-          msg: `API Error: ${response.statusText}`,
+          msg: `API Error: ${response.statusText || response.error?.message || 'UNKNOWN_ERROR'}`,
         }
       }
 

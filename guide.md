@@ -12,7 +12,7 @@ StudyLanguage là ứng dụng học tiếng Anh chạy hoàn toàn ở phía tr
 
 | Module | Route | Mục đích |
 |---|---|---|
-| Vocabulary | `/vocabulary` | CRUD từ vựng, Kanban 3 trạng thái, luyện tập multiple choice / writing, import-export JSON, hệ thống level |
+| Vocabulary | `/vocabulary` | CRUD từ vựng, Kanban 3 trạng thái, luyện tập multiple choice / writing / sentence (AI), import-export JSON, hệ thống level |
 | Writing | `/writing` | AI sinh đoạn văn tiếng Việt, người dùng dịch từng câu sang tiếng Anh, AI chấm và gợi ý cải thiện |
 | Grammar | `/grammar` | Người dùng chọn chủ đề ngữ pháp, AI sinh 10 câu trắc nghiệm kèm giải thích |
 | Reading | `/reading` | AI sinh đoạn văn tiếng Anh và 5 câu hỏi đọc hiểu |
@@ -60,8 +60,9 @@ src/
 │   │   ├── vocabulary-form.tsx   # Form thêm/sửa từ vựng
 │   │   ├── vocabulary-study.tsx  # Điều phối bài luyện tập vocabulary
 │   │   └── vocabulary-study/
-│   │       ├── multi-choice.tsx  # Quiz trắc nghiệm vocabulary
-│   │       └── writing.tsx       # Quiz viết vocabulary
+│   │       ├── multi-choice.tsx  # Quiz trắc nghiệm vocabulary (hỗ trợ chiều Anh→Việt và Việt→Anh)
+│   │       ├── writing.tsx       # Quiz viết vocabulary
+│   │       └── sentence.tsx      # Quiz câu văn AI (MCQ hoặc fill-blank theo chiều)
 │   ├── writing/
 │   │   ├── topic-selector.tsx    # Chọn chủ đề + sinh đoạn văn
 │   │   ├── translation-practice.tsx # Dịch từng câu + AI chấm + gợi ý + lưu vocab
@@ -220,12 +221,17 @@ writing_history_paragraph / reading_history_paragraph
 
 #### Chọn bài luyện tập
 - `VocabularyStudy` tự load dữ liệu từ localStorage khi mount và khi refresh.
-- Có hai chế độ:
-  - `multiple_choice`
-  - `writing`
+- Ba chế độ học:
+  - `multiple_choice`: trắc nghiệm, không cần AI
+  - `writing`: viết, không cần AI
+  - `sentence`: câu văn AI, yêu cầu cấu hình AI
+- Chiều luyện tập (chỉ áp dụng cho `multiple_choice` và `sentence`):
+  - `en_to_vi`: hiển thị tiếng Anh, chọn nghĩa tiếng Việt — có voice và switch ẩn/hiện
+  - `vi_to_en`: hiển thị nghĩa tiếng Việt, chọn/nhập từ tiếng Anh — luôn hiển, không có voice
 - Điều kiện bắt đầu:
   - multiple choice: tối thiểu 4 từ
   - writing: tối thiểu 1 từ
+  - sentence: tối thiểu 1 từ + phải có AI key
 
 #### Chọn 10 từ
 - Nếu `<= 10` từ, shuffle toàn bộ và dùng tất cả.
@@ -235,6 +241,9 @@ writing_history_paragraph / reading_history_paragraph
   - 3 từ cuối
 
 #### Multiple Choice
+- Hỗ trợ 2 chiều học:
+  - `en_to_vi`: hiển từ tiếng Anh, chọn nghĩa tiếng Việt. Có voice (Web Speech API) và switch ẩn/hiện từ.
+  - `vi_to_en`: hiển nghĩa tiếng Việt, chọn từ tiếng Anh. Luôn hiển, không có voice.
 - Mỗi câu gồm 1 từ đúng + 3 đáp án sai.
 - Đáp án sai ưu tiên lấy từ cùng pool vocabulary.
 - Đúng: `level + 1`.
@@ -246,6 +255,14 @@ writing_history_paragraph / reading_history_paragraph
   - hạ `status`
   - reset `level = 5`
 - `level` không bao giờ âm.
+
+#### Sentence (AI)
+- Yêu cầu cấu hình AI (API Key).
+- Random shuffle lấy tối đa 50 từ từ vocabulary list, gửi lên AI để tạo 10 câu hỏi.
+- Hỗ trợ 2 chiều:
+  - `en_to_vi`: hiển câu tiếng Anh (có voice + switch ẩn/hiện), chọn 1 trong 4 bản dịch tiếng Việt.
+  - `vi_to_en`: hiển câu tiếng Việt (có voice tiếng anh + luôn hiển thị), nhập câu tiếng Anh vào input. Có gợi ý kí tự (reveal hình thức giống writing).
+- Không cập nhật level/status của từ vựng sau khi trả lời.
 
 #### Writing
 - Mỗi câu yêu cầu nhập lại từ theo nghĩa tiếng Anh.

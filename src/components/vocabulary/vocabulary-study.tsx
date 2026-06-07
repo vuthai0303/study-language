@@ -1,11 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { STUDY_LABELS } from "@/consts";
+import { STUDY_DIRECTION_LABELS, STUDY_LABELS } from "@/consts";
+import { useAI } from "@/hooks/useAI";
 import { getLocalVocabulary } from "@/lib/localStorage";
-import { VocabularyStudyType, VocabularyType } from "@/types/vocabulary";
+import { StudyDirection, VocabularyStudyType, VocabularyType } from "@/types/vocabulary";
 import { useEffect, useState } from "react";
 import { VocabularyMultiChoiceStudy } from "./vocabulary-study/multi-choice";
+import { VocabularySentenceStudy } from "./vocabulary-study/sentence";
 import { VocabularyWritingStudy } from "./vocabulary-study/writing";
 
 // Weighted shuffle function that favors lower level words
@@ -38,19 +40,37 @@ function selectStudyVocabulary(vocabularies: VocabularyType[]): VocabularyType[]
   }
 
   // Shuffle weighted list
-  const shuffledWeightedVocabularies = weightedShuffleByLevel(vocabularies, 0.3);
+  const shuffledVocabularies = weightedShuffleByLevel(vocabularies, 0.15);
 
   // Combine and shuffle final selection
-  return [...shuffledWeightedVocabularies.slice(0, 7), ...shuffledWeightedVocabularies.slice(-3)];
+  return [...shuffledVocabularies.slice(0, 7), ...shuffledVocabularies.slice(-3)];
 }
 
+/**
+ * Select 50 words for practice based on weighted shuffle by level (the lower level, the higher the chance of being selected at the top of the list):
+ * - If total vocabulary > 50, select 40 first words in list, 10 end words in list
+ * - If total vocabulary <= 50, random list and select all
+ */
+function selectSentenceVocabulary(vocabularies: VocabularyType[]): VocabularyType[] {
+  if (vocabularies.length <= 50) {
+    return [...vocabularies].sort(() => 0.5 - Math.random());
+  }
+  const shuffledVocabularies = weightedShuffleByLevel(vocabularies, 0.3);
+  return [...shuffledVocabularies.slice(0, 40), ...shuffledVocabularies.slice(-10)];
+}
+
+// Study modes that support direction selection
+const DIRECTION_SUPPORTED_MODES: VocabularyStudyType[] = ["multiple_choice", "sentence"];
+
 export function VocabularyStudy() {
+  const { isHasKey } = useAI();
   const [vocabulary, setVocabulary] = useState<VocabularyType[]>([]);
   const [studyVocabulary, setStudyVocabulary] = useState<VocabularyType[]>([]);
   const [quizStarted, setQuizStarted] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [selectedStudyType, setSelectedStudyType] =
     useState<VocabularyStudyType>("multiple_choice");
+  const [selectedDirection, setSelectedDirection] = useState<StudyDirection>("en_to_vi");
 
   const loadVocabulary = () => {
     const data = getLocalVocabulary();
@@ -66,15 +86,25 @@ export function VocabularyStudy() {
     return null;
   }
 
+  const showDirectionDropdown = DIRECTION_SUPPORTED_MODES.includes(selectedStudyType);
+
   const startQuiz = () => {
     // Reload fresh data before starting
     const freshData = getLocalVocabulary();
 
-    if (
-      selectedStudyType == "multiple_choice" &&
-      freshData.length < 4
-    ) {
-      alert("Bạn cần có ít nhất 4 từ vựng để bắt đầu học!");
+    if (selectedStudyType === "multiple_choice" && freshData.length < 4) {
+      alert("Bạn cần có ít nhất 4 từ vựng để bắt đầu học trắc nghiệm!");
+      return;
+    }
+
+    if (selectedStudyType === "sentence") {
+      if (!isHasKey()) {
+        alert("Bạn cần cấu hình AI (API Key) để sử dụng chế độ Câu văn!");
+        return;
+      }
+      const selectedVocabulary = selectSentenceVocabulary(freshData);
+      setStudyVocabulary(selectedVocabulary);
+      setQuizStarted(true);
       return;
     }
 
@@ -89,7 +119,14 @@ export function VocabularyStudy() {
     loadVocabulary();
   };
 
+  // ── Start screen ───────────────────────────────────────────────────────────
   if (!quizStarted) {
+    const hasSentenceKey = isHasKey();
+    const isStartDisabled =
+      (selectedStudyType === "multiple_choice" && vocabulary.length < 4) ||
+      vocabulary.length <= 0 ||
+      (selectedStudyType === "sentence" && !hasSentenceKey);
+
     return (
       <div className="flex flex-col items-center justify-center p-8">
         <h2 className="text-2xl font-bold mb-4">Học từ vựng</h2>
@@ -100,67 +137,102 @@ export function VocabularyStudy() {
             7 từ có level thấp nhất + 3 từ có level cao nhất sẽ được chọn để luyện tập.
           </span>
         </p>
-        <div className="mb-4 flex flex-col md:flex-row gap-2">
-          <label htmlFor="study-type-select" className="mr-2 font-medium">
+
+        {/* Study mode selector */}
+        <div className="mb-4 flex flex-col md:flex-row gap-2 items-center">
+          <label htmlFor="study-type-select" className="font-medium">
             Chọn chế độ học:
           </label>
           <select
             id="study-type-select"
             value={selectedStudyType}
-            onChange={(e) =>
-              setSelectedStudyType(e.target.value as VocabularyStudyType)
-            }
-            className="border rounded px-2 py-1"
+            onChange={(e) => setSelectedStudyType(e.target.value as VocabularyStudyType)}
+            className="border rounded px-2 py-1 bg-background"
           >
-            <option value="multiple_choice">
-              {STUDY_LABELS["multiple_choice"]}
-            </option>
+            <option value="multiple_choice">{STUDY_LABELS["multiple_choice"]}</option>
             <option value="writing">{STUDY_LABELS["writing"]}</option>
+            <option value="sentence">{STUDY_LABELS["sentence"]}</option>
           </select>
         </div>
+
+        {/* Direction selector — only for multi-choice and sentence */}
+        {showDirectionDropdown && (
+          <div className="mb-4 flex flex-col md:flex-row gap-2 items-center">
+            <label htmlFor="study-direction-select" className="font-medium">
+              Chiều luyện tập:
+            </label>
+            <select
+              id="study-direction-select"
+              value={selectedDirection}
+              onChange={(e) => setSelectedDirection(e.target.value as StudyDirection)}
+              className="border rounded px-2 py-1 bg-background"
+            >
+              <option value="en_to_vi">{STUDY_DIRECTION_LABELS["en_to_vi"]}</option>
+              <option value="vi_to_en">{STUDY_DIRECTION_LABELS["vi_to_en"]}</option>
+            </select>
+          </div>
+        )}
+
         <p className="text-sm text-muted-foreground mb-4">
           Tổng số từ vựng: {vocabulary.length}
         </p>
-        <Button
-          onClick={startQuiz}
-          disabled={
-            (selectedStudyType == "multiple_choice" &&
-              vocabulary.length < 4) ||
-            vocabulary.length <= 0
-          }
-        >
+
+        <Button onClick={startQuiz} disabled={isStartDisabled}>
           Bắt đầu học
         </Button>
-        {selectedStudyType == "multiple_choice" &&
-          vocabulary.length < 4 && (
-            <p className="text-sm text-muted-foreground mt-2">
-              Bạn cần có ít nhất 4 từ vựng để bắt đầu học trắc nghiệm.
-            </p>
-          )}
+
+        {/* Hint messages */}
+        {selectedStudyType === "multiple_choice" && vocabulary.length < 4 && (
+          <p className="text-sm text-muted-foreground mt-2">
+            Bạn cần có ít nhất 4 từ vựng để bắt đầu học trắc nghiệm.
+          </p>
+        )}
         {vocabulary.length <= 0 && (
           <p className="text-sm text-muted-foreground mt-2">
             Bạn cần có ít nhất 1 từ vựng để bắt đầu học.
+          </p>
+        )}
+        {selectedStudyType === "sentence" && !hasSentenceKey && (
+          <p className="text-sm text-muted-foreground mt-2">
+            Chế độ Câu văn yêu cầu cấu hình AI. Vui lòng thiết lập API Key trong phần Cài đặt.
           </p>
         )}
       </div>
     );
   }
 
-  if (selectedStudyType == "multiple_choice") {
+  // ── Study screens ──────────────────────────────────────────────────────────
+  if (selectedStudyType === "multiple_choice") {
     return (
       <VocabularyMultiChoiceStudy
         vocabulary={studyVocabulary}
         allVocabulary={vocabulary}
+        direction={selectedDirection}
         quizStarted={quizStarted}
         onRefresh={loadVocabulary}
         startQuiz={startQuiz}
         onCloseQuiz={onCloseQuiz}
       />
     );
-  } else if (selectedStudyType == "writing") {
+  }
+
+  if (selectedStudyType === "writing") {
     return (
       <VocabularyWritingStudy
         vocabulary={studyVocabulary}
+        quizStarted={quizStarted}
+        onRefresh={loadVocabulary}
+        startQuiz={startQuiz}
+        onCloseQuiz={onCloseQuiz}
+      />
+    );
+  }
+
+  if (selectedStudyType === "sentence") {
+    return (
+      <VocabularySentenceStudy
+        vocabulary={studyVocabulary}
+        direction={selectedDirection}
         quizStarted={quizStarted}
         onRefresh={loadVocabulary}
         startQuiz={startQuiz}

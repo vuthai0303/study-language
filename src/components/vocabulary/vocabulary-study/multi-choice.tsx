@@ -16,13 +16,14 @@ import {
 } from "@/components/ui/tooltip";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { updateLocalVocabulary } from "@/lib/localStorage";
-import { QuizQuestion, QuizResult, VocabularyType } from "@/types/vocabulary";
+import { QuizQuestion, QuizResult, StudyDirection, VocabularyType } from "@/types/vocabulary";
 import { Speech } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface VocabularyMultiChoiceStudyProps {
   vocabulary: VocabularyType[];
   allVocabulary: VocabularyType[];
+  direction: StudyDirection;
   quizStarted: boolean;
   onRefresh: () => void;
   startQuiz: () => void;
@@ -52,7 +53,7 @@ function handleCorrectAnswer(wordObj: VocabularyType): VocabularyType {
 }
 
 /**
- * Handle level and status on incorrect answer (multi-choice: -1 level).
+ * Handle level and status on incorrect answer (multi-choice: -2 level).
  * When level drops below 0 at learning/mastered → demote status, reset level to 5.
  */
 function handleIncorrectAnswer(wordObj: VocabularyType): VocabularyType {
@@ -77,6 +78,7 @@ function handleIncorrectAnswer(wordObj: VocabularyType): VocabularyType {
 export function VocabularyMultiChoiceStudy({
   vocabulary,
   allVocabulary,
+  direction,
   quizStarted,
   onRefresh,
   startQuiz,
@@ -103,20 +105,28 @@ export function VocabularyMultiChoiceStudy({
       const incorrectOptions = optionPool
         .filter((v) => v.id !== item.id)
         .sort((a, b) => (a.type === item.type ? 0 : 1) - (b.type === item.type ? 0 : 1) || Math.random() - 0.5)
-        .slice(0, 3)
+        .slice(0, 3);
 
       // Combine correct and incorrect options and shuffle
-      const options = [
-        item,
-        ...incorrectOptions,
-      ].sort(() => 0.5 - Math.random());
+      const options = [item, ...incorrectOptions].sort(() => 0.5 - Math.random());
 
-      return {
-        id: item.id,
-        word: item.word,
-        correctAnswer: `(${item.type}) ${item.meaning}`,
-        options,
-      };
+      if (direction === "en_to_vi") {
+        // Question: English word → Answer: Vietnamese meaning
+        return {
+          id: item.id,
+          word: item.word,                              // prompt shown to user
+          correctAnswer: `(${item.type}) ${item.meaning}`,
+          options,
+        };
+      } else {
+        // Question: Vietnamese meaning → Answer: English word
+        return {
+          id: item.id,
+          word: `(${item.type}) ${item.meaning}`,       // prompt shown to user
+          correctAnswer: item.word,
+          options,
+        };
+      }
     });
 
     setQuestions(generatedQuestions);
@@ -126,7 +136,7 @@ export function VocabularyMultiChoiceStudy({
     setQuizFinished(false);
     setResult({ total: generatedQuestions.length, correct: 0, incorrect: 0 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quizStarted, vocabulary]);
+  }, [quizStarted, vocabulary, direction]);
 
   const handleOptionSelect = (option: string) => {
     if (isAnswered) return;
@@ -213,64 +223,114 @@ export function VocabularyMultiChoiceStudy({
 
   const currentQuestion = questions[currentQuestionIndex];
 
+  // Helper to get option label text
+  const getOptionLabel = (option: VocabularyType): string => {
+    if (direction === "en_to_vi") {
+      return `(${option.type}) ${option.meaning}`;
+    } else {
+      return option.word;
+    }
+  };
+
   return (
-    <Card className="w-full max-w-3xl mx-auto">
+    <Card className="w-full max-w-5xl mx-auto">
       <CardHeader>
         <CardTitle className="flex flex-row justify-between">
-          <div className="">Câu hỏi {currentQuestionIndex + 1}/{questions.length}</div>
-          <div className="flex items-center gap-2">
-            <Switch defaultChecked={!isHiddenWord} onCheckedChange={(checked) => setIsHiddenWord(!checked)}></Switch>
-            Hiện từ vựng
-          </div>
+          <div>Câu hỏi {currentQuestionIndex + 1}/{questions.length}</div>
+          {/* Switch only shown in en_to_vi direction */}
+          {direction === "en_to_vi" && (
+            <div className="flex items-center gap-2 text-sm font-normal">
+              <Switch
+                defaultChecked={!isHiddenWord}
+                onCheckedChange={(checked) => setIsHiddenWord(!checked)}
+              />
+              Hiện từ vựng
+            </div>
+          )}
         </CardTitle>
-        <CardDescription>Chọn nghĩa đúng của từ vựng sau</CardDescription>
+        <CardDescription>
+          {direction === "en_to_vi"
+            ? "Chọn nghĩa đúng của từ vựng tiếng Anh"
+            : "Chọn từ tiếng Anh đúng với nghĩa tiếng Việt"}
+        </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Prompt word/meaning */}
         <div className="mb-6 flex flex-row flex-wrap gap-2 justify-center items-center">
-          {(!isSupported || !isHiddenWord || isAnswered) && (
-            <h3 className="text-2xl font-bold text-center">
+          {direction === "en_to_vi" ? (
+            <>
+              {/* English word: can be hidden, show on answer */}
+              {(!isSupported || !isHiddenWord || isAnswered) && (
+                <h3 className="text-2xl font-bold text-center">
+                  {currentQuestion?.word}
+                </h3>
+              )}
+              {isSupported && (
+                <Button
+                  onClick={() => speak(currentQuestion?.word)}
+                  variant="outline"
+                  size="icon"
+                >
+                  <Speech />
+                </Button>
+              )}
+            </>
+          ) : (
+            /* Vietnamese meaning: always shown, no voice */
+            <h3 className="text-xl font-semibold text-center text-primary">
               {currentQuestion?.word}
             </h3>
           )}
-          {isSupported && (
-            <Button
-              onClick={() => speak(currentQuestion?.word)}
-              variant="outline"
-              size="icon"
-            >
-              <Speech />
-            </Button>
-          )}
         </div>
+
+        {/* Answer options */}
         <div className="space-y-2">
-          {currentQuestion?.options?.map((option, index) => (
-            <Button
-              key={index}
-              variant={
-                isAnswered
-                  ? `(${option.type}) ${option.meaning}` === currentQuestion?.correctAnswer
-                    ? "default"
-                    : `(${option.type}) ${option.meaning}` === selectedOption
-                      ? "destructive"
-                      : "outline"
-                  : "outline"
-              }
-              className="w-full justify-start text-left h-fit"
-              onClick={() => handleOptionSelect(`(${option.type}) ${option.meaning}`)}
-            >
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    <p className="text-wrap md:truncate">{`(${option.type}) ${option.meaning}`}</p>
-                    {isAnswered && (<p className="display lg:hidden font-bold">{`-${option.word}-`}</p>)}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <span>{isAnswered ? `${option.word}` : `(${option.type}) ${option.meaning}`}</span>
-                </TooltipContent>
-              </Tooltip>
-            </Button>
-          ))}
+          {currentQuestion?.options?.map((option, index) => {
+            const optionLabel = getOptionLabel(option);
+            const isCorrectOption = optionLabel === currentQuestion.correctAnswer;
+            const isSelectedOption = optionLabel === selectedOption;
+            return (
+              <Button
+                key={index}
+                variant={
+                  isAnswered
+                    ? isCorrectOption
+                      ? "default"
+                      : isSelectedOption
+                        ? "destructive"
+                        : "outline"
+                    : "outline"
+                }
+                className="w-full justify-start text-left h-fit"
+                onClick={() => handleOptionSelect(optionLabel)}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <p className="text-wrap md:truncate">{optionLabel}</p>
+                      {isAnswered && direction === "en_to_vi" && (
+                        <p className="display lg:hidden font-bold">{`-${option.word}-`}</p>
+                      )}
+                      {isAnswered && direction === "vi_to_en" && (
+                        <p className="display lg:hidden text-muted-foreground text-xs">
+                          {`(${option.type}) ${option.meaning}`}
+                        </p>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {direction === "en_to_vi"
+                      ? isAnswered
+                        ? option.word
+                        : optionLabel
+                      : isAnswered
+                        ? `(${option.type}) ${option.meaning}`
+                        : optionLabel}
+                  </TooltipContent>
+                </Tooltip>
+              </Button>
+            );
+          })}
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">

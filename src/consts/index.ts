@@ -1,5 +1,5 @@
 import { Topic } from "@/types";
-import { VocabularyStudyType, VocabularyType } from "@/types/vocabulary";
+import { StudyDirection, VocabularyStudyType, VocabularyType } from "@/types/vocabulary";
 
 export const TYPE_VOCAB_LABELS = [
   { id: "noun", name: "Danh từ (Noun)" },
@@ -21,6 +21,12 @@ export const STATUS_LABELS: Record<VocabularyType["status"], string> = {
 export const STUDY_LABELS: Record<VocabularyStudyType, string> = {
   multiple_choice: "Trắc nghiệm",
   writing: "Viết",
+  sentence: "Câu văn (AI)",
+};
+
+export const STUDY_DIRECTION_LABELS: Record<StudyDirection, string> = {
+  en_to_vi: "Anh → Việt",
+  vi_to_en: "Việt → Anh",
 };
 
 export const DEFAULT_WRITING_TOPIC: Topic[] = [
