@@ -3,7 +3,6 @@ export type VocabularyType = {
   word: string;
   type: string;
   meaning: string;
-  createdAt: string;
   status: "to_learn" | "learning" | "mastered";
   level: number;
 };

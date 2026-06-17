@@ -229,7 +229,7 @@ export function VocabularyTable() {
           v.type === item.type &&
           v.meaning === item.meaning
       );
-    const newWords: Omit<VocabularyType, "id" | "createdAt">[] = parsed
+    const newWords: Omit<VocabularyType, "id">[] = parsed
       .filter(
         (item) => item.word && item.type && item.meaning && !isDuplicate(item)
       )

@@ -152,7 +152,6 @@ writing_history_paragraph / reading_history_paragraph
 - `word`
 - `type`
 - `meaning`
-- `createdAt`
 - `status: "to_learn" | "learning" | "mastered"`
 - `level`
 
@@ -208,7 +207,7 @@ writing_history_paragraph / reading_history_paragraph
 #### CRUD
 - Thêm mới từ form.
 - Mặc định `status = to_learn`.
-- `id` và `createdAt` được sinh trong localStorage helper.
+- `id` được sinh trong localStorage helper.
 - Sửa có thể đổi cả `status`.
 - Kéo thả sang cột khác sẽ đổi `status` và reset `level = 0`.
 - Xóa loại bỏ mục khỏi localStorage ngay lập tức.
@@ -217,7 +216,7 @@ writing_history_paragraph / reading_history_paragraph
 - Export xuất toàn bộ vocabulary dạng JSON.
 - Import nhận JSON array.
 - Chỉ thêm item hợp lệ và chưa trùng theo `word + type + meaning`.
-- Item import mới được cấp `id`, `createdAt`, `level` mới.
+- Item import mới được cấp `id` và `level` mới.
 
 #### Chọn bài luyện tập
 - `VocabularyStudy` tự load dữ liệu từ localStorage khi mount và khi refresh.

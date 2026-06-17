@@ -5,6 +5,36 @@ import { AiKeyType } from "@/types/ai";
 import { VocabularyType } from "@/types/vocabulary";
 import { v4 as uuidv4 } from "uuid";
 
+const isValidVocabularyStatus = (
+  status: unknown
+): status is VocabularyType["status"] =>
+  status === "to_learn" || status === "learning" || status === "mastered";
+
+const normalizeVocabulary = (value: unknown): VocabularyType | null => {
+  if (!value || typeof value !== "object") return null;
+
+  const vocabulary = value as Record<string, unknown>;
+  if (
+    typeof vocabulary.id !== "string" ||
+    typeof vocabulary.word !== "string" ||
+    typeof vocabulary.type !== "string" ||
+    typeof vocabulary.meaning !== "string"
+  ) {
+    return null;
+  }
+
+  return {
+    id: vocabulary.id,
+    word: vocabulary.word,
+    type: vocabulary.type,
+    meaning: vocabulary.meaning,
+    status: isValidVocabularyStatus(vocabulary.status)
+      ? vocabulary.status
+      : "to_learn",
+    level: typeof vocabulary.level === "number" ? vocabulary.level : 0,
+  };
+};
+
 // AI KEY functions
 export const getLocalStoreAiKey = (): AiKeyType => {
   const defaultValue : AiKeyType = {provider: "OPENAI", key: "", model: "gpt-5.4-mini-2026-03-17"};
@@ -24,8 +54,20 @@ export const setLocalStoreAiKey = (value: AiKeyType) => {
 export const getLocalVocabulary = (): VocabularyType[] => {
   if (typeof window === "undefined") return [];
 
-  const vocabulary = localStorage.getItem(LOCAL_STORAGE_KEY.VOCABULARY);
-  return vocabulary ? JSON.parse(vocabulary) : [];
+  try {
+    const vocabulary = localStorage.getItem(LOCAL_STORAGE_KEY.VOCABULARY);
+    if (!vocabulary) return [];
+
+    const parsed = JSON.parse(vocabulary);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.map(normalizeVocabulary).filter(
+      (item): item is VocabularyType => item !== null
+    );
+  } catch (error) {
+    console.error("Failed to parse local vocabulary:", error);
+    return [];
+  }
 };
 
 export const saveLocalVocabulary = (vocabulary: VocabularyType[]) => {
@@ -35,12 +77,11 @@ export const saveLocalVocabulary = (vocabulary: VocabularyType[]) => {
 };
 
 export const addLocalVocabulary = (
-  vocabulary: Omit<VocabularyType, "id" | "createdAt">
+  vocabulary: Omit<VocabularyType, "id">
 ) => {
   const existingVocabulary = getLocalVocabulary();
   const newVocabulary = {
     id: uuidv4(),
-    createdAt: new Date().toISOString(),
     ...vocabulary,
   };
 
@@ -49,13 +90,12 @@ export const addLocalVocabulary = (
 };
 
 export const addLocalVocabularyList = (
-  vocabularyList: Omit<VocabularyType, "id" | "createdAt">[]
+  vocabularyList: Omit<VocabularyType, "id">[]
 ) => {
   const existingVocabulary = getLocalVocabulary();
   const newVocabularyList = vocabularyList.map((vocabulary) => ({
     ...vocabulary,
     id: uuidv4(),
-    createdAt: new Date().toISOString(),
   }));
   
   saveLocalVocabulary([...existingVocabulary, ...newVocabularyList]);
