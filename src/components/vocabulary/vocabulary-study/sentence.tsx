@@ -109,7 +109,7 @@ export function VocabularySentenceStudy({
         Mỗi câu hỏi:
         - Từ danh sách từ vựng trên, hãy tạo ra 1 câu văn hoàn chỉnh bằng tiếng Anh (đảm bảo câu văn tự nhiên, có ý nghĩa, thường được sử dụng trong giao tiếp hằng ngày)
         - Dịch câu tiếng Anh đó sang tiếng Việt
-        - Tạo thêm 3 câu tiếng Việt sai (nội dung khác biệt không quá nhiều so với câu đúng để người nghe/đọc dễ bị bối rối tuy nhiên vẫn phải có thể phân biệt được) làm đáp án nhiễu
+        - Tạo thêm 3 câu tiếng Việt sai (nội dung khác biệt không quá nhiều so với câu đúng để người nghe/đọc dễ bị bối rối) làm đáp án nhiễu
         Trả về JSON array (không có thêm ký tự nào khác), mỗi phần tử có dạng:
         {"englishSentence":"...","vietnameseSentence":"...","wrongOptions":["...","...","..."]}`;
 

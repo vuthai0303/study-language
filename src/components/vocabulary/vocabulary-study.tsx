@@ -40,7 +40,7 @@ function selectStudyVocabulary(vocabularies: VocabularyType[]): VocabularyType[]
   }
 
   // Shuffle weighted list
-  const shuffledVocabularies = weightedShuffleByLevel(vocabularies, 0.15);
+  const shuffledVocabularies = weightedShuffleByLevel(vocabularies, 0.1);
 
   // Combine and shuffle final selection
   return [...shuffledVocabularies.slice(0, 7), ...shuffledVocabularies.slice(-3)];
@@ -55,7 +55,7 @@ function selectSentenceVocabulary(vocabularies: VocabularyType[]): VocabularyTyp
   if (vocabularies.length <= 50) {
     return [...vocabularies].sort(() => 0.5 - Math.random());
   }
-  const shuffledVocabularies = weightedShuffleByLevel(vocabularies, 0.3);
+  const shuffledVocabularies = weightedShuffleByLevel(vocabularies, 0.1);
   return [...shuffledVocabularies.slice(0, 40), ...shuffledVocabularies.slice(-10)];
 }
 
@@ -131,11 +131,7 @@ export function VocabularyStudy() {
       <div className="flex flex-col items-center justify-center p-8">
         <h2 className="text-2xl font-bold mb-4">Học từ vựng</h2>
         <p className="text-center mb-6">
-          Hệ thống sẽ tự động chọn từ vựng dựa theo mức độ thành thạo (level) của bạn.
-          <br />
-          <span className="text-sm text-muted-foreground">
-            7 từ có level thấp nhất + 3 từ có level cao nhất sẽ được chọn để luyện tập.
-          </span>
+          Hệ thống sẽ tự động chọn từ vựng dựa bằng cách random theo mức độ thành thạo (level) của bạn.
         </p>
 
         {/* Study mode selector */}
