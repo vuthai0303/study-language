@@ -1,4 +1,4 @@
-import { Topic } from "@/types";
+﻿import { Topic } from "@/types";
 import { StudyDirection, VocabularyStudyType, VocabularyType } from "@/types/vocabulary";
 
 export const TYPE_VOCAB_LABELS = [
@@ -55,10 +55,24 @@ export const DEFAULT_READING_TOPIC: Topic[] = [
   { id: "8", name: "Công nghệ thông tin" },
 ];
 
+export const DEFAULT_LISTENING_TOPIC: Topic[] = [
+  { id: "0", name: "Du lịch" },
+  { id: "1", name: "Công nghệ" },
+  { id: "2", name: "Giáo dục" },
+  { id: "3", name: "Sức khỏe" },
+  { id: "4", name: "Kinh doanh" },
+  { id: "5", name: "Môi trường" },
+  { id: "6", name: "Văn hóa" },
+  { id: "7", name: "Tài chính cá nhân" },
+  { id: "8", name: "Khoa học" },
+  { id: "9", name: "Từ vựng hiện có" },
+];
+
 export const LOCAL_STORAGE_KEY = {
   VOCABULARY: "vocabulary",
   WRITING_HISTORY_PARAGRAPH: "writing_history_paragraph",
   READING_HISTORY_PARAGRAPH: "reading_history_paragraph",
+  LISTENING_HISTORY_PARAGRAPH: "listening_history_paragraph",
   AI_CONFIG: "AI_CONFIG",
 };
 export const PROVIDER_AI = {

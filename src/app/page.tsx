@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,7 +15,7 @@ export default function Home() {
         Chào mừng đến với StudyLanguage
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 px-2">
         <Card>
           <CardHeader>
             <CardTitle>Học từ vựng</CardTitle>
@@ -54,8 +54,7 @@ export default function Home() {
           <CardHeader>
             <CardTitle>Học ngữ pháp</CardTitle>
             <CardDescription>
-              Luyện tập các chủ điểm ngữ pháp tiếng Anh với câu hỏi trắc nghiệm
-              AI
+              Luyện tập các chủ điểm ngữ pháp tiếng Anh với câu hỏi trắc nghiệm AI
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -72,14 +71,30 @@ export default function Home() {
         <Card>
           <CardHeader>
             <CardTitle>Luyện đọc</CardTitle>
-            <CardDescription>Luyện tập khả năng đọc tiếng anh</CardDescription>
+            <CardDescription>Luyện tập khả năng đọc tiếng Anh</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="mb-4">
-              Thực hành các bài tập để luyện tập khả năng đọc tiếng anh
+              Thực hành các bài tập để luyện tập khả năng đọc tiếng Anh.
             </p>
             <Link href="/reading">
               <Button>Bắt đầu luyện đọc</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Học nghe</CardTitle>
+            <CardDescription>Luyện nghe tiếng Anh theo trình độ</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">
+              Tạo bài nghe bằng AI, nghe từng câu hoặc từng đoạn văn rồi kiểm tra
+              ngay kết quả đúng sai sau khi nộp bài.
+            </p>
+            <Link href="/listening">
+              <Button>Bắt đầu học nghe</Button>
             </Link>
           </CardContent>
         </Card>

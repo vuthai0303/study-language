@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -32,6 +32,11 @@ export function Navigation() {
       href: "/reading",
       label: "Luyện đọc",
       active: pathname === "/reading",
+    },
+    {
+      href: "/listening",
+      label: "Học nghe",
+      active: pathname === "/listening",
     },
   ];
 

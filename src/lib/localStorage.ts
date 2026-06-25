@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { LOCAL_STORAGE_KEY } from "@/consts";
 import { AiKeyType } from "@/types/ai";
@@ -37,13 +37,18 @@ const normalizeVocabulary = (value: unknown): VocabularyType | null => {
 
 // AI KEY functions
 export const getLocalStoreAiKey = (): AiKeyType => {
-  const defaultValue : AiKeyType = {provider: "OPENAI", key: "", model: "gpt-5.4-mini-2026-03-17"};
+  const defaultValue: AiKeyType = {
+    provider: "OPENAI",
+    key: "",
+    model: "gpt-5.4-mini-2026-03-17",
+  };
 
   if (typeof window === "undefined") return defaultValue;
 
   const aiKey = localStorage.getItem(LOCAL_STORAGE_KEY.AI_CONFIG);
   return aiKey ? JSON.parse(aiKey) : defaultValue;
 };
+
 export const setLocalStoreAiKey = (value: AiKeyType) => {
   if (typeof window === "undefined") return;
 
@@ -97,7 +102,7 @@ export const addLocalVocabularyList = (
     ...vocabulary,
     id: uuidv4(),
   }));
-  
+
   saveLocalVocabulary([...existingVocabulary, ...newVocabularyList]);
   return newVocabularyList;
 };
@@ -136,7 +141,43 @@ export const saveLocalHistoryParagraph = (
   if (typeof window === "undefined") return [];
 
   localStorage.setItem(
-    isWriting ? LOCAL_STORAGE_KEY.WRITING_HISTORY_PARAGRAPH : LOCAL_STORAGE_KEY.READING_HISTORY_PARAGRAPH,
+    isWriting
+      ? LOCAL_STORAGE_KEY.WRITING_HISTORY_PARAGRAPH
+      : LOCAL_STORAGE_KEY.READING_HISTORY_PARAGRAPH,
+    JSON.stringify(historyParagraph)
+  );
+  return historyParagraph ?? [];
+};
+
+export const getLocalListeningHistoryParagraph = (): string[] => {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const historyParagraph = localStorage.getItem(
+      LOCAL_STORAGE_KEY.LISTENING_HISTORY_PARAGRAPH
+    );
+
+    if (!historyParagraph) return [];
+
+    const parsed = JSON.parse(historyParagraph);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.filter(
+      (item): item is string => typeof item === "string" && item.trim().length > 0
+    );
+  } catch (error) {
+    console.error("Failed to parse local listening history:", error);
+    return [];
+  }
+};
+
+export const saveLocalListeningHistoryParagraph = (
+  historyParagraph: string[]
+): string[] => {
+  if (typeof window === "undefined") return [];
+
+  localStorage.setItem(
+    LOCAL_STORAGE_KEY.LISTENING_HISTORY_PARAGRAPH,
     JSON.stringify(historyParagraph)
   );
   return historyParagraph ?? [];

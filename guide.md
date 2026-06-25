@@ -1,4 +1,4 @@
-# StudyLanguage - AI Guide & Architecture Reference
+﻿# StudyLanguage - AI Guide & Architecture Reference
 
 > Tài liệu này mô tả kiến trúc hiện tại của StudyLanguage theo cách ngắn gọn, đồng nhất, và dễ scan cho AI.
 
@@ -416,3 +416,26 @@ Toàn bộ localStorage access đi qua `src/lib/localStorage.ts`.
 - Không đổi architecture của persistence khỏi localStorage.
 - Không chỉnh `src/components/ui/` trừ khi thật sự cần cập nhật primitive shadcn.
 
+
+## Listening Module
+
+### Flow
+- Chọn trình độ nghe.
+- Ở trình độ `Chuyên nghiệp`, chọn thêm chủ đề.
+- Nhấn `Tạo bài tập` để AI sinh bài nghe.
+- Làm bài rồi nhấn `Nộp bài` để xem đúng/sai và transcript.
+
+### Level Rules
+- `Cơ bản`: 10 câu trắc nghiệm, mỗi câu là 1 câu tiếng Anh có 1 từ quan trọng bị ẩn.
+- `Trung cấp`: 10 câu trắc nghiệm, mỗi câu là 1 đoạn văn riêng khoảng 3-4 câu.
+- `Chuyên nghiệp`: 3 phần audio riêng, 10 câu hỏi khó hơn, câu 10 dựa trên toàn bộ transcript.
+
+### AI Output
+- AI phải trả về JSON thuần.
+- Mỗi bài cần có `title`, `topic`, `level`, `questions[]`.
+- Trình độ Chuyên nghiệp cần thêm `segments[]` và `fullTranscript`.
+- Phần giải thích phải bằng tiếng Việt.
+
+### LocalStorage
+- `LISTENING_HISTORY_PARAGRAPH`
+- Lưu transcript gần đây để giảm lặp nội dung khi sinh bài mới.
